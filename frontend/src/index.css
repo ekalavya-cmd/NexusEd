@@ -1,0 +1,72 @@
+/* Global styles for NexusEd */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --primary-color: #2563eb; /* Tailwind's blue-600 */
+  --secondary-color: #dbeafe; /* Tailwind's blue-100 */
+  --error-bg: #fee2e2; /* Tailwind's red-100 */
+  --error-text: #b91c1c; /* Tailwind's red-700 */
+  --success-bg: #dcfce7; /* Tailwind's green-100 */
+  --success-text: #15803d; /* Tailwind's green-700 */
+}
+
+.dark {
+  --primary-color: #d4d4d8; /* Tailwind's zinc-300 for dark mode */
+  --secondary-color: #4b5563; /* Tailwind's gray-600 */
+  --error-bg: #7f1d1d80; /* Tailwind's red-900 with 50% opacity */
+  --error-text: #fecaca; /* Tailwind's red-200 */
+  --success-bg: #16653480; /* Tailwind's green-900 with 50% opacity */
+  --success-text: #bbf7d0; /* Tailwind's green-200 */
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Inter", sans-serif;
+  background-color: #f9fafb; /* Tailwind's gray-50 */
+  color: #1f2937; /* Tailwind's gray-800 */
+}
+
+.dark html,
+.dark body {
+  background-color: #1f2937; /* Tailwind's gray-800 */
+  color: #e5e7eb; /* Tailwind's gray-200 */
+}
+
+/* Global link styles */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
+}
+
+.dark a {
+  color: var(--primary-color);
+}
+
+a:hover {
+  color: #4f46e5; /* Tailwind's indigo-600 */
+}
+
+.dark a:hover {
+  color: #9ca3af; /* Tailwind's gray-400, matching navbar's hover underline */
+}
+
+/* Fade-out animation for messages */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.message {
+  animation: fadeOut 3s ease-in-out forwards;
+}

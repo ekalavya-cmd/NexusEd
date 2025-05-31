@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="NexusEd - A community platform for students"
+    />
+    <!-- Add prefers-color-scheme meta tag -->
+    <meta name="color-scheme" content="light dark" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>NexusEd - Student Community Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind for Dark Mode -->
+    <script>
+      tailwind.config = {
+        darkMode: "class", // Enable dark mode using the 'dark' class
+      };
+    </script>
+    <!-- Font Awesome CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- React Big Calendar CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/react-big-calendar/1.13.1/react-big-calendar.min.css"
+      integrity="sha512-6HGvS2S0nqT7oW8Aly7Es9B2Z0G/4gQ5B74ifG8J+6tNp8g3j4DkeyW5QLgqS2oM4iXzu0n7uK2qMAr6q2g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body class="bg-gray-50 dark:bg-gray-800">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!-- React Big Calendar JS (needed for browser environment) -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/react-big-calendar/1.13.1/react-big-calendar.min.js"
+      integrity="sha512-KTvzQ4jkhL5R5M3fJCpR+UNp+0Z4bTVtIRSt/8gGoeYf0jUcH2b9Z1n0zRudnFimYqW0zGHyKhD3q4nB0PQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </body>
+</html>
