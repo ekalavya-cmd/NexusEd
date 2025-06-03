@@ -1,4 +1,4 @@
-# NexusEd - Student Community Platform
+# NexusEd
 
 ## Project Overview
 
@@ -50,8 +50,6 @@ NexusEd is a full-stack web application designed to foster collaboration among s
 - **React Toastify**: Notification system (v11.0.5).
 - **Font Awesome**: Icons for UI elements (v6.7.2).
 - **date-fns**: Date manipulation library (v2.30.0).
-- **Testing Libraries**: `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`.
-- **Other**: `moment` (v2.30.1), `web-vitals` (v2.1.4).
 
 ### Backend
 - **Node.js**: JavaScript runtime environment (v14.0.0 or higher).
@@ -144,22 +142,27 @@ backend/
 
 ### Frontend Setup
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    ```
 2. Navigate to the frontend directory:
+
    ```bash
    cd frontend
    ```
 3. Install dependencies:
+
    ```bash
    npm install
    ```
 4. Create a `.env` file in the `frontend/` directory with:
+
    ```
    REACT_APP_API_URL=http://localhost:5000
    ```
 5. Start the frontend development server:
+
    ```bash
    npm start
    ```
@@ -167,180 +170,34 @@ backend/
 
 ### Backend Setup
 1. Navigate to the backend directory:
+
    ```bash
    cd backend
    ```
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 3. Create a `.env` file in the `backend/` directory with:
+
    ```
    MONGO_URI=<your-mongodb-connection-string>
    PORT=5000
    JWT_SECRET=<your-jwt-secret-key>
    ```
 4. Start the backend server:
+
    ```bash
-   npm start
+   node server.js
    ```
    The backend should be running at `http://localhost:5000`.
 
 ### Running the Full Application
 1. Ensure MongoDB is running (locally or remotely).
-2. Start the backend server (`npm start` in `backend/`).
+2. Start the backend server (`node server.js` in `backend/`).
 3. Start the frontend server (`npm start` in `frontend/`).
 4. Open `http://localhost:3000` in a browser to access NexusEd.
-
-## API Endpoints
-
-The backend provides RESTful APIs for the frontend to interact with. All protected routes require a JWT token in the `Authorization` header as `Bearer <token>`.
-
-### Authentication Routes
-- **POST /api/auth/register**
-  - Description: Register a new user.
-  - Request Body: `{ "username": string, "email": string, "password": string }`
-  - Response: `{ "token": string, "user": { "id": string, "username": string, "email": string } }`
-
-- **POST /api/auth/login**
-  - Description: Login a user.
-  - Request Body: `{ "identifier": string, "password": string }` (identifier can be username or email)
-  - Response: `{ "token": string, "user": { "id": string, "username": string, "email": string } }`
-
-- **GET /api/auth/me**
-  - Description: Get authenticated user’s details.
-  - Requires Authentication: Yes
-  - Response: `{ "id": string, "username": string, "email": string, "bio": string, "profilePicture": string, "createdAt": Date }`
-
-### Post Routes
-- **GET /api/posts**
-  - Description: Get all posts (supports query param `author` for filtering by user ID).
-  - Response: `[{ "_id": string, "title": string, "content": string, "author": object, "likes": array, "comments": array, "createdAt": Date }, ...]`
-
-- **POST /api/posts**
-  - Description: Create a new post.
-  - Requires Authentication: Yes
-  - Request Body: `{ "title": string, "content": string }`
-  - Response: `{ "_id": string, "title": string, "content": string, "author": object, ... }`
-
-- **DELETE /api/posts/:id**
-  - Description: Delete a post (only by the author).
-  - Requires Authentication: Yes
-  - Response: `{ "message": string }`
-
-- **POST /api/posts/:id/comments**
-  - Description: Add a comment to a post.
-  - Requires Authentication: Yes
-  - Request Body: `{ "content": string }`
-  - Response: `{ "_id": string, "content": string, "author": object, ... }`
-
-- **DELETE /api/posts/:id/comments/:commentId**
-  - Description: Delete a comment (only by the author).
-  - Requires Authentication: Yes
-  - Response: `{ "message": string }`
-
-- **POST /api/posts/:id/like**
-  - Description: Like or unlike a post.
-  - Requires Authentication: Yes
-  - Response: `{ "message": string, "likes": array }`
-
-- **POST /api/posts/:id/comments/:commentId/like**
-  - Description: Like or unlike a comment.
-  - Requires Authentication: Yes
-  - Response: `{ "message": string, "likes": array }`
-
-### User Routes
-- **GET /api/users/profile**
-  - Description: Get authenticated user’s profile.
-  - Requires Authentication: Yes
-  - Response: `{ "id": string, "username": string, "email": string, "bio": string, "profilePicture": string, "createdAt": Date }`
-
-- **PUT /api/users/profile**
-  - Description: Update user’s bio and/or username.
-  - Requires Authentication: Yes
-  - Request Body: `{ "bio": string, "username": string }`
-  - Response: `{ "id": string, "username": string, "email": string, "bio": string, ... }`
-
-- **POST /api/users/upload-profile-picture**
-  - Description: Upload a profile picture.
-  - Requires Authentication: Yes
-  - Form-data: `profilePicture` (image file, max 5MB)
-  - Response: `{ "profilePicture": string }`
-
-- **DELETE /api/users/me/profile-picture**
-  - Description: Remove the user’s profile picture.
-  - Requires Authentication: Yes
-  - Response: `{ "message": string }`
-
-### Study Group Routes
-- **GET /api/study-groups**
-  - Description: Get all study groups.
-  - Response: `[{ "_id": string, "name": string, "description": string, "category": string, "groupImage": string, "members": array, ... }, ...]`
-
-- **GET /api/study-groups/:groupId**
-  - Description: Get a specific study group.
-  - Response: `{ "_id": string, "name": string, "description": string, ... }`
-
-- **POST /api/study-groups**
-  - Description: Create a new study group.
-  - Requires Authentication: Yes
-  - Request Body: `{ "name": string, "description": string, "category": string, "groupImage": string }`
-  - Response: `{ "_id": string, "name": string, ... }`
-
-- **PUT /api/study-groups/:groupId**
-  - Description: Update a study group (only by the creator).
-  - Requires Authentication: Yes
-  - Request Body: `{ "name": string, "description": string, "category": string, "groupImage": string }`
-  - Response: `{ "_id": string, "name": string, ... }`
-
-- **DELETE /api/study-groups/:groupId**
-  - Description: Delete a study group (only by the creator).
-  - Requires Authentication: Yes
-  - Response: `{ "message": string }`
-
-- **POST /api/study-groups/:groupId/join**
-  - Description: Join a study group.
-  - Requires Authentication: Yes
-  - Response: `{ "message": string }`
-
-- **POST /api/study-groups/:groupId/leave**
-  - Description: Leave a study group.
-  - Requires Authentication: Yes
-  - Response: `{ "message": string }`
-
-- **POST /api/study-groups/:groupId/messages**
-  - Description: Add a message to a study group’s discussion board.
-  - Requires Authentication: Yes
-  - Request Body: `{ "content": string }` (optional if files are provided)
-  - Form-data: `files` (up to 5 files, max 10MB each)
-  - Response: `{ "_id": string, "content": string, "files": array, "author": object, ... }`
-
-- **DELETE /api/study-groups/:groupId/messages/:messageId**
-  - Description: Delete a message (only by the author).
-  - Requires Authentication: Yes
-  - Response: `{ "message": string }`
-
-### Event Routes
-- **POST /api/events**
-  - Description: Create a new event for a study group.
-  - Requires Authentication: Yes
-  - Request Body: `{ "title": string, "description": string, "start": Date, "end": Date, "groupId": string }`
-  - Response: `{ "_id": string, "title": string, "start": Date, "end": Date, ... }`
-
-- **GET /api/events**
-  - Description: Get all events for the user’s study groups.
-  - Requires Authentication: Yes
-  - Response: `[{ "_id": string, "title": string, "start": Date, "end": Date, "group": object, ... }, ...]`
-
-- **GET /api/events/group/:groupId**
-  - Description: Get all events for a specific study group.
-  - Requires Authentication: Yes
-  - Response: `[{ "_id": string, "title": string, "start": Date, "end": Date, ... }, ...]`
-
-- **DELETE /api/events/:id**
-  - Description: Delete an event (only by the creator).
-  - Requires Authentication: Yes
-  - Response: `{ "message": string }`
 
 ## Authentication
 - **Frontend**: Uses `AuthContext` to manage user state and token storage in `localStorage`. Protected routes redirect unauthenticated users to the login page.
@@ -370,35 +227,24 @@ The backend provides RESTful APIs for the frontend to interact with. All protect
   - 404: Not Found (resource missing)
   - 500: Internal Server Error (unexpected issues)
 
-## Testing
-- **Frontend**: Configured with `@testing-library/react` for unit and integration tests. Run tests with:
-  ```bash
-  cd frontend
-  npm test
-  ```
-- **Backend**: No testing framework specified, but you can add Jest or Mocha for API testing. Example test setup:
-  ```bash
-  npm install --save-dev jest supertest
-  ```
-
 ## Contributing
 1. Fork the repository.
 2. Create a feature branch:
+   
    ```bash
    git checkout -b feature/your-feature
    ```
 3. Commit changes:
+   
    ```bash
    git commit -m 'Add your feature'
    ```
 4. Push to the branch:
+   
    ```bash
    git push origin feature/your-feature
    ```
 5. Open a pull request.
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contact
-For questions or support, please open an issue on the repository or contact the maintainers.
+This project is licensed under the MIT License.
