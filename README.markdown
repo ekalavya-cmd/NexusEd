@@ -102,6 +102,7 @@ frontend/
 │   │   ├── dateUtils.js         # Date utilities
 │   │   └── formatUtils.js       # Formatting utilities
 │   ├── App.js                   # Main app with routing
+    ├── App.css                  # App styles
 │   ├── index.js                 # React entry point
 │   └── index.css                # Global styles
 ├── .env                         # Environment variables
@@ -124,10 +125,7 @@ backend/
 │   ├── events.js                # Event routes
 ├── middleware/                  # Custom middleware
 │   ├── auth.js                  # JWT authentication
-│   ├── upload.js                # File upload handling
 ├── uploads/                     # Directory for file uploads
-├── cron/                        # Scheduled tasks
-│   └── deleteExpiredEvents.js   # Cron job for event cleanup
 ├── .env                         # Environment variables
 ├── server.js                    # Express server entry point
 └── package.json                 # Dependencies and scripts
@@ -140,28 +138,30 @@ backend/
 - **MongoDB**: Local instance or a remote connection string (e.g., MongoDB Atlas).
 - **Git**: For cloning the repository.
 
-### Frontend Setup
-1. Clone the repository:
+### Clone the Repository
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/ekalavya-cmd/NexusEd.git
+   cd NexusEd
    ```
-2. Navigate to the frontend directory:
+   
+### Frontend Setup
+1. Navigate to the frontend directory:
 
    ```bash
    cd frontend
    ```
-3. Install dependencies:
+2. Install dependencies:
 
    ```bash
    npm install
    ```
-4. Create a `.env` file in the `frontend/` directory with:
+3. Create a `.env` file in the `frontend/` directory with:
 
    ```
    REACT_APP_API_URL=http://localhost:5000
    ```
-5. Start the frontend development server:
+4. Start the frontend development server:
 
    ```bash
    npm start
