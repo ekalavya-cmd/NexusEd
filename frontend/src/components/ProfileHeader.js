@@ -12,7 +12,9 @@ const ProfileHeader = ({
   isEditing,
   setIsEditing,
   error,
+  setError,
   success,
+  setSuccess,
   uploadError,
   isLoading,
   handleProfilePictureChange,
@@ -36,6 +38,8 @@ const ProfileHeader = ({
   const cancelButtonRef = useRef(null);
   const [showPictureOptions, setShowPictureOptions] = useState(false);
   const [clickedButton, setClickedButton] = useState(null);
+  const [usernameChangeConfirmation, setUsernameChangeConfirmation] =
+    useState(null);
 
   useEffect(() => {
     if (!user.profilePicture) {
@@ -82,20 +86,33 @@ const ProfileHeader = ({
     setIsEditing(false);
     setBio(user.bio || DEFAULT_BIO);
     setUsername(user.username || "");
-    setTemporaryMessage(
-      () => {},
-      () => {},
-      ""
-    );
-    setTemporarySuccess(
-      () => {},
-      () => {},
-      ""
-    );
+    setTemporaryMessage(setError, setSuccess, "");
+    setTemporarySuccess(setError, setSuccess, "");
+    setUsernameChangeConfirmation(null); // Reset confirmation on cancel
   };
 
   const togglePictureOptions = () => {
     setShowPictureOptions((prev) => !prev);
+  };
+
+  const handleSave = (e) => {
+    e.preventDefault();
+    // Check if username has changed
+    if (username !== user.username) {
+      setUsernameChangeConfirmation(username);
+    } else {
+      // If username hasn't changed, proceed with the update
+      handleBioUpdate(e);
+    }
+  };
+
+  const confirmUsernameChange = (e) => {
+    setUsernameChangeConfirmation(null);
+    handleBioUpdate(e);
+  };
+
+  const cancelUsernameChange = () => {
+    setUsernameChangeConfirmation(null);
   };
 
   const profilePictureUrl = user.profilePicture
@@ -241,7 +258,7 @@ const ProfileHeader = ({
         </div>
       </div>
       {isEditing ? (
-        <form onSubmit={handleBioUpdate} className="animate-fade-in-up">
+        <form onSubmit={handleSave} className="animate-fade-in-up">
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
@@ -284,6 +301,31 @@ const ProfileHeader = ({
               Cancel
             </button>
           </div>
+          {usernameChangeConfirmation && (
+            <div className="mt-4 bg-yellow-100 dark:bg-yellow-900/70 text-yellow-700 dark:text-yellow-300 p-4 rounded-lg border border-gradient-to-r from-yellow-200 to-yellow-300 dark:from-yellow-800 dark:to-yellow-700 shadow-md hover:shadow-[0_0_10px_rgba(234,179,8,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300 animate-fade-in-up flex justify-between items-center">
+              <span>
+                Are you sure you want to change your username to "
+                {usernameChangeConfirmation}"? You will need to use this
+                username to log in from now on.
+              </span>
+              <div className="flex space-x-2">
+                <button
+                  onClick={confirmUsernameChange}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-teal-600 text-white dark:text-gray-200 px-3 py-1 rounded-md hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(21,94,117,0.5)] dark:hover:dark-glow hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 text-sm"
+                  aria-label="Confirm Username Change"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={cancelUsernameChange}
+                  className="bg-gradient-to-r from-gray-500 to-gray-600 dark:from-gray-600 dark:to-gray-500 text-white dark:text-gray-200 px-3 py-1 rounded-md hover:shadow-[0_0_10px_rgba(107,114,128,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] dark:hover:dark-glow hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 text-sm"
+                  aria-label="Cancel Username Change"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       ) : (
         <>

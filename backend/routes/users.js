@@ -149,6 +149,7 @@ router.put("/profile", auth, async (req, res) => {
       email: user.email,
       bio: user.bio,
       profilePicture: user.profilePicture || "",
+      createdAt: user.createdAt, // Include createdAt in the response
     });
   } catch (err) {
     console.error("Error updating profile:", err.message);

@@ -24,10 +24,8 @@ const useCalendar = () => {
     end: "",
     groupId: "",
   });
-  const [currentDateTime, setCurrentDateTime] = useState(
-    new Date("2025-05-29T15:08:00+05:30")
-  );
-  const [date, setDate] = useState(new Date("2025-05-29T15:08:00+05:30"));
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const [date, setDate] = useState(new Date());
   const [view, setView] = useState("month");
 
   // Update currentDateTime every second to reflect the passage of time

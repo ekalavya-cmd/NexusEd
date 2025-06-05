@@ -57,10 +57,10 @@ function GroupChat({ groupId, messages, setGroup, currentUser }) {
         const eventsData = await response.json();
         console.log("Fetched events:", eventsData);
 
-        // Current date and time: 01:12 AM IST, May 31, 2025
-        const currentDate = new Date("2025-05-31T01:12:00+05:30");
-        const todayStart = new Date("2025-05-31T00:00:00+05:30"); // Start of May 31, 2025 IST
-        const todayEnd = new Date("2025-05-31T23:59:59+05:30"); // End of May 31, 2025 IST
+        // Current date and time: 01:17 AM IST, June 06, 2025
+        const currentDate = new Date("2025-06-06T01:17:00+05:30");
+        const todayStart = new Date("2025-06-06T00:00:00+05:30"); // Start of June 06, 2025 IST
+        const todayEnd = new Date("2025-06-06T23:59:59+05:30"); // End of June 06, 2025 IST
 
         // Filter events: exclude those that have ended
         const activeEvents = eventsData.filter((event) => {
@@ -68,16 +68,16 @@ function GroupChat({ groupId, messages, setGroup, currentUser }) {
           return endDate > currentDate; // Only keep events that haven't ended
         });
 
-        // Today's Events: start date is on May 31, 2025
+        // Today's Events: start date is on June 06, 2025
         const todayEventsFiltered = activeEvents.filter((event) => {
           const startDate = new Date(event.start);
           return startDate >= todayStart && startDate <= todayEnd;
         });
 
-        // Upcoming Events: start date is after May 31, 2025
+        // Upcoming Events: start date is after June 06, 2025
         const upcomingEventsFiltered = activeEvents.filter((event) => {
           const startDate = new Date(event.start);
-          return startDate > todayEnd; // After May 31, 2025
+          return startDate > todayEnd; // After June 06, 2025
         });
 
         setTodayEvents(todayEventsFiltered);
@@ -367,11 +367,6 @@ function GroupChat({ groupId, messages, setGroup, currentUser }) {
       <h4 className="relative text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 mb-4 hover-underline">
         Discussion Board
       </h4>
-      {error && (
-        <div className="bg-red-100 dark:bg-red-900/70 text-red-700 dark:text-red-300 p-4 mb-6 rounded-lg border border-gradient-to-r from-red-200 to-red-300 dark:from-red-800 dark:to-red-700 shadow-md hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300 animate-fade-in-up">
-          {error}
-        </div>
-      )}
       {messages && messages.length > 0 ? (
         <div className="space-y-4 mb-6">
           {messages.map((message, index) => (
@@ -505,6 +500,11 @@ function GroupChat({ groupId, messages, setGroup, currentUser }) {
               </>
             )}
           </button>
+          {error && (
+            <div className="bg-red-100 dark:bg-red-900/70 text-red-700 dark:text-red-300 p-4 mt-4 rounded-lg border border-gradient-to-r from-red-200 to-red-300 dark:from-red-800 dark:to-red-700 shadow-md hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300 animate-fade-in-up">
+              {error}
+            </div>
+          )}
         </form>
       )}
     </div>

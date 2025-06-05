@@ -19,6 +19,8 @@ const useProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [sortOption, setSortOption] = useState("newest");
   const [imageLoadError, setImageLoadError] = useState(false);
+  const [usernameChangeConfirmation, setUsernameChangeConfirmation] =
+    useState(false);
   const {
     setTemporaryMessage,
     setTemporarySuccess,
@@ -234,6 +236,57 @@ const useProfile = () => {
     }
   };
 
+  const performProfileUpdate = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found. Please log in again.");
+      }
+      if (typeof setUser !== "function") {
+        throw new Error(
+          "setUser is not a function. Ensure AuthProvider wraps the app."
+        );
+      }
+
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_URL}/api/users/profile`,
+        { bio, username },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const updatedUser = {
+        id: response.data.id,
+        username: response.data.username,
+        email: response.data.email,
+        bio: response.data.bio,
+        profilePicture: user.profilePicture || response.data.profilePicture,
+        createdAt: response.data.createdAt,
+      };
+      setUser(updatedUser);
+      setIsEditing(false);
+      setUsernameChangeConfirmation(false);
+      setTemporarySuccess(setError, setSuccess, "Profile updated successfully");
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to update profile";
+      setTemporaryMessage(setError, setSuccess, errorMessage);
+      setUsernameChangeConfirmation(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const confirmUsernameChange = () => {
+    setIsLoading(true);
+    performProfileUpdate();
+  };
+
+  const cancelUsernameChange = () => {
+    setUsernameChangeConfirmation(false);
+  };
+
   const handleBioUpdate = async (e) => {
     e.preventDefault();
     setError("");
@@ -279,43 +332,22 @@ const useProfile = () => {
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found. Please log in again.");
-      }
-      if (typeof setUser !== "function") {
-        throw new Error(
-          "setUser is not a function. Ensure AuthProvider wraps the app."
-        );
-      }
-
-      const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/users/profile`,
-        { bio, username },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      const updatedUser = {
-        id: response.data.id,
-        username: response.data.username,
-        email: response.data.email,
-        bio: response.data.bio,
-        profilePicture: user.profilePicture || response.data.profilePicture,
-        createdAt: response.data.createdAt,
-      };
-      setUser(updatedUser);
-      setIsEditing(false);
-      setTemporarySuccess(setError, setSuccess, "Profile updated successfully");
-    } catch (err) {
-      const errorMessage =
-        err.response?.data?.message ||
-        err.message ||
-        "Failed to update profile";
-      setTemporaryMessage(setError, setSuccess, errorMessage);
-    } finally {
+    // Check if username has changed
+    if (username !== user.username && !usernameChangeConfirmation) {
+      setUsernameChangeConfirmation(true);
       setIsLoading(false);
+      return;
     }
+
+    // If confirmation is already shown and user has confirmed, proceed with update
+    if (usernameChangeConfirmation) {
+      // Update is handled by confirmUsernameChange
+      setIsLoading(false);
+      return;
+    }
+
+    // If username hasn't changed, proceed with update directly
+    await performProfileUpdate();
   };
 
   return {
@@ -349,6 +381,9 @@ const useProfile = () => {
     setImageLoadError,
     setTemporaryMessage,
     setTemporarySuccess,
+    usernameChangeConfirmation,
+    confirmUsernameChange,
+    cancelUsernameChange,
     handleProfilePictureChange,
     handleRemoveProfilePicture,
     handleBioUpdate,
