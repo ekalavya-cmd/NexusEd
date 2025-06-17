@@ -50,4 +50,4 @@ async function updatePassword(email, newPlainPassword) {
 }
 
 // Call the function — replace with your values
-updatePassword("ajs@gmail.com", "Test@123");
+updatePassword("sus@gmail.com", "Test@123");

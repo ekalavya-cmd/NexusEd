@@ -46,7 +46,7 @@ function GroupCard({
       style={{ animationDelay }}
     >
       <div className="flex items-center space-x-4 mb-2">
-        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 dark:from-orange-600 dark:to-amber-600 text-white text-2xl icon-hover transition-all duration-300">
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 dark:from-orange-600 dark:to-amber-600 text-white text-2xl">
           <i className={`fa-solid ${group.groupImage || "fa-users"}`}></i>
         </div>
         <div className="flex-1">
