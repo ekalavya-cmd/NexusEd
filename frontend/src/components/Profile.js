@@ -1,9 +1,9 @@
 import React from "react";
+import { Row, Col, Tab, Nav, Spinner, Alert } from "react-bootstrap";
 import useProfile from "../hooks/useProfile";
 import ProfileHeader from "./ProfileHeader";
-import StudyGroups from "./ProfileGroups";
+import ProfileGroups from "./ProfileGroups";
 import UserPosts from "./UserPosts";
-import { profileStyles } from "../styles/profileStyles";
 
 function Profile() {
   const {
@@ -48,67 +48,100 @@ function Profile() {
 
   if (authLoading) {
     return (
-      <div className="text-gray-600 dark:text-gray-400 py-10 animate-pulse">
-        Loading profile...
+      <div className="text-center py-5">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-3 text-secondary">Loading profile...</p>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="text-gray-600 dark:text-gray-400 py-10 text-center">
-        Please log in to view your profile.
-      </div>
+      <Alert variant="info" className="text-center py-5">
+        <Alert.Heading>Not Logged In</Alert.Heading>
+        <p>Please log in to view your profile.</p>
+      </Alert>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-800">
-      <style>{profileStyles}</style>
-      <div className="container mx-auto px-4 py-10">
-        <ProfileHeader
-          user={user}
-          bio={bio}
-          setBio={setBio}
-          username={username}
-          setUsername={setUsername}
-          profilePicture={profilePicture}
-          setProfilePicture={setProfilePicture}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          error={error}
-          setError={setError}
-          success={success}
-          setSuccess={setSuccess}
-          uploadError={uploadError}
-          isLoading={isLoading}
-          handleProfilePictureChange={handleProfilePictureChange}
-          handleBioUpdate={handleBioUpdate}
-          imageLoadError={imageLoadError}
-          setImageLoadError={setImageLoadError}
-          posts={posts}
-          joinedGroups={joinedGroups}
-          BIO_MAX_LENGTH={BIO_MAX_LENGTH}
-          USERNAME_MIN_LENGTH={USERNAME_MIN_LENGTH}
-          USERNAME_MAX_LENGTH={USERNAME_MAX_LENGTH}
-          DEFAULT_BIO={DEFAULT_BIO}
-          setTemporaryMessage={setTemporaryMessage}
-          setTemporarySuccess={setTemporarySuccess}
-          handleRemoveProfilePicture={handleRemoveProfilePicture}
-        />
-        <StudyGroups
-          joinedGroups={joinedGroups}
-          isGroupsLoading={isGroupsLoading}
-        />
-        <UserPosts
-          posts={posts}
-          isPostsLoading={isPostsLoading}
-          sortOption={sortOption}
-          setSortOption={setSortOption}
-          setPosts={setPosts}
-          currentUser={user}
-        />
-      </div>
+    <div className="animate-fade-in-up">
+      {error && (
+        <Alert variant="danger" className="mb-4">
+          {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert variant="success" className="mb-4">
+          {success}
+        </Alert>
+      )}
+
+      <ProfileHeader
+        user={user}
+        bio={bio}
+        setBio={setBio}
+        username={username}
+        setUsername={setUsername}
+        profilePicture={profilePicture}
+        isEditing={isEditing}
+        setIsEditing={setIsEditing}
+        uploadError={uploadError}
+        isLoading={isLoading}
+        imageLoadError={imageLoadError}
+        handleProfilePictureChange={handleProfilePictureChange}
+        handleRemoveProfilePicture={handleRemoveProfilePicture}
+        handleBioUpdate={handleBioUpdate}
+        BIO_MAX_LENGTH={BIO_MAX_LENGTH}
+        USERNAME_MIN_LENGTH={USERNAME_MIN_LENGTH}
+        USERNAME_MAX_LENGTH={USERNAME_MAX_LENGTH}
+        DEFAULT_BIO={DEFAULT_BIO}
+      />
+
+      <Tab.Container id="profile-tabs" defaultActiveKey="posts">
+        <Row className="mt-4">
+          <Col>
+            <Nav variant="tabs" className="mb-3">
+              <Nav.Item>
+                <Nav.Link eventKey="posts" className="px-4">
+                  <i className="fas fa-comment-alt me-2"></i>
+                  Posts
+                </Nav.Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Nav.Link eventKey="groups" className="px-4">
+                  <i className="fas fa-users me-2"></i>
+                  Groups
+                </Nav.Link>
+              </Nav.Item>
+            </Nav>
+
+            <Tab.Content>
+              <Tab.Pane eventKey="posts">
+                <UserPosts
+                  posts={posts}
+                  setPosts={setPosts}
+                  isLoading={isPostsLoading}
+                  userId={user.id}
+                  sortOption={sortOption}
+                  setSortOption={setSortOption}
+                  setTemporaryMessage={setTemporaryMessage}
+                  setTemporarySuccess={setTemporarySuccess}
+                />
+              </Tab.Pane>
+              <Tab.Pane eventKey="groups">
+                <ProfileGroups
+                  groups={joinedGroups}
+                  isLoading={isGroupsLoading}
+                  setTemporaryMessage={setTemporaryMessage}
+                  setTemporarySuccess={setTemporarySuccess}
+                />
+              </Tab.Pane>
+            </Tab.Content>
+          </Col>
+        </Row>
+      </Tab.Container>
     </div>
   );
 }

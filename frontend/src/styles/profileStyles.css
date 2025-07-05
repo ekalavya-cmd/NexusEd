@@ -1,0 +1,146 @@
+/* Custom styles for Profile components */
+
+/* Animations */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
+  }
+}
+
+[data-bs-theme="dark"] {
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 5px rgba(209, 213, 219, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(209, 213, 219, 0.5);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(209, 213, 219, 0.3);
+    }
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.glow-effect {
+  animation: glow 2s infinite ease-in-out;
+}
+
+/* Hover underline effect */
+.hover-underline-effect {
+  position: relative;
+  text-decoration: none;
+}
+
+.hover-underline-effect::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to right, #0d6efd, #6610f2);
+  transition: width 0.3s ease-in-out;
+}
+
+[data-bs-theme="dark"] .hover-underline-effect::after {
+  background: linear-gradient(to right, #adb5bd, #dee2e6);
+}
+
+.hover-underline-effect:hover::after {
+  width: 100%;
+}
+
+/* Profile image styles */
+.profile-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-image-placeholder {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9ecef;
+  color: #6c757d;
+  font-size: 3rem;
+}
+
+[data-bs-theme="dark"] .profile-image-placeholder {
+  background-color: #343a40;
+  color: #adb5bd;
+}
+
+/* Member avatars */
+.member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #6c757d;
+  color: white;
+  font-weight: bold;
+}
+
+/* Custom tab styles */
+.profile-tabs .nav-link {
+  color: #6c757d;
+  border-radius: 0;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.profile-tabs .nav-link:hover {
+  color: #0d6efd;
+  border-bottom-color: #dee2e6;
+}
+
+.profile-tabs .nav-link.active {
+  color: #0d6efd;
+  background-color: transparent;
+  border-bottom-color: #0d6efd;
+}
+
+[data-bs-theme="dark"] .profile-tabs .nav-link {
+  color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .profile-tabs .nav-link:hover {
+  color: #6ea8fe;
+  border-bottom-color: #495057;
+}
+
+[data-bs-theme="dark"] .profile-tabs .nav-link.active {
+  color: #6ea8fe;
+  border-bottom-color: #6ea8fe;
+}

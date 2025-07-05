@@ -1,6 +1,10 @@
-/* Custom styles for App, if needed beyond Tailwind */
+/* Custom styles for App, if needed beyond Bootstrap */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 }
+
+/* Dark mode class will be handled via data-bs-theme="dark" attribute on html element */
+
+/* Additional Bootstrap customizations can be added here */

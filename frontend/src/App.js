@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { Container } from "react-bootstrap";
 import Navbar from "./components/Navbar";
 import Home from "./components/Home";
 import StudyGroups from "./components/StudyGroups";
@@ -12,19 +13,21 @@ import Footer from "./components/Footer";
 
 function App() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-800">
+    <div className="d-flex flex-column min-vh-100 bg-light">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 flex-grow">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/study-groups" element={<StudyGroups />} />
-          <Route path="/groups/:groupId" element={<GroupDetail />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<div>404 - Page Not Found</div>} />
-        </Routes>
+      <main className="flex-grow-1 py-4">
+        <Container>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/study-groups" element={<StudyGroups />} />
+            <Route path="/groups/:groupId" element={<GroupDetail />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="*" element={<div>404 - Page Not Found</div>} />
+          </Routes>
+        </Container>
       </main>
       <Footer />
     </div>

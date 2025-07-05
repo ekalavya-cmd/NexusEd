@@ -1,0 +1,158 @@
+/* Custom styles for React Big Calendar to work with Bootstrap */
+
+/* Calendar container */
+.bootstrap-calendar {
+  background-color: white;
+  font-family: inherit;
+  height: 100%;
+  min-height: 580px;
+  border-radius: 0.375rem;
+}
+
+[data-bs-theme="dark"] .bootstrap-calendar {
+  background-color: #2b3035;
+  color: #e9ecef;
+}
+
+/* Header row */
+.rbc-calendar .rbc-toolbar {
+  margin-bottom: 15px;
+}
+
+/* Month view */
+.rbc-month-view {
+  border-radius: 0.375rem;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+}
+
+[data-bs-theme="dark"] .rbc-month-view {
+  border-color: #495057;
+}
+
+/* Day cells */
+.rbc-date-cell {
+  padding: 5px;
+  text-align: right;
+}
+
+/* Today's cell */
+.rbc-today {
+  background-color: rgba(13, 110, 253, 0.1);
+}
+
+[data-bs-theme="dark"] .rbc-today {
+  background-color: rgba(54, 115, 203, 0.2);
+}
+
+/* Event styles */
+.rbc-event {
+  background-color: #0d6efd;
+  border-radius: 4px;
+  color: white;
+  padding: 2px 5px;
+  font-size: 0.85rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+[data-bs-theme="dark"] .rbc-event {
+  background-color: #3d8bfd;
+}
+
+.rbc-event:hover {
+  background-color: #0b5ed7;
+}
+
+[data-bs-theme="dark"] .rbc-event:hover {
+  background-color: #4d97fe;
+}
+
+/* Day, week, and agenda view styles */
+.rbc-time-view {
+  border-radius: 0.375rem;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+}
+
+[data-bs-theme="dark"] .rbc-time-view {
+  border-color: #495057;
+}
+
+.rbc-time-header {
+  border-bottom: 1px solid #dee2e6;
+}
+
+[data-bs-theme="dark"] .rbc-time-header {
+  border-color: #495057;
+}
+
+.rbc-time-header-content {
+  border-left: 1px solid #dee2e6;
+}
+
+[data-bs-theme="dark"] .rbc-time-header-content {
+  border-color: #495057;
+}
+
+.rbc-time-slot {
+  border-top: 1px solid #f8f9fa;
+}
+
+[data-bs-theme="dark"] .rbc-time-slot {
+  border-color: #343a40;
+}
+
+/* Off-range days (days from other months) */
+.rbc-off-range {
+  color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .rbc-off-range {
+  color: #6c757d;
+}
+
+/* Day headers */
+.rbc-header {
+  padding: 8px 0;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 500;
+}
+
+[data-bs-theme="dark"] .rbc-header {
+  border-color: #495057;
+}
+
+/* Selected cell or time slot */
+.rbc-selected-cell {
+  background-color: rgba(13, 110, 253, 0.2);
+}
+
+[data-bs-theme="dark"] .rbc-selected-cell {
+  background-color: rgba(54, 115, 203, 0.3);
+}
+
+/* Button to create a new event */
+.create-event-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rbc-toolbar {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .rbc-toolbar-label {
+    margin: 10px 0;
+  }
+
+  .rbc-btn-group {
+    margin-bottom: 10px;
+  }
+}

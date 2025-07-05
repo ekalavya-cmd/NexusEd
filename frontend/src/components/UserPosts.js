@@ -1,92 +1,247 @@
-import React from "react";
+import React, { useState } from "react";
+import { Row, Col, Button, ButtonGroup, Spinner, Alert } from "react-bootstrap";
+import axios from "axios";
 import PostCard from "./PostCard";
+import PostForm from "./PostForm";
 
-const UserPosts = ({
+function UserPosts({
   posts,
-  isPostsLoading,
+  setPosts,
+  isLoading,
+  userId,
   sortOption,
   setSortOption,
-  setPosts,
-  currentUser,
-}) => {
-  const sortPosts = (posts) => {
-    const sortedPosts = [...posts];
-    switch (sortOption) {
+  setTemporaryMessage,
+  setTemporarySuccess,
+}) {
+  const [isLiking, setIsLiking] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCommenting, setIsCommenting] = useState(false);
+  const [showPostForm, setShowPostForm] = useState(false);
+
+  const sortPosts = (option) => {
+    setSortOption(option);
+    let sortedPosts = [...posts];
+
+    switch (option) {
       case "newest":
-        return sortedPosts.sort(
+        sortedPosts.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
+        break;
       case "oldest":
-        return sortedPosts.sort(
+        sortedPosts.sort(
           (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
         );
-      case "mostLikes":
-        return sortedPosts.sort(
-          (a, b) => (b.likes?.length || 0) - (a.likes?.length || 0)
-        );
-      case "leastLikes":
-        return sortedPosts.sort(
-          (a, b) => (a.likes?.length || 0) - (b.likes?.length || 0)
-        );
+        break;
+      case "popular":
+        sortedPosts.sort((a, b) => b.likes.length - a.likes.length);
+        break;
       default:
-        return sortedPosts;
+        break;
+    }
+
+    setPosts(sortedPosts);
+  };
+
+  const handleCreatePost = async (content) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/posts`,
+        { content },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setPosts([response.data, ...posts]);
+      setShowPostForm(false);
+      setTemporarySuccess("Post created successfully!");
+      return true;
+    } catch (err) {
+      console.error("Error creating post:", err);
+      setTemporaryMessage("Failed to create post. Please try again.");
+      return false;
     }
   };
 
+  const handleLikePost = async (postId) => {
+    if (isLiking) return;
+
+    try {
+      setIsLiking(true);
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/posts/${postId}/like`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setPosts(
+        posts.map((post) => (post._id === postId ? response.data : post))
+      );
+    } catch (err) {
+      console.error("Error liking post:", err);
+      setTemporaryMessage("Failed to like post. Please try again.");
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleDeletePost = async (postId) => {
+    if (isDeleting) return;
+
+    try {
+      setIsDeleting(true);
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/api/posts/${postId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setPosts(posts.filter((post) => post._id !== postId));
+      setTemporarySuccess("Post deleted successfully!");
+    } catch (err) {
+      console.error("Error deleting post:", err);
+      setTemporaryMessage("Failed to delete post. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleAddComment = async (postId, content) => {
+    if (isCommenting) return;
+
+    try {
+      setIsCommenting(true);
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/posts/${postId}/comments`,
+        { content },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setPosts(
+        posts.map((post) => (post._id === postId ? response.data : post))
+      );
+    } catch (err) {
+      console.error("Error adding comment:", err);
+      setTemporaryMessage("Failed to add comment. Please try again.");
+    } finally {
+      setIsCommenting(false);
+    }
+  };
+
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      const response = await axios.delete(
+        `${process.env.REACT_APP_API_URL}/api/posts/${postId}/comments/${commentId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setPosts(
+        posts.map((post) => (post._id === postId ? response.data : post))
+      );
+      setTemporarySuccess("Comment deleted successfully!");
+    } catch (err) {
+      console.error("Error deleting comment:", err);
+      setTemporaryMessage("Failed to delete comment. Please try again.");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-3 text-secondary">Loading posts...</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <div className="flex justify-between items-center mb-6 animate-fade-in-up mt-10">
-        <h3 className="relative text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 hover-underline">
-          My Posts
-        </h3>
+    <div className="mt-3">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-          <label
-            htmlFor="sort-posts"
-            className="text-gray-600 dark:text-gray-200 mr-2"
+          <Button
+            variant="primary"
+            className="btn-hover-shadow"
+            onClick={() => setShowPostForm(!showPostForm)}
           >
-            Sort by:
-          </label>
-          <select
-            id="sort-posts"
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-            className="border-2 border-gradient-to-r from-blue-300 to-indigo-300 dark:from-gray-500 dark:to-gray-400 rounded-lg p-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-gray-500 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)] dark:hover:dark-glow transition-all duration-300"
-            aria-label="Sort posts"
-          >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="mostLikes">Most Likes</option>
-            <option value="leastLikes">Least Likes</option>
-          </select>
+            <i className={`fas fa-${showPostForm ? "times" : "plus"} me-2`}></i>
+            {showPostForm ? "Cancel" : "Create Post"}
+          </Button>
         </div>
+
+        <ButtonGroup>
+          <Button
+            variant={sortOption === "newest" ? "primary" : "outline-primary"}
+            onClick={() => sortPosts("newest")}
+          >
+            Newest
+          </Button>
+          <Button
+            variant={sortOption === "oldest" ? "primary" : "outline-primary"}
+            onClick={() => sortPosts("oldest")}
+          >
+            Oldest
+          </Button>
+          <Button
+            variant={sortOption === "popular" ? "primary" : "outline-primary"}
+            onClick={() => sortPosts("popular")}
+          >
+            Most Liked
+          </Button>
+        </ButtonGroup>
       </div>
-      <div className="space-y-6 animate-fade-in-up">
-        {isPostsLoading ? (
-          <div className="text-gray-600 dark:text-gray-400 py-10">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600 dark:border-gray-400"></div>
-            <p className="mt-2">Loading posts...</p>
+
+      {showPostForm && (
+        <div className="mb-4">
+          <PostForm handleCreatePost={handleCreatePost} />
+        </div>
+      )}
+
+      {posts.length === 0 ? (
+        <Alert variant="info">
+          <div className="d-flex align-items-center">
+            <i className="fas fa-info-circle me-3 fs-5"></i>
+            <div>
+              <p className="mb-0">You haven't created any posts yet.</p>
+            </div>
           </div>
-        ) : sortPosts(posts).length > 0 ? (
-          sortPosts(posts).map((post) => (
-            <PostCard
-              key={post._id}
-              id={post._id}
-              title={post.title}
-              content={post.content}
-              author={post.author?.username || "Unknown"}
-              comments={post.comments}
-              likes={post.likes}
-              post={post}
-              setPosts={setPosts}
-              currentUser={currentUser}
-            />
-          ))
-        ) : (
-          <p className="text-gray-600 dark:text-gray-400">No posts yet.</p>
-        )}
-      </div>
-    </>
+        </Alert>
+      ) : (
+        posts.map((post, index) => (
+          <PostCard
+            key={post._id}
+            post={post}
+            currentUser={{ id: userId }}
+            handleLikePost={handleLikePost}
+            handleDeletePost={handleDeletePost}
+            handleAddComment={handleAddComment}
+            handleDeleteComment={handleDeleteComment}
+            isLiking={isLiking}
+            isDeleting={isDeleting}
+            isCommenting={isCommenting}
+            animationDelay={`${index * 0.1}s`}
+          />
+        ))
+      )}
+    </div>
   );
-};
+}
 
 export default UserPosts;

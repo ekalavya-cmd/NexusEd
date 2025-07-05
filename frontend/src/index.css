@@ -2,37 +2,29 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 :root {
-  --primary-color: #2563eb; /* Tailwind's blue-600 */
-  --secondary-color: #dbeafe; /* Tailwind's blue-100 */
-  --error-bg: #fee2e2; /* Tailwind's red-100 */
-  --error-text: #b91c1c; /* Tailwind's red-700 */
-  --success-bg: #dcfce7; /* Tailwind's green-100 */
-  --success-text: #15803d; /* Tailwind's green-700 */
+  --primary-color: #0d6efd; /* Bootstrap primary blue */
+  --secondary-color: #e9f2ff; /* Light blue for secondary backgrounds */
+  --error-bg: #f8d7da; /* Bootstrap danger background */
+  --error-text: #842029; /* Bootstrap danger text */
+  --success-bg: #d1e7dd; /* Bootstrap success background */
+  --success-text: #0f5132; /* Bootstrap success text */
 }
 
-.dark {
-  --primary-color: #d4d4d8; /* Tailwind's zinc-300 for dark mode */
-  --secondary-color: #4b5563; /* Tailwind's gray-600 */
-  --error-bg: #7f1d1d80; /* Tailwind's red-900 with 50% opacity */
-  --error-text: #fecaca; /* Tailwind's red-200 */
-  --success-bg: #16653480; /* Tailwind's green-900 with 50% opacity */
-  --success-text: #bbf7d0; /* Tailwind's green-200 */
-}
-
-html,
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  font-family: "Inter", sans-serif;
-  background-color: #f9fafb; /* Tailwind's gray-50 */
-  color: #1f2937; /* Tailwind's gray-800 */
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
 }
 
-.dark html,
-.dark body {
-  background-color: #1f2937; /* Tailwind's gray-800 */
-  color: #e5e7eb; /* Tailwind's gray-200 */
+/* Dark mode adjustments will be handled through Bootstrap's data-bs-theme attribute */
+[data-bs-theme="dark"] {
+  --primary-color: #6ea8fe; /* Lighter blue for dark mode */
+  --secondary-color: #344258; /* Darker blue for dark mode */
+  --error-bg: rgba(127, 29, 29, 0.5); /* Semi-transparent red */
+  --error-text: #f5c2c7; /* Lighter red text for dark mode */
+  --success-bg: rgba(20, 83, 45, 0.5); /* Semi-transparent green */
+  --success-text: #a3cfbb; /* Lighter green text for dark mode */
 }
 
 /* Global link styles */
@@ -42,16 +34,12 @@ a {
   transition: color 0.3s ease-in-out;
 }
 
-.dark a {
-  color: var(--primary-color);
-}
-
 a:hover {
-  color: #4f46e5; /* Tailwind's indigo-600 */
+  color: #0a58ca; /* Darker blue on hover */
 }
 
-.dark a:hover {
-  color: #9ca3af; /* Tailwind's gray-400, matching navbar's hover underline */
+[data-bs-theme="dark"] a:hover {
+  color: #adb5bd; /* Lighter gray for dark mode hover */
 }
 
 /* Fade-out animation for messages */
@@ -69,4 +57,84 @@ a:hover {
 
 .message {
   animation: fadeOut 3s ease-in-out forwards;
+}
+
+/* Animation for fade-in-up effect */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Custom transition classes */
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Custom styles for buttons with hover effect */
+.btn-hover-shadow:hover {
+  box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+  transform: scale(1.05);
+}
+
+/* Tooltip styles */
+.tooltip-container {
+  position: relative;
+}
+
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 12px;
+  z-index: 1000;
+  transition: visibility 0s, opacity 0.3s;
+  opacity: 0;
+}
+
+.tooltip-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Custom gradient backgrounds */
+.bg-gradient-primary {
+  background-image: linear-gradient(to right, #0d6efd, #6610f2);
+}
+
+.bg-gradient-danger {
+  background-image: linear-gradient(to right, #dc3545, #c71f37);
+}
+
+.bg-gradient-warning {
+  background-image: linear-gradient(to right, #ffc107, #fd7e14);
+}
+
+.bg-gradient-success {
+  background-image: linear-gradient(to right, #198754, #20c997);
+}
+
+/* Dark mode adjustments */
+[data-bs-theme="dark"] .bg-gradient-primary {
+  background-image: linear-gradient(to right, #0d6efd, #6f42c1);
+}
+
+[data-bs-theme="dark"] body {
+  color: #e5e7eb;
 }

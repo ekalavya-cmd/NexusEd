@@ -1,379 +1,175 @@
-import React, { useContext, useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import React, { useState, useContext, useEffect } from "react";
+import { Link, NavLink as RouterNavLink } from "react-router-dom";
+import { Navbar as BsNavbar, Nav, Container, Button } from "react-bootstrap";
 import { AuthContext } from "../context/AuthContext";
 
 function Navbar() {
   const { user, logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem("darkMode");
-    return savedMode ? JSON.parse(savedMode) : false;
-  });
-  const [greeting, setGreeting] = useState("");
+  const [darkMode, setDarkMode] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
+  // Check preferred color scheme and localStorage on component mount
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
+    const storedDarkMode = localStorage.getItem("darkMode");
+    if (storedDarkMode) {
+      setDarkMode(storedDarkMode === "true");
     } else {
-      document.documentElement.classList.remove("dark");
+      const prefersDarkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      setDarkMode(prefersDarkMode);
     }
-    localStorage.setItem("darkMode", JSON.stringify(isDarkMode));
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    const updateGreeting = () => {
-      const hour = new Date().getHours();
-      if (hour >= 5 && hour < 12) {
-        setGreeting("Good Morning");
-      } else if (hour >= 12 && hour < 17) {
-        setGreeting("Good Afternoon");
-      } else if (hour >= 17 && hour < 22) {
-        setGreeting("Good Evening");
-      } else {
-        setGreeting("Good Night");
-      }
-    };
-    updateGreeting();
-    const interval = setInterval(updateGreeting, 60000);
-    return () => clearInterval(interval);
   }, []);
+
+  // Update body data-bs-theme and localStorage when darkMode changes
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      "data-bs-theme",
+      darkMode ? "dark" : "light"
+    );
+    localStorage.setItem("darkMode", darkMode);
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode((prevMode) => !prevMode);
+  };
 
   const handleLogout = () => {
     logout();
-    navigate("/");
-    setIsMobileMenuOpen(false);
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen((prev) => !prev);
-  };
-
-  const toggleDarkMode = () => {
-    setIsDarkMode((prev) => !prev);
+    setExpanded(false);
   };
 
   return (
-    <nav
-      className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-gray-800 dark:to-gray-900 p-4 shadow-lg shadow-inner sticky top-0 z-50"
-      role="navigation"
+    <BsNavbar
+      expand="lg"
+      className={`navbar bg-gradient-primary text-white shadow-sm mb-4`}
+      expanded={expanded}
+      onToggle={setExpanded}
     >
-      <style>
-        {`
-          @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(209, 213, 219, 0.3); }
-            50% { box-shadow: 0 0 15px rgba(209, 213, 219, 0.5); }
-            100% { box-shadow: 0 0 5px rgba(209, 213, 219, 0.3); }
-          }
-          .dark-glow {
-            animation: glow 2s infinite ease-in-out;
-          }
-          .hover-underline::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 1px;
-            bottom: 0;
-            left: 0;
-            background: #93c5fd;
-            transition: width 0.3s ease-in-out;
-          }
-          .dark .hover-underline::after {
-            background: #9ca3af;
-          }
-          .hover-underline:hover::after {
-            width: 100%;
-          }
-        `}
-      </style>
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <NavLink
-            to="/"
-            className="text-white dark:text-amber-200 text-2xl font-bold hover:text-white dark:hover:text-amber-200 transition-none"
-            aria-label="NexusEd Home"
-          >
-            NexusEd
-          </NavLink>
-          {user && (
-            <span className="text-white dark:text-amber-200 text-sm md:text-base">
-              {greeting}, {user.username}!
-            </span>
-          )}
-          <button
-            onClick={toggleDarkMode}
-            className="text-white dark:text-amber-400 focus:outline-none rounded-md p-2 transition-all duration-300"
-            aria-label={
-              isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"
-            }
-          >
-            <i
-              className={
-                isDarkMode
-                  ? "fa-solid fa-sun text-2xl"
-                  : "fa-solid fa-moon text-2xl"
+      <Container>
+        <BsNavbar.Brand
+          as={Link}
+          to="/"
+          className="text-white fw-bold d-flex align-items-center"
+        >
+          <i className="fas fa-graduation-cap me-2 fs-4"></i>
+          NexusEd
+        </BsNavbar.Brand>
+
+        <Button
+          variant="link"
+          className="text-white ms-2 text-decoration-none d-flex d-lg-none position-relative"
+          onClick={toggleDarkMode}
+          aria-label={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
+        </Button>
+
+        <BsNavbar.Toggle aria-controls="basic-navbar-nav" className="border-0">
+          <i className="fas fa-bars text-white"></i>
+        </BsNavbar.Toggle>
+
+        <BsNavbar.Collapse id="basic-navbar-nav">
+          <Nav className="ms-auto d-flex align-items-center">
+            <Nav.Link
+              as={RouterNavLink}
+              to="/"
+              className={({ isActive }) =>
+                `text-white mx-1 ${isActive ? "active fw-bold" : ""}`
               }
-            ></i>
-          </button>
-        </div>
-
-        <div className="flex items-center">
-          <button
-            className="md:hidden text-white dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-gray-500 rounded-md p-2 transition-all duration-300"
-            onClick={toggleMobileMenu}
-            aria-expanded={isMobileMenuOpen}
-            aria-controls="mobile-menu"
-            aria-label="Toggle navigation menu"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+              onClick={() => setExpanded(false)}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d={
-                  isMobileMenuOpen
-                    ? "M6 18L18 6M6 6l12 12"
-                    : "M4 6h16M4 12h16M4 18h16"
-                }
-              />
-            </svg>
-          </button>
-        </div>
+              Home
+            </Nav.Link>
 
-        <div className="hidden md:flex md:space-x-6">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `relative text-white dark:text-gray-200 px-3 py-1 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                isActive
-                  ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                  : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-              }`
-            }
-            aria-label="Home"
-          >
-            Posts
-          </NavLink>
-          {user ? (
-            <>
-              <NavLink
-                to="/profile"
-                className={({ isActive }) =>
-                  `relative text-white dark:text-gray-200 px-3 py-1 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                aria-label="Profile"
-              >
-                Profile
-              </NavLink>
-              <NavLink
-                to="/study-groups"
-                className={({ isActive }) =>
-                  `relative text-white dark:text-gray-200 px-3 py-1 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                aria-label="Study Groups"
-              >
-                Groups
-              </NavLink>
-              <NavLink
-                to="/calendar"
-                className={({ isActive }) =>
-                  `relative text-white dark:text-gray-200 px-3 py-1 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                aria-label="Calendar"
-              >
-                Calendar
-              </NavLink>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="bg-red-500 dark:bg-red-600 text-white dark:text-gray-200 px-3 py-1 rounded-md hover:bg-red-400 dark:hover:bg-red-500 hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.3)] dark:hover:dark-glow transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                aria-label="Logout"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <NavLink
-                to="/study-groups"
-                className={({ isActive }) =>
-                  `relative text-white dark:text-gray-200 px-3 py-1 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                aria-label="Study Groups"
-              >
-                Groups
-              </NavLink>
-              <NavLink
-                to="/login"
-                className={({ isActive }) =>
-                  `relative text-white dark:text-gray-200 px-3 py-1 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                aria-label="Login"
-              >
-                Login
-              </NavLink>
-              <NavLink
-                to="/register"
-                className={({ isActive }) =>
-                  `relative text-white dark:text-gray-200 px-3 py-1 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                aria-label="Register"
-              >
-                Register
-              </NavLink>
-            </>
-          )}
-        </div>
-      </div>
+            {user && (
+              <>
+                <Nav.Link
+                  as={RouterNavLink}
+                  to="/profile"
+                  className={({ isActive }) =>
+                    `text-white mx-1 ${isActive ? "active fw-bold" : ""}`
+                  }
+                  onClick={() => setExpanded(false)}
+                >
+                  Profile
+                </Nav.Link>
 
-      {isMobileMenuOpen && (
-        <div id="mobile-menu" className="md:hidden mt-4 space-y-3">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `block text-white dark:text-gray-200 px-4 py-2 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                isActive
-                  ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                  : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-              }`
-            }
-            onClick={() => setIsMobileMenuOpen(false)}
-            aria-label="Home"
-          >
-            Home
-          </NavLink>
-          {user ? (
-            <>
-              <NavLink
-                to="/profile"
-                className={({ isActive }) =>
-                  `block text-white dark:text-gray-200 px-4 py-2 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
+                <Nav.Link
+                  as={RouterNavLink}
+                  to="/calendar"
+                  className={({ isActive }) =>
+                    `text-white mx-1 ${isActive ? "active fw-bold" : ""}`
+                  }
+                  onClick={() => setExpanded(false)}
+                >
+                  Calendar
+                </Nav.Link>
+              </>
+            )}
+
+            <Nav.Link
+              as={RouterNavLink}
+              to="/study-groups"
+              className={({ isActive }) =>
+                `text-white mx-1 ${isActive ? "active fw-bold" : ""}`
+              }
+              onClick={() => setExpanded(false)}
+            >
+              Study Groups
+            </Nav.Link>
+
+            <div className="ms-2 d-none d-lg-block">
+              <Button
+                variant="link"
+                className="text-white text-decoration-none"
+                onClick={toggleDarkMode}
+                aria-label={
+                  darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"
                 }
-                onClick={() => setIsMobileMenuOpen(false)}
-                aria-label="Profile"
               >
-                Profile
-              </NavLink>
-              <NavLink
-                to="/study-groups"
-                className={({ isActive }) =>
-                  `block text-white dark:text-gray-200 px-4 py-2 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-                aria-label="Study Groups"
-              >
-                Study Groups
-              </NavLink>
-              <NavLink
-                to="/calendar"
-                className={({ isActive }) =>
-                  `block text-white dark:text-gray-200 px-4 py-2 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-                aria-label="Calendar"
-              >
-                Calendar
-              </NavLink>
-              <button
-                type="button"
+                <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
+              </Button>
+            </div>
+
+            {user ? (
+              <Button
+                variant="outline-light"
+                className="ms-2 btn-sm"
                 onClick={handleLogout}
-                className="block w-full text-left text-white dark:text-gray-200 px-4 py-2 rounded-md bg-red-500 dark:bg-red-600 hover:bg-red-400 dark:hover:bg-red-500 hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.3)] dark:hover:dark-glow transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-200 dark:focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                aria-label="Logout"
               >
+                <i className="fas fa-sign-out-alt me-2"></i>
                 Logout
-              </button>
-            </>
-          ) : (
-            <>
-              <NavLink
-                to="/study-groups"
-                className={({ isActive }) =>
-                  `block text-white dark:text-gray-200 px-4 py-2 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-                aria-label="Study Groups"
-              >
-                Study Groups
-              </NavLink>
-              <NavLink
-                to="/login"
-                className={({ isActive }) =>
-                  `block text-white dark:text-gray-200 px-4 py-2 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0)] dark:shadow-[0_0_10px_rgba(209,213,219,0)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-                aria-label="Login"
-              >
-                Login
-              </NavLink>
-              <NavLink
-                to="/register"
-                className={({ isActive }) =>
-                  `block text-white dark:text-gray-200 px-4 py-2 rounded-md transition-all duration-300 ease-in-out hover-underline ${
-                    isActive
-                      ? "bg-blue-400 dark:bg-gray-600 text-white dark:text-gray-200 shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)]"
-                      : "hover:bg-blue-500 dark:hover:bg-gray-700 hover:shadow-[0_0_5px_rgba(59,130,246,0.3)] dark:hover:shadow-[0_0_5px_rgba(209,213,219,0.3)]"
-                  }`
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-                aria-label="Register"
-              >
-                Register
-              </NavLink>
-            </>
-          )}
-        </div>
-      )}
-    </nav>
+              </Button>
+            ) : (
+              <>
+                <Nav.Link
+                  as={RouterNavLink}
+                  to="/login"
+                  className={({ isActive }) =>
+                    `text-white mx-1 ${isActive ? "active fw-bold" : ""}`
+                  }
+                  onClick={() => setExpanded(false)}
+                >
+                  Login
+                </Nav.Link>
+
+                <Nav.Link
+                  as={RouterNavLink}
+                  to="/register"
+                  className={({ isActive }) =>
+                    `text-white mx-1 ${isActive ? "active fw-bold" : ""}`
+                  }
+                  onClick={() => setExpanded(false)}
+                >
+                  Register
+                </Nav.Link>
+              </>
+            )}
+          </Nav>
+        </BsNavbar.Collapse>
+      </Container>
+    </BsNavbar>
   );
 }
 

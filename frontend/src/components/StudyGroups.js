@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Form,
+  Button,
+  ButtonGroup,
+  Alert,
+  Spinner,
+  Modal,
+} from "react-bootstrap";
 import axios from "axios";
 import GroupForm from "./GroupForm";
 import GroupCard from "./GroupCard";
@@ -22,6 +34,7 @@ function StudyGroups() {
   const [visibleMembers, setVisibleMembers] = useState({});
   const [confirmation, setConfirmation] = useState(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const timeoutRef = useRef(null);
   const confirmationTimeoutRef = useRef(null);
   const confirmationMessageRef = useRef(null);
@@ -78,184 +91,117 @@ function StudyGroups() {
     const fetchGroups = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(
+        const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/study-groups`
         );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch study groups: ${response.status}`);
-        }
-        const data = await response.json();
-        setGroups(data);
+        setGroups(response.data);
       } catch (err) {
-        console.error("Error fetching study groups:", err.message);
+        console.error("Error fetching study groups:", err);
         setTemporaryMessage("error", "Failed to load study groups.");
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchGroups();
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      if (confirmationTimeoutRef.current) {
-        clearTimeout(confirmationTimeoutRef.current);
-      }
-    };
   }, []);
-
-  useEffect(() => {
-    if (confirmation && confirmationMessageRef.current) {
-      confirmationMessageRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-      if (confirmationMessageRef.current.focusUndoButton) {
-        setTimeout(() => {
-          confirmationMessageRef.current.focusUndoButton();
-        }, 500);
-      }
-    }
-  }, [confirmation]);
-
-  useEffect(() => {
-    if (editGroup && editFormRef.current) {
-      editFormRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  }, [editGroup]);
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
-    if (!user) {
-      setTemporaryMessage("error", "Please log in to create a study group.");
-      return;
-    }
-    if (
-      !newGroup.name.trim() ||
-      !newGroup.description.trim() ||
-      !newGroup.category
-    ) {
-      setTemporaryMessage(
-        "error",
-        "Name, description, and category are required."
-      );
+
+    if (!newGroup.name || !newGroup.description) {
+      setTemporaryMessage("error", "Please fill out all required fields.");
       return;
     }
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token missing. Please log in again.");
-      }
+      setIsLoading(true);
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/study-groups`,
+        newGroup,
         {
-          name: newGroup.name,
-          description: newGroup.description,
-          category: newGroup.category,
-          groupImage: newGroup.groupImage,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
-      setGroups([...groups, response.data]);
+
+      setGroups([response.data, ...groups]);
       setNewGroup({
         name: "",
         description: "",
         category: "",
         groupImage: "fa-users",
       });
+      setShowCreateModal(false);
       setTemporaryMessage("success", "Study group created successfully!");
     } catch (err) {
+      console.error("Error creating study group:", err);
       setTemporaryMessage(
         "error",
         err.response?.data?.message || "Failed to create study group."
       );
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleEditGroup = (group) => {
-    setEditGroup({
-      id: group._id,
-      name: group.name,
-      description: group.description,
-      category: group.category,
-      groupImage: group.groupImage || "fa-users",
-    });
   };
 
   const handleUpdateGroup = async (e) => {
     e.preventDefault();
-    if (!user) {
-      setTemporaryMessage("error", "Please log in to update a study group.");
-      return;
-    }
-    if (
-      !editGroup.name.trim() ||
-      !editGroup.description.trim() ||
-      !editGroup.category
-    ) {
-      setTemporaryMessage(
-        "error",
-        "Name, description, and category are required."
-      );
+
+    if (!editGroup.name || !editGroup.description) {
+      setTemporaryMessage("error", "Please fill out all required fields.");
       return;
     }
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token missing. Please log in again.");
-      }
+      setIsLoading(true);
       const response = await axios.put(
-        `${process.env.REACT_APP_API_URL}/api/study-groups/${editGroup.id}`,
+        `${process.env.REACT_APP_API_URL}/api/study-groups/${editGroup._id}`,
+        editGroup,
         {
-          name: editGroup.name,
-          description: editGroup.description,
-          category: editGroup.category,
-          groupImage: editGroup.groupImage,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
+
       setGroups(
         groups.map((group) =>
-          group._id === editGroup.id ? response.data : group
+          group._id === editGroup._id ? response.data : group
         )
       );
       setEditGroup(null);
       setTemporaryMessage("success", "Study group updated successfully!");
     } catch (err) {
+      console.error("Error updating study group:", err);
       setTemporaryMessage(
         "error",
         err.response?.data?.message || "Failed to update study group."
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleJoinGroup = async (groupId, fromUndo = false) => {
-    if (!user) {
-      setTemporaryMessage("error", "Please log in to join a study group.");
-      return;
-    }
-
+  const handleJoinGroup = async (groupId) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token missing. Please log in again.");
-      }
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/study-groups/${groupId}/join`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
 
       setGroups(
         groups.map((group) => (group._id === groupId ? response.data : group))
       );
+      setTemporaryMessage("success", "Joined study group successfully!");
     } catch (err) {
+      console.error("Error joining study group:", err);
       setTemporaryMessage(
         "error",
         err.response?.data?.message || "Failed to join study group."
@@ -263,46 +209,24 @@ function StudyGroups() {
     }
   };
 
-  const handleLeaveGroup = async (groupId, fromUndo = false) => {
-    if (!user) {
-      setTemporaryMessage("error", "Please log in to leave a study group.");
-      return;
-    }
-
+  const handleLeaveGroup = async (groupId) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token missing. Please log in again.");
-      }
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/study-groups/${groupId}/leave`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
 
-      if (!fromUndo) {
-        const previousGroups = [...groups];
-        setGroups(
-          groups.map((group) => (group._id === groupId ? response.data : group))
-        );
-
-        clearConfirmation();
-        setConfirmation({
-          type: "leave",
-          groupId,
-          message: "You have left the study group.",
-          undo: () => {
-            handleJoinGroup(groupId, true);
-            setGroups(previousGroups);
-          },
-        });
-        confirmationTimeoutRef.current = setTimeout(clearConfirmation, 5000);
-      } else {
-        setGroups(
-          groups.map((group) => (group._id === groupId ? response.data : group))
-        );
-      }
+      setGroups(
+        groups.map((group) => (group._id === groupId ? response.data : group))
+      );
+      setTemporaryMessage("success", "Left study group successfully!");
     } catch (err) {
+      console.error("Error leaving study group:", err);
       setTemporaryMessage(
         "error",
         err.response?.data?.message || "Failed to leave study group."
@@ -310,26 +234,21 @@ function StudyGroups() {
     }
   };
 
+  const handleDeleteConfirmation = (groupId) => {
+    setDeleteConfirmation(groupId);
+  };
+
   const handleDeleteGroup = async (groupId) => {
-    if (!user) {
-      setTemporaryMessage("error", "Please log in to delete a study group.");
-      return;
-    }
-
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setTemporaryMessage(
-          "error",
-          "Authentication token missing. Please log in again."
-        );
-        return;
-      }
-
       await axios.delete(
         `${process.env.REACT_APP_API_URL}/api/study-groups/${groupId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
+
       setGroups(groups.filter((group) => group._id !== groupId));
       setDeleteConfirmation(null);
       setTemporaryMessage("success", "Study group deleted successfully!");
@@ -342,8 +261,16 @@ function StudyGroups() {
     }
   };
 
-  const handleDeleteConfirmation = (groupId) => {
-    setDeleteConfirmation(groupId);
+  const cancelDeleteGroup = () => {
+    setDeleteConfirmation(null);
+  };
+
+  const handleEditGroup = (group) => {
+    setEditGroup({ ...group });
+  };
+
+  const cancelEditGroup = () => {
+    setEditGroup(null);
   };
 
   const toggleMembersVisibility = (groupId) => {
@@ -360,197 +287,103 @@ function StudyGroups() {
 
   if (authLoading) {
     return (
-      <div className="text-gray-600 dark:text-gray-400 py-10 animate-pulse">
-        Loading auth...
+      <div className="text-center py-5">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-3 text-secondary">Loading...</p>
       </div>
     );
   }
 
   return (
-    <section
-      className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 py-10"
-      aria-label="Study Groups"
-    >
-      <style>
-        {`
-          @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-          }
-          @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(209, 213, 219, 0.3); }
-            50% { box-shadow: 0 0 15px rgba(209, 213, 219, 0.5); }
-            100% { box-shadow: 0 0 5px rgba(209, 213, 219, 0.3); }
-          }
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-          .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
-          }
-          .animate-pulse-text {
-            animation: pulse 1.5s infinite;
-          }
-          .dark-glow {
-            animation: glow 2s infinite ease-in-out;
-          }
-          .icon-hover:hover {
-            animation: spin 1s linear infinite;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-          }
-          .dark .icon-hover:hover {
-            box-shadow: 0 0 10px rgba(209, 213, 219, 0.5);
-          }
-          .hover-underline::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background: linear-gradient(to right, #2563eb, #4f46e5);
-            transition: width 0.3s ease-in-out;
-          }
-          .dark .hover-underline::after {
-            background: linear-gradient(to right, #9ca3af, #d1d5db);
-          }
-          .hover-underline:hover::after {
-            width: 100%;
-          }
-          .tooltip {
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #1f2937;
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            z-index: 10;
-          }
-          .avatar:hover .tooltip {
-            visibility: visible;
-            opacity: 1;
-          }
-          input:-webkit-autofill,
-          input:-webkit-autofill:hover,
-          input:-webkit-autofill:focus,
-          input:-webkit-autofill:active,
-          textarea:-webkit-autofill,
-          textarea:-webkit-autofill:hover,
-          textarea:-webkit-autofill:focus,
-          textarea:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #f9fafb inset !important;
-            -webkit-text-fill-color: #1f2937 !important;
-            border-radius: 0.5rem !important;
-            border: 1px solid #e5e7eb !important;
-          }
-          .dark input:-webkit-autofill,
-          .dark input:-webkit-autofill:hover,
-          .dark input:-webkit-autofill:focus,
-          .dark input:-webkit-autofill:active,
-          .dark textarea:-webkit-autofill,
-          .dark textarea:-webkit-autofill:hover,
-          .dark textarea:-webkit-autofill:focus,
-          .dark textarea:-webkit-autofill:active {
-            -webkit-box-shadow: 0 0 0 30px #1f2937 inset !important;
-            -webkit-text-fill-color: #d1d5db !important;
-            border-radius: 0.5rem !important;
-            border: 1px solid #4b5563 !important;
-          }
-        `}
-      </style>
-      <div className="container mx-auto px-4 animate-fade-in-up">
-        <h1 className="relative text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 hover-underline mb-8">
-          Study Groups
-        </h1>
+    <div className="animate-fade-in-up">
+      {error && (
+        <ConfirmationMessage
+          message={error}
+          type="error"
+          onClose={() => setError("")}
+        />
+      )}
+      {success && (
+        <ConfirmationMessage
+          message={success}
+          type="success"
+          onClose={() => setSuccess("")}
+        />
+      )}
+      {confirmation && (
+        <ConfirmationMessage
+          message={confirmation}
+          type="success"
+          onClose={clearConfirmation}
+          ref={confirmationMessageRef}
+        />
+      )}
 
-        {user ? (
-          <GroupForm
-            formTitle="Create a New Study Group"
-            formData={newGroup}
-            setFormData={setNewGroup}
-            onSubmit={handleCreateGroup}
-            categories={categories}
-            groupIcons={groupIcons}
-            isEdit={false}
-          />
-        ) : (
-          <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg transition-transform duration-200 hover:scale-105 animate-fade-in-up">
-            Please log in to create or join a study group.
-          </p>
-        )}
+      <h1 className="display-6 fw-bold text-primary mb-4">Study Groups</h1>
 
-        {editGroup && (
-          <div ref={editFormRef}>
-            <GroupForm
-              formTitle="Edit Study Group"
-              formData={editGroup}
-              setFormData={setEditGroup}
-              onSubmit={handleUpdateGroup}
-              categories={categories}
-              groupIcons={groupIcons}
-              isEdit={true}
-              onCancel={() => setEditGroup(null)}
-            />
-          </div>
-        )}
-
-        <div ref={confirmationMessageRef}>
-          <ConfirmationMessage
-            error={error}
-            success={success}
-            confirmation={confirmation}
-            clearConfirmation={clearConfirmation}
-          />
-        </div>
-
-        <div className="mb-6">
-          <label
-            htmlFor="category-filter"
-            className="block text-gray-700 dark:text-gray-200 mb-2 font-medium bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-400 dark:to-gray-300"
+      {user && (
+        <div className="mb-4 text-end">
+          <Button
+            variant="primary"
+            className="btn-hover-shadow"
+            onClick={() => setShowCreateModal(true)}
           >
-            Filter by Category
-          </label>
-          <select
-            id="category-filter"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full sm:w-48 p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gradient-to-r from-blue-500 to-indigo-500 dark:from-gray-500 dark:to-gray-400 focus:scale-[1.01] transition-all duration-300 text-gray-800 dark:text-gray-200"
-            aria-label="Filter by Category"
-          >
-            <option value="All">All</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+            <i className="fas fa-plus me-2"></i>
+            Create New Group
+          </Button>
         </div>
+      )}
 
-        {isLoading ? (
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-xl shadow-xl border border-blue-100 dark:border-gray-600 hover:shadow-2xl dark:hover:shadow-[0_0_15px_rgba(209,213,219,0.3)] hover:-translate-y-2 transition-all duration-300 animate-fade-in-up flex flex-col items-center justify-center">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-4 border-b-4 border-gradient-to-r from-blue-600 to-indigo-600 dark:from-gray-500 dark:to-gray-400"></div>
-            <p className="text-gray-600 dark:text-gray-400 mt-3 text-lg animate-pulse-text">
-              Loading study groups...
-            </p>
+      <Card className="mb-4 shadow-sm">
+        <Card.Body>
+          <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <h2 className="fs-4 fw-semibold text-primary mb-3 mb-md-0">
+              Filter Study Groups
+            </h2>
+            <div className="d-flex flex-wrap gap-2">
+              <ButtonGroup>
+                <Button
+                  variant={
+                    selectedCategory === "All" ? "primary" : "outline-primary"
+                  }
+                  onClick={() => setSelectedCategory("All")}
+                >
+                  All
+                </Button>
+                {categories.map((category) => (
+                  <Button
+                    key={category}
+                    variant={
+                      selectedCategory === category
+                        ? "primary"
+                        : "outline-primary"
+                    }
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </ButtonGroup>
+            </div>
           </div>
-        ) : filteredGroups.length > 0 ? (
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-xl shadow-xl border border-blue-100 dark:border-gray-600 hover:shadow-2xl dark:hover:shadow-[0_0_15px_rgba(209,213,219,0.3)] hover:-translate-y-2 transition-all duration-300 space-y-6">
-            {filteredGroups.map((group, index) => (
+        </Card.Body>
+      </Card>
+
+      {isLoading ? (
+        <div className="text-center py-5">
+          <Spinner animation="border" variant="primary" />
+          <p className="mt-3 text-secondary">Loading study groups...</p>
+        </div>
+      ) : filteredGroups.length === 0 ? (
+        <Alert variant="info">
+          <i className="fas fa-info-circle me-2"></i>
+          No study groups found. {user && "Create one to get started!"}
+        </Alert>
+      ) : (
+        <Row xs={1} md={2} lg={3} className="g-4">
+          {filteredGroups.map((group, index) => (
+            <Col key={group._id}>
               <GroupCard
-                key={`${group._id}-${selectedCategory}`}
                 group={group}
                 user={user}
                 visibleMembers={visibleMembers}
@@ -561,18 +394,60 @@ function StudyGroups() {
                 handleLeaveGroup={handleLeaveGroup}
                 deleteConfirmation={deleteConfirmation}
                 handleDeleteGroup={handleDeleteGroup}
-                cancelDeleteGroup={() => setDeleteConfirmation(null)}
+                cancelDeleteGroup={cancelDeleteGroup}
                 animationDelay={`${index * 0.1}s`}
               />
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-lg bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 transition-transform duration-200 hover:scale-105">
-            No study groups available.
-          </p>
-        )}
-      </div>
-    </section>
+            </Col>
+          ))}
+        </Row>
+      )}
+
+      {/* Create Group Modal */}
+      <Modal
+        show={showCreateModal}
+        onHide={() => setShowCreateModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Create Study Group</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <GroupForm
+            group={newGroup}
+            setGroup={setNewGroup}
+            categories={categories}
+            groupIcons={groupIcons}
+            handleSubmit={handleCreateGroup}
+            handleCancel={() => setShowCreateModal(false)}
+            isLoading={isLoading}
+            buttonText="Create Group"
+          />
+        </Modal.Body>
+      </Modal>
+
+      {/* Edit Group Modal */}
+      <Modal show={!!editGroup} onHide={cancelEditGroup} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Study Group</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {editGroup && (
+            <GroupForm
+              group={editGroup}
+              setGroup={setEditGroup}
+              categories={categories}
+              groupIcons={groupIcons}
+              handleSubmit={handleUpdateGroup}
+              handleCancel={cancelEditGroup}
+              isLoading={isLoading}
+              buttonText="Update Group"
+              ref={editFormRef}
+            />
+          )}
+        </Modal.Body>
+      </Modal>
+    </div>
   );
 }
 

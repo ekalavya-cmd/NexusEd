@@ -1,512 +1,451 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Card,
+  Form,
+  Button,
+  Alert,
+  Spinner,
+  InputGroup,
+} from "react-bootstrap";
+import axios from "axios";
 import { format } from "date-fns";
-import { isDateValid } from "../utils/dateUtils";
 import EventDetailsModal from "./EventDetailsModal";
 
-function GroupChat({ groupId, messages, setGroup, currentUser }) {
-  const [messageContent, setMessageContent] = useState("");
-  const [error, setError] = useState("");
-  const [isPosting, setIsPosting] = useState(false);
+function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState("");
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const [todayEvents, setTodayEvents] = useState([]);
-  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [fileError, setFileError] = useState("");
+  const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const timeoutRef = useRef(null);
-  const messageInputRef = useRef(null);
-  const postMessageButtonRef = useRef(null);
+  const messageEndRef = useRef(null);
   const fileInputRef = useRef(null);
-  const navigate = useNavigate();
 
-  const setTemporaryError = (message) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    setError(message);
-    timeoutRef.current = setTimeout(() => {
-      setError("");
-      timeoutRef.current = null;
-    }, 3000);
-  };
-
-  // Fetch events for the group
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchMessages = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Authentication token missing. Please log in again.");
-        }
-
-        const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/events/group/${groupId}`,
+        setIsLoading(true);
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/study-groups/${group._id}/messages`,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setMessages(response.data);
+      } catch (err) {
+        console.error("Error fetching messages:", err);
+        setTemporaryMessage("Failed to load messages. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const fetchEvents = async () => {
+      try {
+        setEventsLoading(true);
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/events/group/${group._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           }
         );
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Error response from server:", errorText);
-          const errorData = JSON.parse(errorText);
-          throw new Error(errorData.message || "Failed to fetch events");
-        }
+        // Filter events
+        const currentDate = new Date();
+        const upcoming = response.data
+          .filter((event) => new Date(event.end) > currentDate)
+          .sort((a, b) => new Date(a.start) - new Date(b.start));
 
-        const eventsData = await response.json();
-        console.log("Fetched events:", eventsData);
+        const today = upcoming.filter(
+          (event) =>
+            new Date(event.start).toDateString() === currentDate.toDateString()
+        );
 
-        // Current date and time: 01:17 AM IST, June 06, 2025
-        const currentDate = new Date("2025-06-06T01:17:00+05:30");
-        const todayStart = new Date("2025-06-06T00:00:00+05:30"); // Start of June 06, 2025 IST
-        const todayEnd = new Date("2025-06-06T23:59:59+05:30"); // End of June 06, 2025 IST
+        const future = upcoming.filter(
+          (event) =>
+            new Date(event.start).toDateString() !== currentDate.toDateString()
+        );
 
-        // Filter events: exclude those that have ended
-        const activeEvents = eventsData.filter((event) => {
-          const endDate = new Date(event.end);
-          return endDate > currentDate; // Only keep events that haven't ended
-        });
-
-        // Today's Events: start date is on June 06, 2025
-        const todayEventsFiltered = activeEvents.filter((event) => {
-          const startDate = new Date(event.start);
-          return startDate >= todayStart && startDate <= todayEnd;
-        });
-
-        // Upcoming Events: start date is after June 06, 2025
-        const upcomingEventsFiltered = activeEvents.filter((event) => {
-          const startDate = new Date(event.start);
-          return startDate > todayEnd; // After June 06, 2025
-        });
-
-        setTodayEvents(todayEventsFiltered);
-        setUpcomingEvents(upcomingEventsFiltered);
+        setEvents({ today, upcoming: future });
       } catch (err) {
-        console.error("Fetch events error:", err);
-        setTemporaryError(err.message || "Failed to fetch events");
+        console.error("Error fetching events:", err);
+        setTemporaryMessage("Failed to load events. Please try again.");
+      } finally {
+        setEventsLoading(false);
       }
     };
 
+    fetchMessages();
     fetchEvents();
-  }, [groupId]);
+  }, [group._id, setTemporaryMessage]);
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/gif",
-      "application/pdf",
-      "text/plain",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
-    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-
-    const validFiles = files.filter((file) => {
-      if (!allowedTypes.includes(file.type)) {
-        setTemporaryError(
-          `File type not allowed for ${file.name}. Allowed types: images, PDFs, text, Word documents.`
-        );
-        return false;
-      }
-      if (file.size > maxSize) {
-        setTemporaryError(
-          `File ${file.name} is too large. Maximum size is 10MB.`
-        );
-        return false;
-      }
-      return true;
-    });
-
-    setSelectedFiles((prev) => [...prev, ...validFiles]);
-    e.target.value = null; // Reset file input
-  };
-
-  const removeSelectedFile = (index) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleMessageSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setIsPosting(true);
-
-    if (postMessageButtonRef.current) {
-      postMessageButtonRef.current.blur();
+  useEffect(() => {
+    // Scroll to bottom when messages change
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
+  }, [messages]);
 
-    if (!messageContent.trim() && selectedFiles.length === 0) {
-      setTemporaryError("Message or file is required");
-      setIsPosting(false);
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+
+    if (!message.trim() && selectedFiles.length === 0) {
+      setMessageError("Please enter a message or attach a file.");
       return;
     }
 
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token missing. Please log in again.");
-      }
+    if (selectedFiles.length > 5) {
+      setFileError("You can upload a maximum of 5 files.");
+      return;
+    }
 
+    setMessageError("");
+    setFileError("");
+    setIsSending(true);
+
+    try {
       const formData = new FormData();
-      formData.append("content", messageContent);
-      selectedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
+      formData.append("content", message);
 
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/study-groups/${groupId}/messages`,
+      for (let i = 0; i < selectedFiles.length; i++) {
+        formData.append("files", selectedFiles[i]);
+      }
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/study-groups/${group._id}/messages`,
+        formData,
         {
-          method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
           },
-          body: formData,
         }
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to post message");
-      }
-
-      const updatedGroup = await response.json();
-      setGroup(updatedGroup);
-      setMessageContent("");
+      setMessages([...messages, response.data]);
+      setMessage("");
       setSelectedFiles([]);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (err) {
-      setTemporaryError(err.message || "Failed to post message");
-    } finally {
-      setIsPosting(false);
-    }
-  };
-
-  const handleDeleteMessage = async (messageId) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token missing. Please log in again.");
-      }
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/study-groups/${groupId}/messages/${messageId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete message");
-      }
-
-      const updatedGroup = await response.json();
-      setGroup(updatedGroup);
-    } catch (err) {
-      setTemporaryError(err.message || "Failed to delete message");
-    }
-  };
-
-  const handleDeleteEvent = async () => {
-    if (!selectedEvent) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token missing. Please log in again.");
-      }
-
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/events/${selectedEvent._id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to delete event");
-      }
-
-      // Remove the deleted event from both lists
-      setTodayEvents(
-        todayEvents.filter((event) => event._id !== selectedEvent._id)
-      );
-      setUpcomingEvents(
-        upcomingEvents.filter((event) => event._id !== selectedEvent._id)
-      );
-      setSelectedEvent(null); // Close the modal
-    } catch (err) {
-      setTemporaryError(err.message || "Failed to delete event");
-    }
-  };
-
-  const handleMessageKeyDown = (e) => {
-    if (e.key === "Enter") {
-      if (e.shiftKey) {
-        e.preventDefault();
-        setMessageContent(messageContent + "\n");
+      console.error("Error sending message:", err);
+      if (err.response?.status === 413) {
+        setFileError("File size too large. Maximum size per file is 10MB.");
       } else {
-        e.preventDefault();
-        handleMessageSubmit(e);
+        setMessageError("Failed to send message. Please try again.");
       }
+    } finally {
+      setIsSending(false);
     }
   };
 
-  const formatDateTime = (date) => {
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      month: "numeric",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-      timeZone: "Asia/Kolkata",
-    });
-    return formatter.format(new Date(date)).replace(" at", ",");
-  };
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setSelectedFiles(files);
+    setFileError("");
 
-  const getFileIcon = (fileName) => {
-    const extension = fileName.split(".").pop().toLowerCase();
-    switch (extension) {
-      case "pdf":
-        return "fa-solid fa-file-pdf text-red-500";
-      case "jpg":
-      case "jpeg":
-      case "png":
-      case "gif":
-        return "fa-solid fa-file-image text-blue-500";
-      case "doc":
-      case "docx":
-        return "fa-solid fa-file-word text-blue-700";
-      case "txt":
-        return "fa-solid fa-file-text text-gray-500";
-      default:
-        return "fa-solid fa-file text-gray-500";
+    // Check file size (10MB max per file)
+    const hasLargeFile = files.some((file) => file.size > 10 * 1024 * 1024);
+    if (hasLargeFile) {
+      setFileError("Some files exceed the maximum size of 10MB.");
+    }
+
+    // Check file count (5 max)
+    if (files.length > 5) {
+      setFileError("You can upload a maximum of 5 files.");
     }
   };
 
-  // Common render function for event cards
+  const handleDeleteEvent = async (eventId) => {
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/api/events/${eventId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      // Update events state
+      setEvents((prevEvents) => ({
+        today: prevEvents.today.filter((event) => event._id !== eventId),
+        upcoming: prevEvents.upcoming.filter((event) => event._id !== eventId),
+      }));
+
+      setTemporarySuccess("Event deleted successfully!");
+    } catch (err) {
+      console.error("Error deleting event:", err);
+      setTemporaryMessage("Failed to delete event. Please try again.");
+    }
+  };
+
+  const formatMessageDate = (dateString) => {
+    const messageDate = new Date(dateString);
+    const today = new Date();
+
+    if (messageDate.toDateString() === today.toDateString()) {
+      return `Today at ${format(messageDate, "p")}`;
+    }
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (messageDate.toDateString() === yesterday.toDateString()) {
+      return `Yesterday at ${format(messageDate, "p")}`;
+    }
+
+    return format(messageDate, "PPP p");
+  };
+
   const renderEventCard = (event, index) => (
-    <div
+    <Card
       key={event._id}
-      onClick={() => setSelectedEvent(event)}
-      className="bg-gradient-to-r from-gray-50 to-green-50 dark:from-gray-700 dark:to-gray-600 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300 animate-fade-in-up cursor-pointer"
+      className="mb-3 cursor-pointer animate-fade-in-up"
       style={{ animationDelay: `${index * 0.1}s` }}
+      onClick={() => setSelectedEvent(event)}
     >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-800 dark:text-gray-200 font-semibold">
-            {event.title}
-          </p>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            <strong>Start:</strong>{" "}
-            {isDateValid(new Date(event.start))
-              ? format(new Date(event.start), "PPP p")
-              : "Invalid Date"}
-          </p>
+      <Card.Body className="p-3">
+        <div className="d-flex justify-content-between align-items-start">
+          <div>
+            <Card.Title className="fs-5 mb-1">{event.title}</Card.Title>
+            <Card.Subtitle className="mb-2 text-muted">
+              {format(new Date(event.start), "PPP p")}
+            </Card.Subtitle>
+          </div>
+          <i
+            className="fa-solid fa-calendar-alt fs-5 text-primary"
+            aria-label="View Calendar"
+          ></i>
         </div>
-        <i
-          className="fa-solid fa-calendar-alt text-lg cursor-pointer text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-purple-500 transition-all duration-300"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate("/calendar");
-          }}
-          aria-label="View Calendar"
-        ></i>
-      </div>
-    </div>
+      </Card.Body>
+    </Card>
   );
 
   return (
-    <div className="mt-6">
+    <div className="chat-container">
+      <div className="row">
+        <div className="col-md-8 mb-4 mb-md-0">
+          {/* Messages Section */}
+          <div className="d-flex flex-column h-100">
+            <div
+              className="messages-container bg-light p-3 rounded border mb-3"
+              style={{ height: "400px", overflowY: "auto" }}
+            >
+              {isLoading ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" variant="primary" />
+                  <p className="mt-3 text-secondary">Loading messages...</p>
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="text-center py-5 text-secondary">
+                  <i className="fas fa-comments fa-3x mb-3"></i>
+                  <p>No messages yet. Start the conversation!</p>
+                </div>
+              ) : (
+                <div>
+                  {messages.map((msg) => (
+                    <div
+                      key={msg._id}
+                      className={`mb-3 ${
+                        msg.sender._id === user.id ? "text-end" : ""
+                      }`}
+                    >
+                      <div
+                        className={`d-inline-block p-3 rounded-3 shadow-sm ${
+                          msg.sender._id === user.id
+                            ? "bg-primary text-white"
+                            : "bg-white border"
+                        }`}
+                        style={{ maxWidth: "80%" }}
+                      >
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <small
+                            className={
+                              msg.sender._id === user.id
+                                ? "text-white"
+                                : "text-primary"
+                            }
+                          >
+                            <strong>{msg.sender.username}</strong>
+                          </small>
+                          <small
+                            className={
+                              msg.sender._id === user.id
+                                ? "text-white"
+                                : "text-muted"
+                            }
+                          >
+                            {formatMessageDate(msg.createdAt)}
+                          </small>
+                        </div>
+
+                        {msg.content && <p className="mb-2">{msg.content}</p>}
+
+                        {msg.files && msg.files.length > 0 && (
+                          <div className="mt-2">
+                            {msg.files.map((file) => (
+                              <div key={file._id} className="mb-1">
+                                <a
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`d-flex align-items-center ${
+                                    msg.sender._id === user.id
+                                      ? "text-white"
+                                      : "text-primary"
+                                  }`}
+                                >
+                                  <i className="fas fa-file-download me-2"></i>
+                                  {file.originalname}
+                                </a>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messageEndRef}></div>
+                </div>
+              )}
+            </div>
+
+            <Form onSubmit={handleSendMessage}>
+              {messageError && (
+                <Alert variant="danger" className="py-2 mb-2">
+                  {messageError}
+                </Alert>
+              )}
+
+              {fileError && (
+                <Alert variant="danger" className="py-2 mb-2">
+                  {fileError}
+                </Alert>
+              )}
+
+              <Form.Group className="mb-3">
+                <InputGroup>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    disabled={isSending}
+                  />
+                  <Button
+                    variant="outline-primary"
+                    onClick={() => fileInputRef.current.click()}
+                    disabled={isSending}
+                  >
+                    <i className="fas fa-paperclip"></i>
+                  </Button>
+                </InputGroup>
+
+                <Form.Control
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="d-none"
+                  multiple
+                />
+
+                {selectedFiles.length > 0 && (
+                  <div className="mt-2">
+                    <small className="text-muted">
+                      {selectedFiles.length} file(s) selected
+                    </small>
+                  </div>
+                )}
+              </Form.Group>
+
+              <div className="d-grid">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={
+                    isSending || (!message.trim() && selectedFiles.length === 0)
+                  }
+                  className="btn-hover-shadow"
+                >
+                  {isSending ? (
+                    <>
+                      <Spinner animation="border" size="sm" className="me-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-paper-plane me-2"></i>
+                      Send Message
+                    </>
+                  )}
+                </Button>
+              </div>
+            </Form>
+          </div>
+        </div>
+
+        <div className="col-md-4">
+          {/* Events Section */}
+          <div>
+            <h4 className="mb-3 fs-5 fw-semibold text-primary">
+              <i className="fas fa-calendar me-2"></i>
+              Upcoming Events
+            </h4>
+
+            {eventsLoading ? (
+              <div className="text-center py-3">
+                <Spinner animation="border" variant="primary" size="sm" />
+                <p className="mt-2 text-secondary">Loading events...</p>
+              </div>
+            ) : (
+              <>
+                {/* Today's Events */}
+                <h5 className="mb-2 fs-6 fw-semibold">Today's Events</h5>
+                {events.today && events.today.length > 0 ? (
+                  events.today.map((event, index) =>
+                    renderEventCard(event, index)
+                  )
+                ) : (
+                  <p className="text-secondary small">
+                    No events scheduled for today.
+                  </p>
+                )}
+
+                {/* Upcoming Events */}
+                <h5 className="mb-2 mt-4 fs-6 fw-semibold">Future Events</h5>
+                {events.upcoming && events.upcoming.length > 0 ? (
+                  events.upcoming.map((event, index) =>
+                    renderEventCard(event, index)
+                  )
+                ) : (
+                  <p className="text-secondary small">No upcoming events.</p>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Event Details Modal */}
       <EventDetailsModal
         selectedEvent={selectedEvent}
         setSelectedEvent={setSelectedEvent}
-        user={currentUser}
+        user={user}
         handleDeleteEvent={handleDeleteEvent}
         hideViewGroupButton={true}
       />
-
-      {/* Today's Events Section */}
-      <h4 className="relative text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 mb-4 hover-underline">
-        Today's Events
-      </h4>
-      {todayEvents.length > 0 ? (
-        <div className="space-y-4 mb-6">
-          {todayEvents.map((event, index) => renderEventCard(event, index))}
-        </div>
-      ) : (
-        <p className="text-sm mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 transition-transform duration-200">
-          No events scheduled for today.
-        </p>
-      )}
-
-      {/* Upcoming Events Section */}
-      <h4 className="relative text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 mb-4 hover-underline">
-        Upcoming Events
-      </h4>
-      {upcomingEvents.length > 0 ? (
-        <div className="space-y-4 mb-6">
-          {upcomingEvents.map((event, index) => renderEventCard(event, index))}
-        </div>
-      ) : (
-        <p className="text-sm mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 transition-transform duration-200">
-          No upcoming events.
-        </p>
-      )}
-
-      {/* Discussion Board */}
-      <h4 className="relative text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 mb-4 hover-underline">
-        Discussion Board
-      </h4>
-      {messages && messages.length > 0 ? (
-        <div className="space-y-4 mb-6">
-          {messages.map((message, index) => (
-            <div
-              key={message._id}
-              className="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-700 dark:to-gray-700 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300 animate-fade-in-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              {message.content && (
-                <p className="text-gray-600 dark:text-gray-200 mb-2 transition-all duration-200">
-                  {message.content}
-                </p>
-              )}
-              {message.files && message.files.length > 0 && (
-                <div className="mb-2 flex flex-wrap gap-2">
-                  {message.files.map((file, fileIndex) => (
-                    <a
-                      key={fileIndex}
-                      href={`${process.env.REACT_APP_API_URL}${file.url}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center space-x-2 text-sm bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-800 dark:to-indigo-800 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-md hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300"
-                      aria-label={`Download ${file.name}`}
-                    >
-                      <i className={getFileIcon(file.name)}></i>
-                      <span className="truncate max-w-[150px]">
-                        {file.name}
-                      </span>
-                    </a>
-                  ))}
-                </div>
-              )}
-              <div className="flex items-center justify-between">
-                <p className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-gray-500 to-gray-700 dark:from-gray-400 dark:to-gray-300 transition-all duration-200">
-                  By {message.author?.username || "Unknown"} on{" "}
-                  {formatDateTime(message.createdAt)}
-                </p>
-                {currentUser &&
-                  message.author?._id?.toString() === currentUser.id && (
-                    <button
-                      onClick={() => handleDeleteMessage(message._id)}
-                      className="bg-gradient-to-r from-red-600 to-red-800 dark:from-red-700 dark:to-red-600 text-white dark:text-gray-200 px-3 py-1 rounded-md hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] dark:hover:dark-glow hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 text-sm flex items-center space-x-1"
-                      aria-label={`Delete message by ${
-                        message.author?.username || "Unknown"
-                      }`}
-                    >
-                      <i className="fa-solid fa-trash"></i>
-                      <span>Delete</span>
-                    </button>
-                  )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 transition-transform duration-200">
-          No messages yet. Be the first to post!
-        </p>
-      )}
-      {currentUser && (
-        <form onSubmit={handleMessageSubmit}>
-          <div className="relative">
-            <textarea
-              value={messageContent}
-              onChange={(e) => setMessageContent(e.target.value)}
-              onKeyDown={handleMessageKeyDown}
-              placeholder="Post a message..."
-              className="w-full p-3 pr-10 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gradient-to-r from-blue-500 to-indigo-500 dark:from-gray-500 dark:to-gray-400 focus:scale-[1.01] transition-all duration-300 mb-4 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
-              rows="3"
-              ref={messageInputRef}
-              disabled={isPosting}
-              aria-label="Post a Message"
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current.click()}
-              className="absolute top-3 right-3 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-cyan-500 transition-all duration-300"
-              disabled={isPosting}
-              aria-label="Attach Files"
-            >
-              <i className="fa-solid fa-paperclip text-lg"></i>
-            </button>
-            <input
-              type="file"
-              multiple
-              onChange={handleFileChange}
-              ref={fileInputRef}
-              className="hidden"
-              disabled={isPosting}
-              aria-label="Upload Files"
-            />
-          </div>
-          {selectedFiles.length > 0 && (
-            <div className="mb-4 flex flex-wrap gap-2">
-              {selectedFiles.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1 rounded-md"
-                >
-                  <i className={getFileIcon(file.name)}></i>
-                  <span className="truncate max-w-[150px]">{file.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeSelectedFile(index)}
-                    className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                    disabled={isPosting}
-                    aria-label={`Remove ${file.name}`}
-                  >
-                    <i className="fa-solid fa-times"></i>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-          <button
-            type="submit"
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-teal-600 text-white dark:text-gray-200 px-5 py-3 rounded-lg hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(21,94,117,0.5)] dark:hover:dark-glow hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 flex items-center space-x-1"
-            disabled={isPosting}
-            ref={postMessageButtonRef}
-            aria-label="Post Message"
-          >
-            {isPosting ? (
-              <>
-                <div className="inline-block animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
-                <span>Posting...</span>
-              </>
-            ) : (
-              <>
-                <i className="fa-solid fa-paper-plane"></i>
-                <span>Post Message</span>
-              </>
-            )}
-          </button>
-          {error && (
-            <div className="bg-red-100 dark:bg-red-900/70 text-red-700 dark:text-red-300 p-4 mt-4 rounded-lg border border-gradient-to-r from-red-200 to-red-300 dark:from-red-800 dark:to-red-700 shadow-md hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300 animate-fade-in-up">
-              {error}
-            </div>
-          )}
-        </form>
-      )}
     </div>
   );
 }

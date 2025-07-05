@@ -1,355 +1,214 @@
-import React, { useRef, useState, useEffect } from "react";
-import { formatDateTime } from "../utils/formatUtils";
+import React, { useRef } from "react";
+import {
+  Card,
+  Row,
+  Col,
+  Form,
+  Button,
+  InputGroup,
+  Alert,
+  Spinner,
+} from "react-bootstrap";
 
-const ProfileHeader = ({
+function ProfileHeader({
   user,
   bio,
   setBio,
   username,
   setUsername,
   profilePicture,
-  setProfilePicture,
   isEditing,
   setIsEditing,
-  error,
-  setError,
-  success,
-  setSuccess,
   uploadError,
   isLoading,
-  handleProfilePictureChange,
-  handleBioUpdate,
   imageLoadError,
-  setImageLoadError,
-  posts,
-  joinedGroups,
+  handleProfilePictureChange,
+  handleRemoveProfilePicture,
+  handleBioUpdate,
   BIO_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   USERNAME_MAX_LENGTH,
   DEFAULT_BIO,
-  setTemporaryMessage,
-  setTemporarySuccess,
-  handleRemoveProfilePicture,
-}) => {
+}) {
   const fileInputRef = useRef(null);
-  const usernameRef = useRef(null);
-  const bioRef = useRef(null);
-  const saveButtonRef = useRef(null);
-  const cancelButtonRef = useRef(null);
-  const [showPictureOptions, setShowPictureOptions] = useState(false);
-  const [clickedButton, setClickedButton] = useState(null);
-  const [usernameChangeConfirmation, setUsernameChangeConfirmation] =
-    useState(null);
+  const isCurrentUser = true; // In a real app, check if the profile belongs to the logged-in user
 
-  useEffect(() => {
-    if (!user.profilePicture) {
-      setImageLoadError(false);
-    }
-  }, [user.profilePicture, setImageLoadError]);
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (bioRef.current) {
-        bioRef.current.focus();
-      }
-    }
+  const handleFileInputClick = () => {
+    fileInputRef.current.click();
   };
 
-  const handleBioKeyDown = (e) => {
-    if (e.key === "Enter") {
-      if (e.shiftKey) {
-        e.preventDefault();
-        setBio(bio + "\n");
-      } else {
-        e.preventDefault();
-        saveButtonRef.current.focus();
-      }
-    }
-  };
-
-  const handleSaveKeyDown = (e) => {
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      cancelButtonRef.current.focus();
-    }
-  };
-
-  const handleCancelKeyDown = (e) => {
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      saveButtonRef.current.focus();
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleBioUpdate();
   };
 
   const handleCancel = () => {
-    setIsEditing(false);
     setBio(user.bio || DEFAULT_BIO);
-    setUsername(user.username || "");
-    setTemporaryMessage(setError, setSuccess, "");
-    setTemporarySuccess(setError, setSuccess, "");
-    setUsernameChangeConfirmation(null); // Reset confirmation on cancel
+    setUsername(user.username);
+    setIsEditing(false);
   };
-
-  const togglePictureOptions = () => {
-    setShowPictureOptions((prev) => !prev);
-  };
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    // Check if username has changed
-    if (username !== user.username) {
-      setUsernameChangeConfirmation(username);
-    } else {
-      // If username hasn't changed, proceed with the update
-      handleBioUpdate(e);
-    }
-  };
-
-  const confirmUsernameChange = (e) => {
-    setUsernameChangeConfirmation(null);
-    handleBioUpdate(e);
-  };
-
-  const cancelUsernameChange = () => {
-    setUsernameChangeConfirmation(null);
-  };
-
-  const profilePictureUrl = user.profilePicture
-    ? `${process.env.REACT_APP_API_URL}${
-        user.profilePicture
-      }?t=${new Date().getTime()}`
-    : null;
-
-  const totalLikes = posts.reduce(
-    (sum, post) => sum + (post.likes?.length || 0),
-    0
-  );
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 p-8 rounded-xl shadow-xl border border-blue-100 dark:border-gray-600 mb-8 animate-fade-in-up hover:shadow-2xl dark:hover:shadow-[0_0_15px_rgba(209,213,219,0.3)] transition-all duration-300">
-      <div className="flex flex-col sm:flex-row items-start space-y-6 sm:space-y-0 sm:space-x-8 mb-6">
-        <div className="relative">
-          <div onClick={togglePictureOptions} className="cursor-pointer">
-            {profilePictureUrl && !imageLoadError ? (
-              <img
-                src={profilePictureUrl}
-                alt={`${user.username}'s profile picture`}
-                className="w-28 h-28 rounded-full object-cover border-4 border-gradient-to-r from-blue-600 to-indigo-600 dark:from-gray-500 dark:to-gray-400 shadow-[0_0_10px_rgba(59,130,246,0.3)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)] transition-transform duration-300 hover:scale-105 aspect-[5/4]"
-                aria-label={`${user.username}'s profile picture`}
-                onError={() => setImageLoadError(true)}
-              />
-            ) : (
+    <Card className="shadow-sm">
+      <Card.Body className="p-4">
+        <Row className="align-items-center">
+          <Col md={3} className="text-center text-md-start mb-4 mb-md-0">
+            <div className="position-relative d-inline-block">
               <div
-                className="w-28 h-28 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-gray-500 dark:to-gray-400 text-white dark:text-gray-200 flex items-center justify-center rounded-full text-4xl font-bold border-4 border-gradient-to-r from-blue-600 to-indigo-600 dark:from-gray-500 dark:to-gray-400 shadow-[0_0_10px_rgba(59,130,246,0.3)] dark:shadow-[0_0_10px_rgba(209,213,219,0.3)] transition-transform duration-300 hover:scale-105 aspect-[5/4]"
-                aria-label={`${user.username}'s avatar`}
+                className="rounded-circle overflow-hidden bg-light border"
+                style={{ width: "150px", height: "150px" }}
               >
-                {user.username.charAt(0).toUpperCase()}
+                {profilePicture ? (
+                  <img
+                    src={profilePicture}
+                    alt={username}
+                    className="w-100 h-100 object-fit-cover"
+                    onError={() => setImageLoadError(true)}
+                    style={{ display: imageLoadError ? "none" : "block" }}
+                  />
+                ) : (
+                  <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                    <i className="fas fa-user fs-1 text-secondary"></i>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          {showPictureOptions && (
-            <div className="absolute top-full mt-2 left-4 flex gap-2 z-10">
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-full shadow-lg">
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  onMouseDown={() => setClickedButton("add")}
-                  onMouseUp={() => setClickedButton(null)}
-                  className={`bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-purple-600 dark:to-indigo-600 text-white dark:text-gray-200 w-10 h-10 flex items-center justify-center rounded-full hover:bg-blue-700 dark:hover:bg-indigo-700 hover:scale-105 hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(88,28,135,0.5)] dark:hover:dark-glow transition-all duration-300 ${
-                    clickedButton === "add"
-                      ? "ring-2 ring-offset-2 ring-blue-500/50 dark:ring-purple-500/50"
-                      : ""
-                  }`}
-                  aria-label={
-                    profilePictureUrl
-                      ? "Update profile picture"
-                      : "Add profile picture"
-                  }
-                  disabled={isLoading}
-                >
-                  <i className="fa-solid fa-plus"></i>
-                </button>
-              </div>
-              {profilePictureUrl && (
-                <div className="bg-gray-100 dark:bg-gray-700 rounded-full shadow-lg">
-                  <button
-                    onClick={() => {
-                      handleRemoveProfilePicture(fileInputRef);
-                      setShowPictureOptions(false);
-                    }}
-                    onMouseDown={() => setClickedButton("delete")}
-                    onMouseUp={() => setClickedButton(null)}
-                    className={`bg-gradient-to-r from-red-600 to-red-700 dark:from-red-700 dark:to-red-600 text-white dark:text-gray-200 w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-800 dark:hover:bg-red-500 hover:scale-105 hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] dark:hover:shadow-[0_0_10px_rgba(220,38,38,0.5)] dark:hover:dark-glow transition-all duration-300 ${
-                      clickedButton === "delete"
-                        ? "ring-2 ring-offset-2 ring-red-500/50 dark:ring-red-500/50"
-                        : ""
-                    }`}
-                    aria-label="Delete profile picture"
-                    disabled={isLoading}
+
+              {isCurrentUser && (
+                <div className="position-absolute bottom-0 end-0">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleProfilePictureChange}
+                    className="d-none"
+                    accept="image/*"
+                  />
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="rounded-circle p-2"
+                    onClick={handleFileInputClick}
                   >
-                    <i className="fa-solid fa-trash"></i>
-                  </button>
+                    <i className="fas fa-camera"></i>
+                  </Button>
                 </div>
               )}
             </div>
-          )}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={(e) => handleProfilePictureChange(e, fileInputRef)}
-            accept="image/*"
-            className="hidden"
-            aria-label="Profile picture upload"
-          />
-          {uploadError && (
-            <div className="absolute top-full mt-3 bg-red-100 dark:bg-red-900/70 text-red-700 dark:text-red-300 p-2 rounded-md flex items-center space-x-2 text-sm w-48 shadow-md">
-              <i className="fa-solid fa-exclamation-circle"></i>
-              <span>{uploadError}</span>
-            </div>
-          )}
-        </div>
-        <div className="w-full">
-          {isEditing ? (
-            <>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Update your username"
-                className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gradient-to-r from-blue-500 to-indigo-500 dark:from-gray-500 dark:to-gray-400 transition-all duration-300 mb-2 text-2xl font-bold text-gray-800 dark:text-amber-200 shadow-sm"
-                maxLength={USERNAME_MAX_LENGTH}
-                ref={usernameRef}
-                aria-label="Username"
-              />
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
-                {username.length}/{USERNAME_MAX_LENGTH} characters
-              </p>
-            </>
-          ) : (
-            <h2 className="relative text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 hover-underline transition-all duration-300">
-              {user.username}
-            </h2>
-          )}
-          <p className="text-sm bg-clip-text text-transparent bg-gradient-to-r from-gray-500 to-gray-700 dark:from-gray-400 dark:to-gray-300 mt-1">
-            {user.email}
-          </p>
-          <div className="flex flex-wrap space-x-4 mt-3 text-sm text-gray-600 dark:text-gray-200">
-            <p className="font-semibold transition-transform duration-300 hover:scale-105">
-              Posts: <span className="dark:text-gray-400">{posts.length}</span>
-            </p>
-            <p className="font-semibold transition-transform duration-300 hover:scale-105">
-              Total Likes:{" "}
-              <span className="dark:text-gray-400">{totalLikes}</span>
-            </p>
-            <p className="font-semibold transition-transform duration-300 hover:scale-105">
-              Groups:{" "}
-              <span className="dark:text-gray-400">{joinedGroups.length}</span>
-            </p>
-            {user.createdAt && (
-              <p className="font-semibold transition-transform duration-300 hover:scale-105">
-                Joined:{" "}
-                <span className="dark:text-gray-400">
-                  {formatDateTime(user.createdAt)}
-                </span>
-              </p>
+
+            {uploadError && (
+              <Alert variant="danger" className="mt-2 text-start small p-2">
+                <i className="fas fa-exclamation-circle me-1"></i>
+                {uploadError}
+              </Alert>
             )}
-          </div>
-        </div>
-      </div>
-      {isEditing ? (
-        <form onSubmit={handleSave} className="animate-fade-in-up">
-          <textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            onKeyDown={handleBioKeyDown}
-            placeholder="Update your bio"
-            className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gradient-to-r from-blue-500 to-indigo-500 dark:from-gray-500 dark:to-gray-400 transition-all duration-300 mb-2 text-gray-800 dark:text-gray-200 shadow-sm"
-            rows="4"
-            maxLength={BIO_MAX_LENGTH}
-            ref={bioRef}
-            aria-label="Bio"
-          />
-          <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
-            {bio.length}/{BIO_MAX_LENGTH} characters
-          </p>
-          {error && (
-            <div className="bg-red-100 dark:bg-red-900/70 text-red-700 dark:text-red-300 p-3 mb-4 rounded-md flex items-center space-x-2 shadow-md">
-              <i className="fa-solid fa-exclamation-circle"></i>
-              <span>{error}</span>
-            </div>
-          )}
-          <div className="flex space-x-3">
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-teal-600 text-white dark:text-gray-200 px-5 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-teal-600 hover:scale-105 hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(21,94,117,0.5)] dark:hover:dark-glow transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50"
-              disabled={isLoading}
-              onKeyDown={handleSaveKeyDown}
-              ref={saveButtonRef}
-              aria-label="Save Profile"
-            >
-              {isLoading ? "Saving..." : "Save"}
-            </button>
-            <button
-              type="button"
-              onClick={handleCancel}
-              onKeyDown={handleCancelKeyDown}
-              className="bg-gradient-to-r from-gray-500 to-gray-600 dark:from-gray-600 dark:to-gray-500 text-white dark:text-gray-200 px-5 py-2 rounded-lg hover:shadow-[0_0_10px_rgba(107,114,128,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] dark:hover:dark-glow hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50"
-              ref={cancelButtonRef}
-              aria-label="Cancel"
-            >
-              Cancel
-            </button>
-          </div>
-          {usernameChangeConfirmation && (
-            <div className="mt-4 bg-yellow-100 dark:bg-yellow-900/70 text-yellow-700 dark:text-yellow-300 p-4 rounded-lg border border-gradient-to-r from-yellow-200 to-yellow-300 dark:from-yellow-800 dark:to-yellow-700 shadow-md hover:shadow-[0_0_10px_rgba(234,179,8,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300 animate-fade-in-up flex justify-between items-center">
-              <span>
-                Are you sure you want to change your username to "
-                {usernameChangeConfirmation}"? You will need to use this
-                username to log in from now on.
-              </span>
-              <div className="flex space-x-2">
-                <button
-                  onClick={confirmUsernameChange}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-teal-600 text-white dark:text-gray-200 px-3 py-1 rounded-md hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(21,94,117,0.5)] dark:hover:dark-glow hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 text-sm"
-                  aria-label="Confirm Username Change"
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={cancelUsernameChange}
-                  className="bg-gradient-to-r from-gray-500 to-gray-600 dark:from-gray-600 dark:to-gray-500 text-white dark:text-gray-200 px-3 py-1 rounded-md hover:shadow-[0_0_10px_rgba(107,114,128,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] dark:hover:dark-glow hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 text-sm"
-                  aria-label="Cancel Username Change"
-                >
-                  No
-                </button>
-              </div>
-            </div>
-          )}
-        </form>
-      ) : (
-        <>
-          <p className="text-gray-700 dark:text-gray-200 mb-4 italic">
-            {user.bio || DEFAULT_BIO}
-          </p>
-          <button
-            onClick={() => setIsEditing(true)}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-green-600 dark:to-emerald-600 text-white dark:text-gray-200 px-5 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-emerald-600 hover:scale-105 hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(6,95,70,0.5)] dark:hover:dark-glow transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 flex items-center space-x-2"
-            aria-label="Edit Profile"
-          >
-            <i className="fa-solid fa-pen text-base"></i>
-            <span>Edit Profile</span>
-          </button>
-          {success && (
-            <div className="bg-green-100 dark:bg-green-900/70 text-green-700 dark:text-green-300 p-3 mt-4 rounded-md flex items-center space-x-2 shadow-md">
-              <i className="fa-solid fa-check-circle"></i>
-              <span>{success}</span>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+          </Col>
+
+          <Col md={9}>
+            {isEditing ? (
+              <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Username</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    maxLength={USERNAME_MAX_LENGTH}
+                    required
+                  />
+                  <Form.Text className="text-muted">
+                    {username.length}/{USERNAME_MAX_LENGTH} characters (min{" "}
+                    {USERNAME_MIN_LENGTH})
+                  </Form.Text>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Bio</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    maxLength={BIO_MAX_LENGTH}
+                  />
+                  <Form.Text className="text-muted">
+                    {bio.length}/{BIO_MAX_LENGTH} characters
+                  </Form.Text>
+                </Form.Group>
+
+                <div className="d-flex justify-content-end gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={handleCancel}
+                    disabled={isLoading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={
+                      isLoading || username.length < USERNAME_MIN_LENGTH
+                    }
+                  >
+                    {isLoading ? (
+                      <>
+                        <Spinner
+                          animation="border"
+                          size="sm"
+                          className="me-1"
+                        />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </Button>
+                </div>
+              </Form>
+            ) : (
+              <>
+                <div className="d-flex justify-content-between align-items-start">
+                  <div>
+                    <h1 className="fs-3 fw-bold mb-1">{user.username}</h1>
+                    <p className="text-secondary mb-3">
+                      Member since{" "}
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  {isCurrentUser && (
+                    <div>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => setIsEditing(true)}
+                      >
+                        <i className="fas fa-edit me-1"></i>
+                        Edit Profile
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <p className="mb-2">{user.bio || DEFAULT_BIO}</p>
+
+                {profilePicture && isCurrentUser && (
+                  <Button
+                    variant="link"
+                    className="text-danger p-0"
+                    onClick={handleRemoveProfilePicture}
+                    disabled={isLoading}
+                  >
+                    <i className="fas fa-trash me-1"></i>
+                    Remove profile picture
+                  </Button>
+                )}
+              </>
+            )}
+          </Col>
+        </Row>
+      </Card.Body>
+    </Card>
   );
-};
+}
 
 export default ProfileHeader;

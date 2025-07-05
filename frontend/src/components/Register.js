@@ -1,350 +1,223 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useContext, useRef } from "react";
+import {
+  Card,
+  Form,
+  Button,
+  InputGroup,
+  Row,
+  Col,
+  Alert,
+} from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 function Register() {
+  const { register } = useContext(AuthContext);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const timeoutRef = useRef(null);
-
-  // Refs for input fields and button
   const usernameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const confirmPasswordRef = useRef(null);
-  const registerButtonRef = useRef(null);
 
-  // Constants for validation (consistent with Profile page)
-  const USERNAME_MIN_LENGTH = 3;
-  const USERNAME_MAX_LENGTH = 20;
-  const PASSWORD_MIN_LENGTH = 8;
-
-  const setTemporaryMessage = (message) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    setError(message);
-    timeoutRef.current = setTimeout(() => {
-      setError("");
-      timeoutRef.current = null;
-    }, 3000);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    // Remove focus from the button after clicking
-    if (registerButtonRef.current) {
-      registerButtonRef.current.blur();
+  const validateForm = () => {
+    if (!username || !email || !password || !confirmPassword) {
+      setError("All fields are required.");
+      return false;
     }
 
-    // Check for empty fields
-    if (
-      !username.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !confirmPassword.trim()
-    ) {
-      setTemporaryMessage("All fields are required");
-      setIsLoading(false);
-      return;
-    }
-
-    // Username validation
-    if (
-      username.length < USERNAME_MIN_LENGTH ||
-      username.length > USERNAME_MAX_LENGTH
-    ) {
-      setTemporaryMessage(
-        `Username must be between ${USERNAME_MIN_LENGTH} and ${USERNAME_MAX_LENGTH} characters`
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      setTemporaryMessage(
-        "Username can only contain letters, numbers, and underscores"
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    // Email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setTemporaryMessage("Please enter a valid email address");
-      setIsLoading(false);
-      return;
-    }
-
-    // Password validation
-    if (password.length < PASSWORD_MIN_LENGTH) {
-      setTemporaryMessage(
-        `Password must be at least ${PASSWORD_MIN_LENGTH} characters`
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      setTemporaryMessage(
-        "Password must contain at least one uppercase letter"
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[a-z]/.test(password)) {
-      setTemporaryMessage(
-        "Password must contain at least one lowercase letter"
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[0-9]/.test(password)) {
-      setTemporaryMessage("Password must contain at least one number");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!/[!@#$%^&*]/.test(password)) {
-      setTemporaryMessage(
-        "Password must contain at least one special character (e.g., !@#$%^&*)"
-      );
-      setIsLoading(false);
-      return;
-    }
-
-    // Confirm password validation
     if (password !== confirmPassword) {
-      setTemporaryMessage("Passwords do not match");
+      setError("Passwords do not match.");
+      return false;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    try {
+      setIsLoading(true);
+      setError("");
+      await register(username, email, password);
+      // If successful, register will redirect
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError(
+        err.response?.data?.message || "Registration failed. Please try again."
+      );
       setIsLoading(false);
-      return;
-    }
-
-    // Proceed with registration
-    const result = await register(username, email, password);
-    setIsLoading(false);
-    if (result.success) {
-      navigate("/");
-    } else {
-      setTemporaryMessage(result.message);
     }
   };
 
-  // Handle Enter key press to navigate between fields or submit
-  const handleKeyDown = (e, nextRef) => {
+  const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (nextRef) {
-        nextRef.current.focus();
-      } else {
-        handleSubmit(e);
-      }
-    }
-  };
-
-  // Handle Enter key press on the eye buttons to toggle visibility
-  const handleEyeKeyDown = (e, toggleFunction) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      toggleFunction((prev) => !prev);
+      handleSubmit();
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 flex items-start justify-center py-4">
-      <style>
-        {`
-          @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(209, 213, 219, 0.3); }
-            50% { box-shadow: 0 0 15px rgba(209, 213, 219, 0.5); }
-            100% { box-shadow: 0 0 5px rgba(209, 213, 219, 0.3); }
-          }
-          .animate-fade-in-up {
-            animation: fadeInUp 0.5s ease-out forwards;
-          }
-          .dark-glow {
-            animation: glow 2s infinite ease-in-out;
-          }
-          .hover-underline::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background: linear-gradient(to right, #2563eb, #4f46e5);
-            transition: width 0.3s ease-in-out;
-          }
-          .dark .hover-underline::after {
-            background: linear-gradient(to right, #9ca3af, #d1d5db);
-          }
-          .hover-underline:hover::after {
-            width: 100%;
-          }
-        `}
-      </style>
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 p-8 rounded-xl shadow-xl border border-blue-100 dark:border-gray-600 max-w-md w-full animate-fade-in-up hover:shadow-2xl dark:hover:shadow-[0_0_15px_rgba(209,213,219,0.3)] transition-all duration-300">
-        <h2 className="relative text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-amber-200 dark:to-amber-100 mb-6 hover-underline">
-          Register
-        </h2>
-        {error && (
-          <div className="bg-red-100 dark:bg-red-900/70 text-red-700 dark:text-red-300 p-4 mb-6 rounded-lg border border-gradient-to-r from-red-200 to-red-300 dark:from-red-800 dark:to-red-700 shadow-md animate-fade-in-up hover:shadow-[0_0_10px_rgba(239,68,68,0.5)] dark:hover:shadow-[0_0_10px_rgba(209,213,219,0.5)] transition-all duration-300">
-            {error}
-          </div>
-        )}
-        <form>
-          <div className="mb-5">
-            <label
-              htmlFor="username"
-              className="block text-gray-700 dark:text-gray-400 mb-2 font-medium bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-400 dark:to-gray-300"
-            >
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, emailRef)}
-              placeholder="Enter username"
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gradient-to-r from-blue-500 to-indigo-500 dark:from-gray-500 dark:to-gray-400 focus:scale-[1.01] transition-all duration-300 text-gray-800 dark:text-gray-200"
-              ref={usernameRef}
-              required
-              aria-required="true"
-            />
-          </div>
-          <div className="mb-5">
-            <label
-              htmlFor="email"
-              className="block text-gray-700 dark:text-gray-400 mb-2 font-medium bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-400 dark:to-gray-300"
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => handleKeyDown(e, passwordRef)}
-              placeholder="Enter email"
-              className="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gradient-to-r from-blue-500 to-indigo-500 dark:from-gray-500 dark:to-gray-400 focus:scale-[1.01] transition-all duration-300 text-gray-800 dark:text-gray-200"
-              ref={emailRef}
-              required
-              aria-required="true"
-            />
-          </div>
-          <div className="mb-5">
-            <label
-              htmlFor="password"
-              className="block text-gray-700 dark:text-gray-400 mb-2 font-medium bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-400 dark:to-gray-300"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, confirmPasswordRef)}
-                placeholder="Enter password"
-                className="w-full p-3 pr-12 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gradient-to-r from-blue-500 to-indigo-500 dark:from-gray-500 dark:to-gray-400 focus:scale-[1.01] transition-all duration-300 text-gray-800 dark:text-gray-200"
-                ref={passwordRef}
-                required
-                aria-required="true"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((prev) => !prev)}
-                onKeyDown={(e) => handleEyeKeyDown(e, setShowPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-amber-400 transition-all duration-300"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                <i
-                  className={`fa-solid ${
-                    showPassword ? "fa-eye-slash" : "fa-eye"
-                  }`}
-                ></i>
-              </button>
+    <Row className="justify-content-center">
+      <Col md={6} lg={5}>
+        <Card className="shadow animate-fade-in-up">
+          <Card.Body className="p-4">
+            <div className="text-center mb-4">
+              <i className="fas fa-user-plus fa-3x text-primary mb-3"></i>
+              <h2 className="fw-bold">Create an Account</h2>
+              <p className="text-muted">Join the NexusEd student community</p>
             </div>
-          </div>
-          <div className="mb-6">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-gray-700 dark:text-gray-400 mb-2 font-medium bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-gray-900 dark:from-gray-400 dark:to-gray-300"
-            >
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e, null)}
-                placeholder="Confirm password"
-                className="w-full p-3 pr-12 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gradient-to-r from-blue-500 to-indigo-500 dark:from-gray-500 dark:to-gray-400 focus:scale-[1.01] transition-all duration-300 text-gray-800 dark:text-gray-200"
-                ref={confirmPasswordRef}
-                required
-                aria-required="true"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((prev) => !prev)}
-                onKeyDown={(e) => handleEyeKeyDown(e, setShowConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-amber-400 transition-all duration-300"
-                aria-label={
-                  showConfirmPassword
-                    ? "Hide confirm password"
-                    : "Show confirm password"
-                }
-              >
-                <i
-                  className={`fa-solid ${
-                    showConfirmPassword ? "fa-eye-slash" : "fa-eye"
-                  }`}
-                ></i>
-              </button>
+
+            {error && (
+              <Alert variant="danger" className="mb-4">
+                {error}
+              </Alert>
+            )}
+
+            <Form onKeyDown={handleKeyDown}>
+              <Form.Group className="mb-3">
+                <Form.Label>Username</Form.Label>
+                <InputGroup>
+                  <InputGroup.Text>
+                    <i className="fas fa-user"></i>
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="text"
+                    ref={usernameRef}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Choose a username"
+                    autoComplete="username"
+                    required
+                  />
+                </InputGroup>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <InputGroup>
+                  <InputGroup.Text>
+                    <i className="fas fa-envelope"></i>
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="email"
+                    ref={emailRef}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    autoComplete="email"
+                    required
+                  />
+                </InputGroup>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Password</Form.Label>
+                <InputGroup>
+                  <InputGroup.Text>
+                    <i className="fas fa-lock"></i>
+                  </InputGroup.Text>
+                  <Form.Control
+                    type={showPassword ? "text" : "password"}
+                    ref={passwordRef}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a password"
+                    autoComplete="new-password"
+                    required
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    <i
+                      className={`fa-solid ${
+                        showPassword ? "fa-eye-slash" : "fa-eye"
+                      }`}
+                    ></i>
+                  </Button>
+                </InputGroup>
+                <Form.Text className="text-muted">
+                  Password must be at least 8 characters long
+                </Form.Text>
+              </Form.Group>
+
+              <Form.Group className="mb-4">
+                <Form.Label>Confirm Password</Form.Label>
+                <InputGroup>
+                  <InputGroup.Text>
+                    <i className="fas fa-lock"></i>
+                  </InputGroup.Text>
+                  <Form.Control
+                    type={showPassword ? "text" : "password"}
+                    ref={confirmPasswordRef}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your password"
+                    autoComplete="new-password"
+                    required
+                  />
+                </InputGroup>
+              </Form.Group>
+
+              <div className="d-grid">
+                <Button
+                  variant="primary"
+                  onClick={handleSubmit}
+                  className="btn-hover-shadow"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Registering...
+                    </>
+                  ) : (
+                    "Register"
+                  )}
+                </Button>
+              </div>
+            </Form>
+
+            <div className="text-center mt-4">
+              <p>
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-primary fw-semibold transition-all"
+                >
+                  Login
+                </Link>
+              </p>
             </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-cyan-600 dark:to-teal-600 text-white dark:text-gray-200 px-5 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-teal-600 hover:shadow-[0_0_10px_rgba(59,130,246,0.5)] dark:hover:shadow-[0_0_10px_rgba(21,94,117,0.5)] dark:hover:dark-glow hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50"
-            ref={registerButtonRef}
-            disabled={isLoading}
-            aria-label="Register"
-          >
-            {isLoading ? "Registering..." : "Register"}
-          </button>
-        </form>
-      </div>
-    </div>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
   );
 }
 

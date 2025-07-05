@@ -12,14 +12,7 @@
     <meta name="color-scheme" content="light dark" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>NexusEd - Student Community Platform</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Configure Tailwind for Dark Mode -->
-    <script>
-      tailwind.config = {
-        darkMode: "class", // Enable dark mode using the 'dark' class
-      };
-    </script>
+
     <!-- Font Awesome CDN -->
     <link
       rel="stylesheet"
@@ -28,6 +21,7 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+
     <!-- React Big Calendar CSS -->
     <link
       rel="stylesheet"
@@ -37,9 +31,10 @@
       referrerpolicy="no-referrer"
     />
   </head>
-  <body class="bg-gray-50 dark:bg-gray-800">
+  <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+
     <!-- React Big Calendar JS (needed for browser environment) -->
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/react-big-calendar/1.13.1/react-big-calendar.min.js"
