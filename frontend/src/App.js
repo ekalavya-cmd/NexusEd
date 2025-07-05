@@ -13,9 +13,9 @@ import Footer from "./components/Footer";
 
 function App() {
   return (
-    <div className="d-flex flex-column min-vh-100 bg-light">
+    <div className="App d-flex flex-column min-vh-100">
       <Navbar />
-      <main className="flex-grow-1 py-4">
+      <main className="main-content flex-grow-1 py-4">
         <Container>
           <Routes>
             <Route path="/" element={<Home />} />

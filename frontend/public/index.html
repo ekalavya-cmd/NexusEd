@@ -13,34 +13,73 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>NexusEd - Student Community Platform</title>
 
-    <!-- Font Awesome CDN -->
+    <!-- Font Awesome CDN - Updated to latest version with correct integrity -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
 
-    <!-- React Big Calendar CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/react-big-calendar/1.13.1/react-big-calendar.min.css"
-      integrity="sha512-6HGvS2S0nqT7oW8Aly7Es9B2Z0G/4gQ5B74ifG8J+6tNp8g3j4DkeyW5QLgqS2oM4iXzu0n7uK2qMAr6q2g=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
+    <!-- CRITICAL: Theme persistence script - Must run BEFORE React loads -->
+    <script>
+      // Immediate theme application to prevent flash
+      (function () {
+        "use strict";
+
+        function applyTheme() {
+          try {
+            // Get stored theme preference
+            const storedDarkMode = localStorage.getItem("darkMode");
+            let isDarkMode = false;
+
+            if (storedDarkMode !== null) {
+              // Use stored preference
+              isDarkMode = storedDarkMode === "true";
+            } else {
+              // Check system preference if no stored preference
+              if (
+                window.matchMedia &&
+                window.matchMedia("(prefers-color-scheme: dark)").matches
+              ) {
+                isDarkMode = true;
+              }
+            }
+
+            // Apply theme immediately to html element
+            document.documentElement.setAttribute(
+              "data-bs-theme",
+              isDarkMode ? "dark" : "light"
+            );
+
+            // Store the preference for consistency
+            localStorage.setItem("darkMode", isDarkMode.toString());
+          } catch (error) {
+            console.warn("Theme initialization error:", error);
+            // Fallback to light mode
+            document.documentElement.setAttribute("data-bs-theme", "light");
+          }
+        }
+
+        // Apply theme immediately
+        applyTheme();
+
+        // Also listen for storage changes from other tabs
+        window.addEventListener("storage", function (e) {
+          if (e.key === "darkMode") {
+            const isDarkMode = e.newValue === "true";
+            document.documentElement.setAttribute(
+              "data-bs-theme",
+              isDarkMode ? "dark" : "light"
+            );
+          }
+        });
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-
-    <!-- React Big Calendar JS (needed for browser environment) -->
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/react-big-calendar/1.13.1/react-big-calendar.min.js"
-      integrity="sha512-KTvzQ4jkhL5R5M3fJCpR+UNp+0Z4bTVtIRSt/8gGoeYf0jUcH2b9Z1n0zRudnFimYqW0zGHyKhD3q4nB0PQ=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
   </body>
 </html>

@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
-import { Toast, ToastContainer } from "react-bootstrap";
 
 // Create the authentication context
 export const AuthContext = createContext();
@@ -8,8 +7,6 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [authError, setAuthError] = useState(null);
-  const [showToast, setShowToast] = useState(false);
 
   // Check for existing token on initial load
   useEffect(() => {
@@ -37,101 +34,117 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Handle authentication errors with Bootstrap Toast
-  useEffect(() => {
-    if (authError) {
-      setShowToast(true);
-      const timer = setTimeout(() => {
-        setShowToast(false);
-        setAuthError(null);
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [authError]);
-
-  // Login function - unchanged API calls but updated error handling
+  // Enhanced login function with proper error handling and return values
   const login = async (identifier, password) => {
     try {
       console.log("AuthContext login - Identifier:", identifier);
+
+      // Convert identifier to lowercase for case-insensitive login
+      const normalizedIdentifier = identifier.toLowerCase().trim();
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/auth/login`,
-        { identifier, password }
+        { identifier: normalizedIdentifier, password }
       );
-      localStorage.setItem("token", response.data.token);
-      setUser(response.data.user);
-      console.log(
-        "AuthContext login - Success for user:",
-        response.data.user.username
-      );
-      return { success: true };
+
+      if (response.data.token && response.data.user) {
+        localStorage.setItem("token", response.data.token);
+        setUser(response.data.user);
+        console.log(
+          "AuthContext login - Success for user:",
+          response.data.user.username
+        );
+        return { success: true, user: response.data.user };
+      } else {
+        throw new Error("Invalid response format from server");
+      }
     } catch (err) {
       console.error(
         "AuthContext login - Error:",
         err.response?.data || err.message
       );
-      setAuthError(err.response?.data?.message || "Login failed");
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Login failed. Please check your credentials.";
+
       return {
         success: false,
-        message: err.response?.data?.message || "Login failed",
+        message: errorMessage,
       };
     }
   };
 
-  // Register function - unchanged API calls but updated error handling
+  // Enhanced register function with proper error handling and return values
   const register = async (username, email, password) => {
     try {
+      console.log(
+        "AuthContext register - Starting registration for:",
+        username
+      );
+
+      // Normalize inputs
+      const normalizedEmail = email.toLowerCase().trim();
+      const trimmedUsername = username.trim();
+
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/auth/register`,
-        { username, email, password }
+        {
+          username: trimmedUsername,
+          email: normalizedEmail,
+          password,
+        }
       );
-      localStorage.setItem("token", response.data.token);
-      setUser(response.data.user);
-      return { success: true };
+
+      if (response.data.token && response.data.user) {
+        localStorage.setItem("token", response.data.token);
+        setUser(response.data.user);
+        console.log(
+          "AuthContext register - Success for user:",
+          response.data.user.username
+        );
+        return { success: true, user: response.data.user };
+      } else {
+        throw new Error("Invalid response format from server");
+      }
     } catch (err) {
       console.error(
         "AuthContext register - Error:",
         err.response?.data || err.message
       );
-      setAuthError(err.response?.data?.message || "Registration failed");
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Registration failed. Please try again.";
+
       return {
         success: false,
-        message: err.response?.data?.message || "Registration failed",
+        message: errorMessage,
       };
     }
   };
 
   // Logout function - unchanged
   const logout = () => {
+    console.log("AuthContext logout - Logging out user");
     localStorage.removeItem("token");
     setUser(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, setUser, isLoading, login, register, logout }}
+      value={{
+        user,
+        setUser,
+        isLoading,
+        login,
+        register,
+        logout,
+      }}
     >
       {children}
-
-      {/* Bootstrap Toast for displaying auth errors */}
-      <ToastContainer
-        position="top-center"
-        className="p-3"
-        style={{ zIndex: 1100 }}
-      >
-        <Toast
-          show={showToast}
-          onClose={() => setShowToast(false)}
-          bg="danger"
-          delay={3000}
-          autohide
-        >
-          <Toast.Header>
-            <strong className="me-auto">Authentication Error</strong>
-          </Toast.Header>
-          <Toast.Body className="text-white">{authError}</Toast.Body>
-        </Toast>
-      </ToastContainer>
     </AuthContext.Provider>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useRef } from "react";
+import React, { useState, useContext, useRef, useEffect } from "react";
 import {
   Card,
   Form,
@@ -8,44 +8,102 @@ import {
   Col,
   Alert,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 function Login() {
   const { login } = useContext(AuthContext);
-  const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+
+  const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
 
+  // Clear errors after 3 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  // Focus management for navigation
+  const handleKeyDown = (e, currentField) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      if (currentField === "email" && password === "") {
+        // If email field and password is empty, move to password field
+        passwordRef.current?.focus();
+      } else if (currentField === "email" && password !== "") {
+        // If email field and password is filled, submit
+        handleSubmit();
+      } else if (currentField === "password") {
+        // If password field, submit
+        handleSubmit();
+      }
+    }
+  };
+
+  const addDebugLog = (message) => {
+    console.log(`🔐 Login Debug: ${message}`);
+  };
+
+  const validateForm = () => {
+    if (!emailOrUsername.trim() || !password.trim()) {
+      setError("Please enter both email/username and password.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
-    if (!email || !password) {
-      setError("Please enter both email and password.");
+    addDebugLog("Form submission started");
+
+    if (!validateForm()) {
+      addDebugLog("Form validation failed");
       return;
     }
 
     try {
       setIsLoading(true);
       setError("");
-      await login(email, password);
-      // If successful, login will redirect
+      addDebugLog(`Attempting login for: ${emailOrUsername.toLowerCase()}`);
+
+      // Convert to lowercase for case-insensitive login
+      const identifier = emailOrUsername.toLowerCase().trim();
+
+      const result = await login(identifier, password);
+
+      if (result && result.success) {
+        addDebugLog("Login successful, redirecting...");
+        // Add a small delay to show success state
+        setTimeout(() => {
+          navigate("/");
+        }, 500);
+      } else {
+        addDebugLog("Login failed with result: " + JSON.stringify(result));
+        setError(
+          result?.message || "Login failed. Please check your credentials."
+        );
+        setIsLoading(false);
+      }
     } catch (err) {
+      addDebugLog("Login error caught: " + err.message);
       console.error("Login error:", err);
       setError(
         err.response?.data?.message ||
+          err.message ||
           "Login failed. Please check your credentials."
       );
       setIsLoading(false);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSubmit();
     }
   };
 
@@ -61,28 +119,34 @@ function Login() {
             </div>
 
             {error && (
-              <Alert variant="danger" className="mb-4">
+              <Alert variant="danger" className="mb-4 fade-message">
+                <i className="fas fa-exclamation-circle me-2"></i>
                 {error}
               </Alert>
             )}
 
-            <Form onKeyDown={handleKeyDown}>
+            <Form>
               <Form.Group className="mb-3">
-                <Form.Label>Email</Form.Label>
+                <Form.Label>Email or Username</Form.Label>
                 <InputGroup>
                   <InputGroup.Text>
                     <i className="fas fa-envelope"></i>
                   </InputGroup.Text>
                   <Form.Control
-                    type="email"
+                    type="text"
                     ref={emailRef}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    autoComplete="email"
+                    value={emailOrUsername}
+                    onChange={(e) => setEmailOrUsername(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, "email")}
+                    placeholder="Enter your email or username"
+                    autoComplete="username"
+                    disabled={isLoading}
                     required
                   />
                 </InputGroup>
+                <Form.Text className="text-muted">
+                  Case insensitive - you can use any case
+                </Form.Text>
               </Form.Group>
 
               <Form.Group className="mb-4">
@@ -96,13 +160,16 @@ function Login() {
                     ref={passwordRef}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e, "password")}
                     placeholder="Enter your password"
                     autoComplete="current-password"
+                    disabled={isLoading}
                     required
                   />
                   <Button
                     variant="outline-secondary"
                     onClick={() => setShowPassword(!showPassword)}
+                    disabled={isLoading}
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -133,7 +200,10 @@ function Login() {
                       Logging in...
                     </>
                   ) : (
-                    "Login"
+                    <>
+                      <i className="fas fa-sign-in-alt me-2"></i>
+                      Login
+                    </>
                   )}
                 </Button>
               </div>
@@ -144,9 +214,9 @@ function Login() {
                 Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="text-primary fw-semibold transition-all"
+                  className="text-primary fw-semibold transition-all hover-underline-effect"
                 >
-                  Register
+                  Register here
                 </Link>
               </p>
             </div>

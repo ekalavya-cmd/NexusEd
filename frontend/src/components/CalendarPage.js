@@ -1,5 +1,6 @@
 import React from "react";
 import { Calendar } from "react-big-calendar";
+// Import CSS from npm package instead of CDN
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Card, Button, Spinner, Alert } from "react-bootstrap";
 import useCalendar from "../hooks/useCalendar";
@@ -82,42 +83,59 @@ function CalendarPage() {
               events={events}
               startAccessor="start"
               endAccessor="end"
-              style={{ height: 580 }}
-              selectable
+              style={{ height: 600 }}
               onSelectSlot={handleSelectSlot}
               onSelectEvent={handleSelectEvent}
-              className="bootstrap-calendar"
-              date={date}
-              onNavigate={handleNavigate}
-              view={view}
-              onView={handleViewChange}
-              views={["month", "week", "day"]}
+              selectable={!!user}
+              popup
+              views={["month", "week", "day", "agenda"]}
+              step={60}
+              showMultiDayTimes
               components={{
                 toolbar: CustomToolbar,
+              }}
+              onNavigate={handleNavigate}
+              onView={handleViewChange}
+              date={date}
+              view={view}
+              className="bootstrap-calendar"
+              eventPropGetter={(event, start, end, isSelected) => {
+                return {
+                  className: isSelected ? "selected-event" : "",
+                  style: {
+                    backgroundColor: event.color || "#0d6efd",
+                    borderRadius: "4px",
+                    opacity: 0.8,
+                    color: "white",
+                    border: "0px",
+                    display: "block",
+                  },
+                };
               }}
             />
           </div>
         </Card.Body>
       </Card>
 
-      {/* Event Details Modal */}
-      <EventDetailsModal
-        selectedEvent={selectedEvent}
-        setSelectedEvent={setSelectedEvent}
-        user={user}
-        handleDeleteEvent={handleDeleteEvent}
-      />
-
       {/* Create Event Modal */}
       <CreateEventModal
-        showModal={showModal}
-        setShowModal={setShowModal}
+        show={showModal}
+        onHide={() => setShowModal(false)}
         newEvent={newEvent}
         setNewEvent={setNewEvent}
-        currentDateTime={currentDateTime}
         groups={groups}
         fieldErrors={fieldErrors}
-        handleCreateEvent={handleCreateEvent}
+        currentDateTime={currentDateTime}
+        onCreateEvent={handleCreateEvent}
+      />
+
+      {/* Event Details Modal */}
+      <EventDetailsModal
+        show={!!selectedEvent}
+        onHide={() => setSelectedEvent(null)}
+        event={selectedEvent}
+        onDeleteEvent={handleDeleteEvent}
+        currentUser={user}
       />
     </section>
   );
