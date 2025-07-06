@@ -1,0 +1,166 @@
+/* Theme debugging utilities - only for development */
+.debug-theme {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+  background: var(--nexus-bg-secondary);
+  border: 1px solid var(--nexus-border);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: monospace;
+  box-shadow: 0 4px 12px var(--nexus-shadow);
+  max-width: 200px;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.debug-theme:hover {
+  opacity: 1;
+}
+
+.debug-theme::before {
+  content: "Theme: " attr(data-theme);
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--nexus-primary);
+}
+
+.debug-theme-info {
+  margin: 3px 0;
+  font-size: 10px;
+  color: var(--nexus-text-secondary);
+}
+
+/* CSS variable inspector */
+.debug-variables {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  z-index: 9998;
+  background: var(--nexus-bg-secondary);
+  border: 1px solid var(--nexus-border);
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-family: monospace;
+  max-height: 200px;
+  overflow-y: auto;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.debug-variables:hover {
+  opacity: 1;
+}
+
+.debug-variables::before {
+  content: "CSS Variables";
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--nexus-primary);
+  border-bottom: 1px solid var(--nexus-border);
+  padding-bottom: 3px;
+}
+
+/* Performance indicators */
+.theme-switch-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--nexus-bg-primary);
+  border: 2px solid var(--nexus-primary);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  color: var(--nexus-primary);
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.theme-switch-indicator.show {
+  opacity: 1;
+}
+
+/* Development only styles */
+@media screen {
+  /* Only show debug tools in development */
+  .debug-theme,
+  .debug-variables {
+    display: none;
+  }
+}
+
+/* Show debug tools when explicitly enabled */
+html[data-debug="true"] .debug-theme,
+html[data-debug="true"] .debug-variables {
+  display: block !important;
+}
+
+/* Highlight elements with hardcoded colors (development only) */
+html[data-debug="true"] [style*="color:"],
+html[data-debug="true"] [style*="background:"] {
+  outline: 2px dashed #ff0000 !important;
+  outline-offset: 2px !important;
+}
+
+/* Theme transition debugging */
+html[data-debug="true"] * {
+  transition-duration: 0.6s !important; /* Slow down transitions for debugging */
+}
+
+/* Color palette display for development */
+.debug-color-palette {
+  position: fixed;
+  top: 50px;
+  right: 10px;
+  z-index: 9997;
+  background: var(--nexus-bg-primary);
+  border: 1px solid var(--nexus-border);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: monospace;
+  display: none;
+}
+
+html[data-debug="true"] .debug-color-palette {
+  display: block;
+}
+
+.debug-color-swatch {
+  display: flex;
+  align-items: center;
+  margin: 2px 0;
+}
+
+.debug-color-box {
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--nexus-border);
+  margin-right: 5px;
+  border-radius: 2px;
+}
+
+/* Accessibility debugging */
+html[data-debug="true"] *:focus {
+  outline: 3px solid #ff6b6b !important;
+  outline-offset: 2px !important;
+}
+
+/* Low contrast warning */
+html[data-debug="true"] .low-contrast {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 0, 0, 0.1) 2px,
+    rgba(255, 0, 0, 0.1) 4px
+  ) !important;
+}

@@ -1,10 +1,11 @@
-/* Enhanced Footer Styles */
+/* Enhanced Footer Styles with Dark Mode Optimizations */
 
 /* Main footer styling */
 footer {
   background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
   position: relative;
   overflow: hidden;
+  contain: layout style;
 }
 
 footer::before {
@@ -18,6 +19,7 @@ footer::before {
     repeat-x;
   background-size: 100px 20px;
   opacity: 0.3;
+  will-change: opacity;
 }
 
 .footer-main {
@@ -29,6 +31,7 @@ footer::before {
   background: rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 1;
+  backdrop-filter: blur(5px);
 }
 
 /* Dark mode adjustments */
@@ -51,6 +54,7 @@ footer::before {
 .footer-section h6 {
   color: #ffffff;
   position: relative;
+  margin-bottom: 1rem;
 }
 
 .footer-section h6::after {
@@ -62,9 +66,19 @@ footer::before {
   height: 2px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 1px;
+  transition: width 0.3s ease;
+}
+
+.footer-section:hover h6::after {
+  width: 50px;
 }
 
 /* Footer links */
+.footer-links {
+  list-style: none;
+  padding: 0;
+}
+
 .footer-links li {
   margin-bottom: 0.5rem;
   transition: all 0.3s ease;
@@ -72,11 +86,15 @@ footer::before {
 
 .footer-links li:hover {
   transform: translateX(5px);
+  padding-left: 0.5rem;
 }
 
 .hover-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
   transition: all 0.3s ease;
   position: relative;
+  display: inline-block;
 }
 
 .hover-link:hover {
@@ -99,147 +117,110 @@ footer::before {
   width: 100%;
 }
 
-/* Social buttons */
-.social-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+/* Social media links */
+.footer-social {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.footer-social a {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: transparent;
+  text-decoration: none;
 }
 
-.social-btn:hover {
+.footer-social a:hover {
   background: rgba(255, 255, 255, 0.2);
-  border-color: #ffffff;
+  color: #ffffff;
   transform: translateY(-3px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
-.social-btn:focus {
-  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+/* Footer newsletter signup */
+.footer-newsletter {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
 }
 
-/* Feature list styling */
-.footer-features li {
-  transition: all 0.3s ease;
-  padding: 0.25rem 0;
-  border-radius: 4px;
-}
-
-.footer-features li:hover {
+.footer-newsletter .form-control {
   background: rgba(255, 255, 255, 0.1);
-  padding-left: 0.5rem;
-  margin-left: -0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
-.footer-features li:hover i {
-  color: #ffffff !important;
-  transform: scale(1.2);
+.footer-newsletter .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
 }
 
-.footer-features li i {
-  transition: all 0.3s ease;
-  width: 20px;
-}
-
-/* Back to top button */
-.back-to-top-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: transparent;
-}
-
-.back-to-top-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: #ffffff;
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.back-to-top-btn:focus {
+.footer-newsletter .form-control:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
   box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
 }
 
-/* Modal enhancements */
-.feature-highlight {
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
+/* Footer brand section */
+.footer-brand {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.feature-highlight:hover {
-  border-color: #0d6efd;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.footer-brand .brand-logo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-[data-bs-theme="dark"] .feature-highlight {
-  background-color: #2d3748 !important;
-  color: #e2e8f0 !important;
+.footer-brand .brand-description {
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
 }
 
-[data-bs-theme="dark"] .feature-highlight:hover {
-  border-color: #6ea8fe;
-  background-color: #374151 !important;
+/* Footer bottom section */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 0;
+  text-align: center;
 }
 
-[data-bs-theme="dark"] .feature-highlight .text-muted {
-  color: #9ca3af !important;
+.footer-bottom p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
 }
 
-/* Privacy and Terms content styling */
-.privacy-content h6,
-.terms-content h6 {
-  color: #0d6efd;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
+.footer-bottom a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
 }
 
-[data-bs-theme="dark"] .privacy-content h6,
-[data-bs-theme="dark"] .terms-content h6 {
-  color: #6ea8fe;
+.footer-bottom a:hover {
+  color: #ffffff;
 }
 
-.privacy-content ul,
-.terms-content ul {
-  padding-left: 1.5rem;
-}
-
-.privacy-content li,
-.terms-content li {
-  margin-bottom: 0.5rem;
-}
-
-/* Animation for footer appearance */
-@keyframes footerFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-footer {
-  animation: footerFadeIn 0.6s ease-out;
-}
-
-/* Responsive adjustments */
+/* Responsive design */
 @media (max-width: 768px) {
-  .footer-section {
+  .footer-main {
+    padding: 2rem 0;
     text-align: center;
+  }
+
+  .footer-section {
     margin-bottom: 2rem;
   }
 
@@ -248,61 +229,119 @@ footer {
     transform: translateX(-50%);
   }
 
-  .social-links {
+  .footer-section:hover h6::after {
+    width: 40px;
+  }
+
+  .footer-links li:hover {
+    transform: none;
+    padding-left: 0;
+  }
+
+  .footer-social {
     justify-content: center;
   }
 
-  .footer-bottom .row {
-    text-align: center;
-  }
-
-  .footer-bottom .col-md-6:last-child {
-    margin-top: 1rem;
+  .footer-newsletter {
+    margin: 1rem;
   }
 }
 
 @media (max-width: 576px) {
-  .footer-main {
-    padding: 2rem 0;
+  .footer-brand .brand-logo {
+    font-size: 1.5rem;
   }
 
-  .social-btn {
+  .footer-social a {
     width: 35px;
     height: 35px;
   }
 
-  .back-to-top-btn {
-    width: 35px;
-    height: 35px;
+  .footer-newsletter {
+    padding: 1rem;
   }
-}
-
-/* Smooth scrolling enhancement */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Focus states for accessibility */
-.footer-links a:focus,
-.footer-links button:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.7);
-  outline-offset: 2px;
-  border-radius: 2px;
 }
 
 /* Print styles */
 @media print {
   footer {
-    background: none !important;
-    color: #000 !important;
+    background: white !important;
+    color: black !important;
   }
 
-  .footer-main::before {
+  footer::before {
     display: none;
   }
 
-  .social-links,
-  .back-to-top-btn {
+  .footer-social,
+  .footer-newsletter {
     display: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  footer {
+    background: #000000 !important;
+    border-top: 2px solid #ffffff;
+  }
+
+  .footer-section h5,
+  .footer-section h6,
+  .hover-link {
+    color: #ffffff !important;
+  }
+
+  .footer-social a {
+    background: #ffffff;
+    color: #000000;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  footer *,
+  .footer-links li,
+  .hover-link,
+  .footer-social a {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .footer-links li:hover,
+  .footer-social a:hover {
+    transform: none !important;
+  }
+}
+
+/* Loading state for footer */
+.footer-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.footer-loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }

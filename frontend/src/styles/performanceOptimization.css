@@ -1,0 +1,205 @@
+/* Performance optimizations for theme switching */
+
+/* Use CSS containment for better performance */
+.card,
+.modal,
+.navbar-custom,
+.footer {
+  contain: layout style;
+}
+
+/* Optimize transitions for better performance */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    transition-property: background-color, border-color, color, box-shadow,
+      transform;
+    transition-timing-function: ease;
+    transition-duration: 0.3s;
+  }
+
+  /* Faster transitions for interactive elements */
+  .btn,
+  .nav-link,
+  .form-control:focus {
+    transition-duration: 0.2s;
+  }
+
+  /* Slower transitions for layout changes */
+  .card,
+  .modal-content {
+    transition-duration: 0.4s;
+  }
+}
+
+/* GPU acceleration for smooth transitions */
+.navbar-custom,
+.card,
+.btn,
+.modal-content {
+  will-change: background-color, transform;
+}
+
+/* Remove will-change after animations complete */
+.transition-complete {
+  will-change: auto;
+}
+
+/* Reduce reflows during theme changes */
+.main-content,
+.container {
+  contain: layout;
+}
+
+/* Optimize expensive operations */
+.navbar-custom::before,
+footer::before {
+  will-change: opacity;
+}
+
+/* Batch DOM updates for theme changes */
+.theme-switching {
+  pointer-events: none;
+}
+
+.theme-switching * {
+  transition-delay: 0s !important;
+}
+
+/* Optimize shadow rendering */
+.card,
+.modal-content,
+.dropdown-menu {
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Memory optimization */
+@media (max-width: 768px) {
+  /* Reduce animations on mobile for better performance */
+  .card:hover {
+    transform: none;
+  }
+
+  .btn:hover {
+    transform: none;
+  }
+
+  /* Simpler shadows on mobile */
+  .card,
+  .modal-content {
+    box-shadow: 0 2px 8px var(--nexus-shadow);
+  }
+}
+
+/* Optimize background gradients */
+.navbar-custom,
+footer {
+  background-attachment: fixed;
+}
+
+@media (max-width: 768px) {
+  /* Remove fixed backgrounds on mobile */
+  .navbar-custom,
+  footer {
+    background-attachment: scroll;
+  }
+}
+
+/* Critical rendering path optimization */
+.above-fold {
+  contain: layout style paint;
+}
+
+/* Optimize font loading */
+.brand-text,
+.nav-link-custom {
+  font-display: swap;
+}
+
+/* Reduce paint area during animations */
+.navbar-custom,
+.footer {
+  isolation: isolate;
+}
+
+/* Optimize expensive CSS operations */
+.blur-effect {
+  filter: blur(0); /* Prepare for GPU */
+  transition: filter 0.3s ease;
+}
+
+.blur-effect.active {
+  filter: blur(5px);
+}
+
+/* Batch CSS custom property updates */
+:root {
+  /* Group all color properties for atomic updates */
+  --theme-transition-duration: 0.3s;
+}
+
+/* Performance monitoring hooks */
+.perf-monitor {
+  /* Use for performance tracking elements */
+  contain: strict;
+}
+
+/* Optimize for high refresh rate displays */
+@media (min-resolution: 120dpi) {
+  * {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* But keep essential feedback */
+  .btn:focus,
+  .form-control:focus {
+    transition: box-shadow 0.1s ease !important;
+  }
+}
+
+/* Optimize for dark mode performance */
+[data-bs-theme="dark"] {
+  /* Use simpler backgrounds in dark mode if needed */
+  color-scheme: dark;
+}
+
+[data-bs-theme="light"] {
+  color-scheme: light;
+}
+
+/* Layer management for better compositing */
+.navbar-custom,
+.modal,
+.dropdown-menu {
+  z-index: var(--bs-zindex-sticky);
+  position: relative;
+  isolation: isolate;
+}
+
+/* Optimize scrolling performance */
+.main-content {
+  scroll-behavior: smooth;
+  overflow-anchor: none; /* Prevent scroll anchoring issues */
+}
+
+/* Critical resource hints */
+.preload-theme {
+  /* Use for preloading theme assets */
+  content-visibility: hidden;
+}
+
+/* Optimize image rendering during theme changes */
+img {
+  transition: filter 0.3s ease;
+}
+
+[data-bs-theme="dark"] img:not(.preserve-colors) {
+  filter: brightness(0.9);
+}

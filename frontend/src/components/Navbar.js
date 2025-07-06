@@ -59,19 +59,84 @@ function Navbar() {
     );
   });
 
-  // Only update localStorage and DOM when darkMode state changes (not on mount)
+  // Enhanced theme switching with detailed logging and performance tracking
   useEffect(() => {
+    const startTime = performance.now();
+    const theme = darkMode ? "dark" : "light";
+
     // Apply theme to DOM
-    document.documentElement.setAttribute(
-      "data-bs-theme",
-      darkMode ? "dark" : "light"
-    );
+    document.documentElement.setAttribute("data-bs-theme", theme);
 
     // Store preference
     localStorage.setItem("darkMode", darkMode.toString());
 
-    console.log(`🎨 Theme toggled to: ${darkMode ? "dark" : "light"}`);
+    // Update debug attribute in development
+    if (process.env.NODE_ENV === "development") {
+      document.documentElement.setAttribute("data-theme-debug", theme);
+    }
+
+    // Enhanced logging with component detection and performance metrics
+    const componentsWithTheme = document.querySelectorAll(
+      '[class*="nexus-"], .card, .btn, .form-control, .navbar-custom, footer'
+    );
+
+    const primaryColor = getComputedStyle(
+      document.documentElement
+    ).getPropertyValue("--nexus-primary");
+
+    const endTime = performance.now();
+    const switchDuration = endTime - startTime;
+
+    console.log(`🎨 Theme Switch Summary:
+    - New Theme: ${theme}
+    - Components Updated: ${componentsWithTheme.length}
+    - Switch Duration: ${switchDuration.toFixed(2)}ms
+    - Primary Color: ${primaryColor.trim()}
+    - Timestamp: ${new Date().toLocaleTimeString()}
+    - CSS Variables Active: ${primaryColor ? "✅" : "❌"}
+    - Performance: ${
+      switchDuration < 50
+        ? "Excellent"
+        : switchDuration < 100
+        ? "Good"
+        : "Needs Optimization"
+    }`);
+
+    // Log theme change to file in development
+    if (process.env.NODE_ENV === "development") {
+      logThemeChange(theme, switchDuration);
+    }
+
+    // Validate theme consistency after switch (development only)
+    if (process.env.NODE_ENV === "development") {
+      setTimeout(() => {
+        const { validateThemeConsistency } = require("../utils/themeValidator");
+        validateThemeConsistency();
+      }, 100);
+    }
   }, [darkMode]);
+
+  // Enhanced theme change logging
+  const logThemeChange = (theme, duration) => {
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      theme: theme,
+      duration: `${duration.toFixed(2)}ms`,
+      userAgent: navigator.userAgent,
+      url: window.location.pathname,
+    };
+
+    // Log to console (visible in VS Code terminal)
+    console.log(
+      `[${logEntry.timestamp}] Theme changed to: ${theme} (${logEntry.duration})`
+    );
+
+    // In a real app, you might send this to a logging service
+    // For now, we'll store it in sessionStorage for debugging
+    const logs = JSON.parse(sessionStorage.getItem("themeLogs") || "[]");
+    logs.push(logEntry);
+    sessionStorage.setItem("themeLogs", JSON.stringify(logs.slice(-50))); // Keep last 50 logs
+  };
 
   // Listen for theme changes from other tabs
   useEffect(() => {
@@ -158,379 +223,235 @@ function Navbar() {
     // Add backdrop
     const backdrop = document.createElement("div");
     backdrop.className =
-      "position-fixed top-0 start-0 w-100 h-100 logout-backdrop";
-    backdrop.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+      "position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50";
     backdrop.style.zIndex = "9998";
-    backdrop.style.opacity = "0";
-    backdrop.style.transition = "opacity 0.3s ease-in-out";
 
     document.body.appendChild(backdrop);
     document.body.appendChild(logoutMessage);
 
-    // Fade in the backdrop and message
-    setTimeout(() => {
-      backdrop.style.opacity = "1";
-    }, 100);
-
-    // Animate the message card (no rotation/tilt)
-    const messageCard = logoutMessage.querySelector(".card");
-    messageCard.style.transform = "scale(0.8) translateY(-10px)";
-    messageCard.style.opacity = "0";
-    messageCard.style.transition =
-      "all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-
-    setTimeout(() => {
-      messageCard.style.transform = "scale(1) translateY(0)";
-      messageCard.style.opacity = "1";
-    }, 200);
-
-    // Wait for animation, then logout and navigate
-    setTimeout(() => {
-      // Perform actual logout
-      logout();
-
-      // Fade out message
-      messageCard.style.transform = "scale(0.9)";
-      messageCard.style.opacity = "0";
-      backdrop.style.opacity = "0";
-
-      // Navigate to home and clean up
-      setTimeout(() => {
+    // Wait for animation, then logout
+    setTimeout(async () => {
+      try {
+        await logout();
         navigate("/");
+      } catch (error) {
+        console.error("Logout error:", error);
+      } finally {
+        // Clean up
+        document.body.removeChild(backdrop);
+        document.body.removeChild(logoutMessage);
+        setIsLoggingOut(false);
 
-        // Clean up elements
-        if (document.body.contains(logoutMessage)) {
-          document.body.removeChild(logoutMessage);
-        }
-        if (document.body.contains(backdrop)) {
-          document.body.removeChild(backdrop);
-        }
-
-        // Reset main content styles
+        // Restore main content opacity
         if (mainContent) {
           mainContent.style.opacity = "1";
           mainContent.style.transform = "translateY(0)";
         }
-
         if (footer) {
           footer.style.opacity = "1";
         }
-
-        setIsLoggingOut(false);
-      }, 300);
-    }, 1500); // Show success message for 1.5 seconds
+      }
+    }, 2000);
   };
 
   return (
     <>
       <BsNavbar
         expand="lg"
-        className="navbar-custom bg-gradient-primary text-white shadow-lg fixed-top"
+        className="navbar-custom sticky-top"
         expanded={expanded}
-        onToggle={setExpanded}
       >
         <Container>
-          <BsNavbar.Brand
-            as={Link}
-            to="/"
-            className="text-white fw-bold d-flex align-items-center brand-logo"
-          >
-            <div className="logo-container me-2">
-              <i className="fas fa-graduation-cap logo-icon"></i>
+          {/* Brand */}
+          <Link to="/" className="brand-logo">
+            <div className="d-flex align-items-center">
+              <div className="logo-container me-3">
+                <i className="fas fa-graduation-cap logo-icon"></i>
+              </div>
+              <span className="brand-text">NexusEd</span>
             </div>
-            <span className="brand-text">NexusEd</span>
-          </BsNavbar.Brand>
+          </Link>
 
-          {/* Mobile controls */}
-          <div className="d-flex d-lg-none align-items-center gap-2">
-            {user && (
-              <Button
-                variant="link"
-                className="text-white p-2"
-                onClick={() => setShowSearch(true)}
-                disabled={isLoggingOut}
-                title="Search"
-              >
-                <i className="fas fa-search"></i>
-              </Button>
-            )}
+          {/* Mobile toggle */}
+          <BsNavbar.Toggle
+            aria-controls="basic-navbar-nav"
+            onClick={() => setExpanded(!expanded)}
+            className="border-0"
+            style={{ boxShadow: "none" }}
+          >
+            <span className="navbar-toggler-icon"></span>
+          </BsNavbar.Toggle>
 
-            <Button
-              variant="link"
-              className="text-white p-2"
-              onClick={toggleDarkMode}
-              disabled={isLoggingOut}
-              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
-            </Button>
-
-            <BsNavbar.Toggle
-              aria-controls="navbar-nav"
-              className="border-0 text-white"
-              disabled={isLoggingOut}
-            >
-              <i className="fas fa-bars"></i>
-            </BsNavbar.Toggle>
-          </div>
-
-          <BsNavbar.Collapse id="navbar-nav">
+          <BsNavbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
-              <Nav.Link
-                as={RouterNavLink}
+              <RouterNavLink
                 to="/"
                 className={({ isActive }) =>
-                  `nav-link-custom ${isActive ? "active" : ""} ${
-                    isLoggingOut ? "opacity-50" : ""
-                  }`
+                  `nav-link nav-link-custom ${isActive ? "active" : ""}`
                 }
-                style={{ pointerEvents: isLoggingOut ? "none" : "auto" }}
               >
-                <i className="fas fa-home me-2"></i>
+                <i className="fas fa-home me-1"></i>
                 Home
-              </Nav.Link>
+              </RouterNavLink>
 
-              <Nav.Link
-                as={RouterNavLink}
+              <RouterNavLink
                 to="/study-groups"
                 className={({ isActive }) =>
-                  `nav-link-custom ${isActive ? "active" : ""} ${
-                    isLoggingOut ? "opacity-50" : ""
-                  }`
+                  `nav-link nav-link-custom ${isActive ? "active" : ""}`
                 }
-                style={{ pointerEvents: isLoggingOut ? "none" : "auto" }}
               >
-                <i className="fas fa-users me-2"></i>
+                <i className="fas fa-users me-1"></i>
                 Study Groups
-              </Nav.Link>
+              </RouterNavLink>
 
               {user && (
-                <>
-                  <Nav.Link
-                    as={RouterNavLink}
-                    to="/calendar"
-                    className={({ isActive }) =>
-                      `nav-link-custom ${isActive ? "active" : ""} ${
-                        isLoggingOut ? "opacity-50" : ""
-                      }`
-                    }
-                    style={{ pointerEvents: isLoggingOut ? "none" : "auto" }}
-                  >
-                    <i className="fas fa-calendar-alt me-2"></i>
-                    Calendar
-                  </Nav.Link>
-                </>
+                <RouterNavLink
+                  to="/calendar"
+                  className={({ isActive }) =>
+                    `nav-link nav-link-custom ${isActive ? "active" : ""}`
+                  }
+                >
+                  <i className="fas fa-calendar-alt me-1"></i>
+                  Calendar
+                </RouterNavLink>
               )}
             </Nav>
 
-            <Nav className="ms-auto d-flex align-items-center gap-2">
-              {/* Search - Desktop */}
-              {user && (
-                <div className="d-none d-lg-block">
-                  <Form onSubmit={handleSearch} className="search-form">
-                    <InputGroup size="sm">
-                      <Form.Control
-                        type="text"
-                        placeholder="Search groups, events..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="search-input"
-                        disabled={isLoggingOut}
-                      />
-                      <Button
-                        variant="outline-light"
-                        type="submit"
-                        disabled={isLoggingOut || !searchQuery.trim()}
-                        className="search-btn"
-                      >
-                        <i className="fas fa-search"></i>
-                      </Button>
-                    </InputGroup>
-                  </Form>
-                </div>
-              )}
-
-              {/* Notifications */}
-              {user && (
-                <Dropdown align="end">
-                  <Dropdown.Toggle
-                    variant="link"
-                    className="text-white text-decoration-none p-2 position-relative notification-btn"
-                    disabled={isLoggingOut}
-                    title="Notifications"
-                  >
-                    <i className="fas fa-bell"></i>
-                    {unreadCount > 0 && (
-                      <Badge
-                        bg="danger"
-                        className="position-absolute top-0 start-100 translate-middle badge-notification"
-                      >
-                        {unreadCount}
-                      </Badge>
-                    )}
-                  </Dropdown.Toggle>
-
-                  <Dropdown.Menu className="notification-menu">
-                    <Dropdown.Header>
-                      <i className="fas fa-bell me-2"></i>
-                      Notifications
-                      {unreadCount > 0 && (
-                        <Badge bg="primary" className="ms-2">
-                          {unreadCount}
-                        </Badge>
-                      )}
-                    </Dropdown.Header>
-                    <Dropdown.Divider />
-
-                    {notifications.length > 0 ? (
-                      <>
-                        {notifications.slice(0, 5).map((notification) => (
-                          <Dropdown.Item
-                            key={notification.id}
-                            className={`notification-item ${
-                              notification.unread ? "unread" : ""
-                            }`}
-                            onClick={() =>
-                              markNotificationAsRead(notification.id)
-                            }
-                          >
-                            <div className="d-flex align-items-start">
-                              <div className="flex-grow-1">
-                                <p className="mb-1 small">
-                                  {notification.text}
-                                </p>
-                                <small className="text-muted">
-                                  {notification.time}
-                                </small>
-                              </div>
-                              {notification.unread && (
-                                <div className="unread-dot"></div>
-                              )}
-                            </div>
-                          </Dropdown.Item>
-                        ))}
-                        <Dropdown.Divider />
-                        <Dropdown.Item className="text-center text-primary">
-                          <small>View All Notifications</small>
-                        </Dropdown.Item>
-                      </>
-                    ) : (
-                      <Dropdown.Item disabled>
-                        <small className="text-muted">No notifications</small>
-                      </Dropdown.Item>
-                    )}
-                  </Dropdown.Menu>
-                </Dropdown>
-              )}
-
-              {/* Theme Toggle - Desktop */}
+            {/* Right side navigation */}
+            <Nav className="ms-auto d-flex align-items-center">
+              {/* Search Button */}
               <Button
-                variant="link"
-                className="text-white text-decoration-none p-2 d-none d-lg-block theme-toggle"
+                variant="outline-light"
+                size="sm"
+                className="me-2"
+                onClick={() => setShowSearch(true)}
+              >
+                <i className="fas fa-search"></i>
+              </Button>
+
+              {/* Theme Toggle */}
+              <Button
+                variant="outline-light"
+                size="sm"
+                className="me-2"
                 onClick={toggleDarkMode}
-                disabled={isLoggingOut}
-                title={
-                  darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"
-                }
+                title={`Switch to ${darkMode ? "light" : "dark"} mode`}
               >
                 <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
               </Button>
 
-              {/* User Menu */}
               {user ? (
-                <Dropdown align="end">
-                  <Dropdown.Toggle
-                    variant="outline-light"
-                    className="user-menu-toggle d-flex align-items-center"
-                    disabled={isLoggingOut}
-                  >
-                    <div className="user-avatar me-2">
-                      {user.profilePicture ? (
-                        <img
-                          src={user.profilePicture}
-                          alt="Profile"
-                          className="avatar-img"
-                        />
-                      ) : (
-                        <i className="fas fa-user"></i>
-                      )}
-                    </div>
-                    <span className="d-none d-md-inline">{user.username}</span>
-                  </Dropdown.Toggle>
-
-                  <Dropdown.Menu className="user-dropdown-menu">
-                    <Dropdown.Header>
-                      <div className="d-flex align-items-center">
-                        <div className="user-avatar-large me-3">
-                          {user.profilePicture ? (
-                            <img
-                              src={user.profilePicture}
-                              alt="Profile"
-                              className="avatar-img"
-                            />
-                          ) : (
-                            <i className="fas fa-user"></i>
-                          )}
-                        </div>
-                        <div>
-                          <div className="fw-bold">{user.username}</div>
-                          <small className="text-muted">{user.email}</small>
-                        </div>
-                      </div>
-                    </Dropdown.Header>
-                    <Dropdown.Divider />
-
-                    <Dropdown.Item as={Link} to="/profile">
-                      <i className="fas fa-user me-2"></i>
-                      My Profile
-                    </Dropdown.Item>
-                    <Dropdown.Item as={Link} to="/calendar">
-                      <i className="fas fa-calendar me-2"></i>
-                      My Calendar
-                    </Dropdown.Item>
-                    <Dropdown.Divider />
-
-                    <Dropdown.Item
-                      onClick={handleLogout}
-                      disabled={isLoggingOut}
-                      className="text-danger"
+                <>
+                  {/* Notifications */}
+                  <Dropdown className="me-2">
+                    <Dropdown.Toggle
+                      variant="outline-light"
+                      size="sm"
+                      className="position-relative"
                     >
-                      {isLoggingOut ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" />
-                          Logging out...
-                        </>
-                      ) : (
-                        <>
-                          <i className="fas fa-sign-out-alt me-2"></i>
-                          Logout
-                        </>
+                      <i className="fas fa-bell"></i>
+                      {unreadCount > 0 && (
+                        <Badge
+                          bg="danger"
+                          className="position-absolute top-0 start-100 translate-middle"
+                          style={{ fontSize: "0.7rem" }}
+                        >
+                          {unreadCount}
+                        </Badge>
                       )}
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu align="end" style={{ minWidth: "300px" }}>
+                      <Dropdown.Header>Notifications</Dropdown.Header>
+                      {notifications.map((notification) => (
+                        <Dropdown.Item
+                          key={notification.id}
+                          className={`${
+                            notification.unread ? "bg-light" : ""
+                          } border-bottom`}
+                          onClick={() =>
+                            markNotificationAsRead(notification.id)
+                          }
+                        >
+                          <div className="d-flex">
+                            <div className="flex-grow-1">
+                              <small className="text-muted">
+                                {notification.text}
+                              </small>
+                              <br />
+                              <small className="text-muted">
+                                {notification.time}
+                              </small>
+                            </div>
+                            {notification.unread && (
+                              <div className="text-primary">
+                                <i
+                                  className="fas fa-circle"
+                                  style={{ fontSize: "0.5rem" }}
+                                ></i>
+                              </div>
+                            )}
+                          </div>
+                        </Dropdown.Item>
+                      ))}
+                    </Dropdown.Menu>
+                  </Dropdown>
+
+                  {/* User Profile Dropdown */}
+                  <Dropdown>
+                    <Dropdown.Toggle
+                      variant="outline-light"
+                      size="sm"
+                      className="d-flex align-items-center"
+                    >
+                      <i className="fas fa-user me-1"></i>
+                      {user.username}
+                    </Dropdown.Toggle>
+
+                    <Dropdown.Menu align="end">
+                      <Link to="/profile" className="dropdown-item">
+                        <i className="fas fa-user-circle me-2"></i>
+                        Profile
+                      </Link>
+                      <Dropdown.Divider />
+                      <Dropdown.Item
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="logout-btn"
+                      >
+                        {isLoggingOut ? (
+                          <>
+                            <div
+                              className="spinner-border spinner-border-sm me-2"
+                              role="status"
+                            >
+                              <span className="visually-hidden">
+                                Loading...
+                              </span>
+                            </div>
+                            Logging out...
+                          </>
+                        ) : (
+                          <>
+                            <i className="fas fa-sign-out-alt me-2"></i>
+                            Logout
+                          </>
+                        )}
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </>
               ) : (
-                <div className="d-flex gap-2">
-                  <Button
-                    as={Link}
+                <div className="d-flex">
+                  <Link
                     to="/login"
-                    variant="outline-light"
-                    size="sm"
-                    className="auth-btn"
+                    className="btn btn-outline-light btn-sm me-2"
                   >
-                    <i className="fas fa-sign-in-alt me-2"></i>
                     Login
-                  </Button>
-                  <Button
-                    as={Link}
-                    to="/register"
-                    variant="light"
-                    size="sm"
-                    className="auth-btn"
-                  >
-                    <i className="fas fa-user-plus me-2"></i>
+                  </Link>
+                  <Link to="/register" className="btn btn-light btn-sm">
                     Register
-                  </Button>
+                  </Link>
                 </div>
               )}
             </Nav>
@@ -538,7 +459,7 @@ function Navbar() {
         </Container>
       </BsNavbar>
 
-      {/* Mobile Search Offcanvas */}
+      {/* Search Offcanvas */}
       <Offcanvas
         show={showSearch}
         onHide={() => setShowSearch(false)}
@@ -546,49 +467,23 @@ function Navbar() {
         className="search-offcanvas"
       >
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title>
-            <i className="fas fa-search me-2"></i>
-            Search NexusEd
-          </Offcanvas.Title>
+          <Offcanvas.Title>Search NexusEd</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
           <Form onSubmit={handleSearch}>
-            <InputGroup className="mb-3">
+            <InputGroup size="lg">
               <Form.Control
                 type="text"
-                placeholder="Search for study groups, events, or users..."
+                placeholder="Search for study groups, posts, or users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 autoFocus
               />
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={!searchQuery.trim()}
-              >
-                <i className="fas fa-search me-2"></i>
-                Search
+              <Button variant="primary" type="submit">
+                <i className="fas fa-search"></i>
               </Button>
             </InputGroup>
           </Form>
-
-          <div className="search-suggestions">
-            <h6 className="text-muted">Popular Searches</h6>
-            <div className="d-flex flex-wrap gap-2">
-              <Button variant="outline-secondary" size="sm">
-                Math Study Group
-              </Button>
-              <Button variant="outline-secondary" size="sm">
-                Physics Events
-              </Button>
-              <Button variant="outline-secondary" size="sm">
-                Computer Science
-              </Button>
-              <Button variant="outline-secondary" size="sm">
-                Study Sessions
-              </Button>
-            </div>
-          </div>
         </Offcanvas.Body>
       </Offcanvas>
     </>

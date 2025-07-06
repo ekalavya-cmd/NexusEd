@@ -1,30 +1,32 @@
-/* Custom styles for App component with enhanced dark mode support */
+/* Enhanced App component styles with dark mode support */
 
 /* Ensure the App container takes full height and background */
 .App {
   min-height: 100vh;
   background-color: transparent;
   transition: background-color 0.3s ease;
+  contain: layout;
 }
 
 /* Light mode App styles */
 html[data-bs-theme="light"] .App,
 .App {
-  background-color: #ffffff;
-  color: #212529;
+  background-color: var(--nexus-bg-primary);
+  color: var(--nexus-text-primary);
 }
 
 /* Dark mode App styles */
 html[data-bs-theme="dark"] .App,
 [data-bs-theme="dark"] .App {
-  background-color: #212529 !important;
-  color: #e9ecef !important;
+  background-color: var(--nexus-bg-primary) !important;
+  color: var(--nexus-text-primary) !important;
 }
 
 /* Ensure main content areas get proper background */
 .main-content {
   min-height: calc(100vh - 200px);
   background-color: transparent;
+  contain: layout;
 }
 
 /* Dark mode adjustments for main content */
@@ -48,44 +50,55 @@ body {
 
 /* Dark mode specific container styles */
 [data-bs-theme="dark"] .page-container {
-  background-color: #212529;
+  background-color: var(--nexus-bg-primary);
 }
 
 /* Fix for any remaining white backgrounds in components */
 [data-bs-theme="dark"] .bg-white {
-  background-color: #2d3748 !important;
+  background-color: var(--nexus-bg-secondary) !important;
 }
 
 [data-bs-theme="dark"] .bg-light {
-  background-color: #374151 !important;
+  background-color: var(--nexus-bg-tertiary) !important;
 }
 
 /* Ensure text colors are properly inherited */
 [data-bs-theme="dark"] .text-dark {
-  color: #e9ecef !important;
+  color: var(--nexus-text-primary) !important;
 }
 
 [data-bs-theme="dark"] .text-muted {
-  color: #9ca3af !important;
+  color: var(--nexus-text-muted) !important;
 }
 
 /* Additional Bootstrap customizations for dark mode */
 [data-bs-theme="dark"] .border {
-  border-color: #4a5568 !important;
+  border-color: var(--nexus-border) !important;
 }
 
 [data-bs-theme="dark"] .border-top {
-  border-top-color: #4a5568 !important;
+  border-top-color: var(--nexus-border) !important;
 }
 
 [data-bs-theme="dark"] .border-bottom {
-  border-bottom-color: #4a5568 !important;
+  border-bottom-color: var(--nexus-border) !important;
 }
 
 [data-bs-theme="dark"] .border-left {
-  border-left-color: #4a5568 !important;
+  border-left-color: var(--nexus-border) !important;
 }
 
 [data-bs-theme="dark"] .border-right {
-  border-right-color: #4a5568 !important;
+  border-right-color: var(--nexus-border) !important;
+}
+
+/* Performance optimizations */
+* {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-timing-function: ease;
+}
+
+/* GPU acceleration for smooth theme transitions */
+.App {
+  will-change: background-color;
 }

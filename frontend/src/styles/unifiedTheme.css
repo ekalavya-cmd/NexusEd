@@ -1,4 +1,4 @@
-/* Unified Theme Colors for Perfect Blending */
+/* Enhanced Unified Theme Colors for Perfect Blending */
 
 /* ===== CORE COLOR VARIABLES ===== */
 :root {
@@ -41,6 +41,11 @@
   --nexus-hover-bg: rgba(13, 110, 253, 0.1);
   --nexus-active-bg: rgba(13, 110, 253, 0.15);
   --nexus-focus-ring: rgba(13, 110, 253, 0.25);
+
+  /* Enhanced shadow system */
+  --nexus-shadow-light: rgba(0, 0, 0, 0.05);
+  --nexus-shadow-medium: rgba(0, 0, 0, 0.1);
+  --nexus-shadow-strong: rgba(0, 0, 0, 0.15);
 }
 
 /* Dark mode color overrides */
@@ -72,157 +77,14 @@
   --nexus-hover-bg: rgba(110, 168, 254, 0.1);
   --nexus-active-bg: rgba(110, 168, 254, 0.15);
   --nexus-focus-ring: rgba(110, 168, 254, 0.25);
+
+  /* Enhanced shadow system for dark mode */
+  --nexus-shadow-light: rgba(255, 255, 255, 0.05);
+  --nexus-shadow-medium: rgba(255, 255, 255, 0.1);
+  --nexus-shadow-strong: rgba(255, 255, 255, 0.15);
 }
 
-/* ===== NAVBAR STYLES ===== */
-.navbar-custom {
-  background: var(--nexus-gradient-primary) !important;
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 20px var(--nexus-shadow);
-}
-
-.navbar-custom.scrolled {
-  background: var(--nexus-gradient-primary-dark) !important;
-  backdrop-filter: blur(15px);
-}
-
-/* Dark mode navbar adjustments */
-[data-bs-theme="dark"] .navbar-custom {
-  border-bottom-color: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
-}
-
-/* Navbar brand */
-.brand-logo {
-  transition: all 0.3s ease;
-  text-decoration: none !important;
-}
-
-.brand-logo:hover {
-  transform: scale(1.05);
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-}
-
-.logo-container {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.brand-logo:hover .logo-container {
-  background: rgba(255, 255, 255, 0.25);
-  transform: rotate(360deg);
-}
-
-/* Navigation links */
-.nav-link-custom {
-  color: rgba(255, 255, 255, 0.9) !important;
-  font-weight: 500;
-  padding: 0.5rem 1rem !important;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  position: relative;
-  margin: 0 0.25rem;
-}
-
-.nav-link-custom:hover {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-.nav-link-custom.active {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* ===== FOOTER STYLES ===== */
-footer {
-  background: var(--nexus-gradient-primary);
-  position: relative;
-  overflow: hidden;
-  margin-top: auto;
-}
-
-footer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" fill="rgba(255,255,255,0.05)"><polygon points="0,20 100,0 100,20"/></svg>')
-    repeat-x;
-  background-size: 100px 20px;
-  opacity: 0.3;
-}
-
-.footer-main {
-  position: relative;
-  z-index: 1;
-}
-
-.footer-bottom {
-  background: rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 1;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Dark mode footer adjustments */
-[data-bs-theme="dark"] footer::before {
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20" fill="rgba(255,255,255,0.03)"><polygon points="0,20 100,0 100,20"/></svg>')
-    repeat-x;
-}
-
-[data-bs-theme="dark"] .footer-bottom {
-  background: rgba(0, 0, 0, 0.2);
-  border-top-color: rgba(255, 255, 255, 0.05);
-}
-
-/* ===== MAIN CONTENT STYLES ===== */
-body {
-  background-color: var(--nexus-bg-primary);
-  color: var(--nexus-text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-main {
-  background-color: var(--nexus-bg-primary);
-  min-height: calc(100vh - 200px);
-  transition: background-color 0.3s ease;
-}
-
-/* Page containers */
-.container {
-  background-color: transparent;
-}
-
-/* Card components */
-.card {
-  background-color: var(--nexus-bg-primary);
-  border: 1px solid var(--nexus-border);
-  box-shadow: 0 2px 10px var(--nexus-shadow);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  box-shadow: 0 4px 20px var(--nexus-shadow);
-  transform: translateY(-2px);
-}
-
-[data-bs-theme="dark"] .card {
-  background-color: var(--nexus-bg-secondary);
-  border-color: var(--nexus-border);
-}
+/* ===== COMPONENT STYLES ===== */
 
 /* Form controls */
 .form-control {
@@ -256,6 +118,7 @@ main {
   background: var(--nexus-gradient-primary);
   border: none;
   transition: all 0.3s ease;
+  will-change: background-color, transform;
 }
 
 .btn-primary:hover {
@@ -322,6 +185,7 @@ main {
   border: 1px solid var(--nexus-border);
   box-shadow: 0 10px 40px var(--nexus-shadow);
   border-radius: 16px;
+  contain: layout style;
 }
 
 .modal-header {
@@ -368,6 +232,7 @@ main {
   border: 1px solid var(--nexus-border);
   box-shadow: 0 10px 30px var(--nexus-shadow);
   border-radius: 12px;
+  contain: layout style;
 }
 
 .dropdown-item {
@@ -413,6 +278,12 @@ main {
     transition: none !important;
     animation: none !important;
   }
+
+  /* Keep essential feedback */
+  .btn:focus,
+  .form-control:focus {
+    transition: box-shadow 0.1s ease !important;
+  }
 }
 
 @media (prefers-contrast: high) {
@@ -425,4 +296,59 @@ main {
     --nexus-border: #ffffff;
     --nexus-shadow: rgba(255, 255, 255, 0.3);
   }
+}
+
+/* ===== ENHANCED FEATURES ===== */
+
+/* Smooth theme transitions */
+* {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-timing-function: ease;
+  transition-duration: 0.3s;
+}
+
+/* Performance optimizations */
+.card,
+.modal,
+.navbar-custom {
+  contain: layout style;
+  will-change: background-color;
+}
+
+/* Enhanced focus management */
+.focus-ring {
+  box-shadow: 0 0 0 0.2rem var(--nexus-focus-ring);
+}
+
+/* Loading states */
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--nexus-bg-secondary) 25%,
+    var(--nexus-bg-tertiary) 50%,
+    var(--nexus-bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading-wave 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-wave {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Error states */
+.error-border {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Success states */
+.success-border {
+  border-color: #198754 !important;
+  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
 }

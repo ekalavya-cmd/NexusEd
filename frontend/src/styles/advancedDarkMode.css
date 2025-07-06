@@ -1,0 +1,468 @@
+/* Advanced dark mode features and enhancements */
+
+/* Auto-adjust images for dark mode */
+[data-bs-theme="dark"] img:not(.preserve-colors) {
+  filter: brightness(0.9) contrast(1.1);
+  transition: filter 0.3s ease;
+}
+
+[data-bs-theme="dark"] img:not(.preserve-colors):hover {
+  filter: brightness(1) contrast(1.2);
+}
+
+/* Enhanced focus indicators for dark mode */
+[data-bs-theme="dark"] *:focus {
+  outline: 2px solid var(--nexus-primary-light);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(110, 168, 254, 0.2);
+}
+
+[data-bs-theme="dark"] .btn:focus {
+  box-shadow: 0 0 0 4px rgba(110, 168, 254, 0.3);
+}
+
+[data-bs-theme="dark"] .form-control:focus {
+  box-shadow: 0 0 0 4px rgba(110, 168, 254, 0.25);
+}
+
+/* Dark mode specific scrollbar styling */
+[data-bs-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--nexus-bg-tertiary);
+  border-radius: 4px;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--nexus-border);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--nexus-text-secondary);
+}
+
+/* Firefox scrollbar support */
+[data-bs-theme="dark"] * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--nexus-border) var(--nexus-bg-tertiary);
+}
+
+/* Enhanced shadow system for dark mode */
+[data-bs-theme="dark"] {
+  --nexus-shadow-light: rgba(255, 255, 255, 0.05);
+  --nexus-shadow-medium: rgba(255, 255, 255, 0.1);
+  --nexus-shadow-strong: rgba(255, 255, 255, 0.15);
+  --nexus-shadow-glow: rgba(110, 168, 254, 0.2);
+}
+
+/* Glowing effects for dark mode */
+[data-bs-theme="dark"] .btn-primary {
+  box-shadow: 0 0 10px rgba(110, 168, 254, 0.3);
+}
+
+[data-bs-theme="dark"] .btn-primary:hover {
+  box-shadow: 0 0 20px rgba(110, 168, 254, 0.4);
+}
+
+[data-bs-theme="dark"] .navbar-custom {
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5), 0 0 30px rgba(110, 168, 254, 0.1);
+}
+
+/* Dark mode code blocks and preformatted text */
+[data-bs-theme="dark"] pre,
+[data-bs-theme="dark"] code {
+  background-color: #1a1d23;
+  color: #e6e8ea;
+  border: 1px solid var(--nexus-border);
+}
+
+[data-bs-theme="dark"] .bg-light {
+  background-color: var(--nexus-bg-tertiary) !important;
+}
+
+[data-bs-theme="dark"] .bg-secondary {
+  background-color: var(--nexus-bg-secondary) !important;
+}
+
+/* Dark mode selection highlighting */
+[data-bs-theme="dark"] ::selection {
+  background-color: rgba(110, 168, 254, 0.3);
+  color: white;
+}
+
+[data-bs-theme="dark"] ::-moz-selection {
+  background-color: rgba(110, 168, 254, 0.3);
+  color: white;
+}
+
+/* Enhanced modal backdrop for dark mode */
+[data-bs-theme="dark"] .modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Dark mode placeholder text */
+[data-bs-theme="dark"] .form-control::placeholder {
+  color: var(--nexus-text-muted);
+  opacity: 0.8;
+}
+
+[data-bs-theme="dark"] .form-control:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* Dark mode disabled states */
+[data-bs-theme="dark"] .btn:disabled,
+[data-bs-theme="dark"] .form-control:disabled {
+  background-color: var(--nexus-bg-tertiary);
+  border-color: var(--nexus-border);
+  color: var(--nexus-text-muted);
+  opacity: 0.6;
+}
+
+/* Dark mode table styling */
+[data-bs-theme="dark"] .table {
+  color: var(--nexus-text-primary);
+}
+
+[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > td {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+[data-bs-theme="dark"] .table-hover > tbody > tr:hover > td {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Dark mode alert enhancements */
+[data-bs-theme="dark"] .alert-info {
+  background: linear-gradient(
+    135deg,
+    rgba(110, 168, 254, 0.1) 0%,
+    rgba(124, 58, 237, 0.1) 100%
+  );
+  border-left: 4px solid var(--nexus-primary-light);
+  color: var(--nexus-primary-light);
+}
+
+[data-bs-theme="dark"] .alert-success {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.1) 0%,
+    rgba(21, 128, 61, 0.1) 100%
+  );
+  border-left: 4px solid #22c55e;
+  color: #4ade80;
+}
+
+[data-bs-theme="dark"] .alert-warning {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.1) 0%,
+    rgba(217, 119, 6, 0.1) 100%
+  );
+  border-left: 4px solid #fbbf24;
+  color: #fcd34d;
+}
+
+[data-bs-theme="dark"] .alert-danger {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.1) 0%,
+    rgba(185, 28, 28, 0.1) 100%
+  );
+  border-left: 4px solid #ef4444;
+  color: #f87171;
+}
+
+/* Dark mode badge styling */
+[data-bs-theme="dark"] .badge {
+  color: white;
+}
+
+[data-bs-theme="dark"] .badge.bg-primary {
+  background-color: var(--nexus-primary-light) !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-secondary {
+  background-color: var(--nexus-secondary-light) !important;
+}
+
+/* Dark mode progress bars */
+[data-bs-theme="dark"] .progress {
+  background-color: var(--nexus-bg-tertiary);
+}
+
+[data-bs-theme="dark"] .progress-bar {
+  background: linear-gradient(
+    90deg,
+    var(--nexus-primary-light) 0%,
+    var(--nexus-secondary-light) 100%
+  );
+}
+
+/* Dark mode tooltips */
+[data-bs-theme="dark"] .tooltip .tooltip-inner {
+  background-color: var(--nexus-bg-secondary);
+  color: var(--nexus-text-primary);
+  border: 1px solid var(--nexus-border);
+}
+
+[data-bs-theme="dark"] .tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--nexus-bg-secondary);
+}
+
+[data-bs-theme="dark"] .tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--nexus-bg-secondary);
+}
+
+/* Dark mode popover styling */
+[data-bs-theme="dark"] .popover {
+  background-color: var(--nexus-bg-secondary);
+  border-color: var(--nexus-border);
+}
+
+[data-bs-theme="dark"] .popover-header {
+  background-color: var(--nexus-bg-tertiary);
+  border-bottom-color: var(--nexus-border);
+  color: var(--nexus-text-primary);
+}
+
+[data-bs-theme="dark"] .popover-body {
+  color: var(--nexus-text-primary);
+}
+
+/* Dark mode breadcrumb */
+[data-bs-theme="dark"] .breadcrumb-item + .breadcrumb-item::before {
+  color: var(--nexus-text-muted);
+}
+
+[data-bs-theme="dark"] .breadcrumb-item.active {
+  color: var(--nexus-text-secondary);
+}
+
+/* Dark mode pagination */
+[data-bs-theme="dark"] .page-link {
+  background-color: var(--nexus-bg-secondary);
+  border-color: var(--nexus-border);
+  color: var(--nexus-text-primary);
+}
+
+[data-bs-theme="dark"] .page-link:hover {
+  background-color: var(--nexus-bg-tertiary);
+  border-color: var(--nexus-primary-light);
+  color: var(--nexus-primary-light);
+}
+
+[data-bs-theme="dark"] .page-item.active .page-link {
+  background-color: var(--nexus-primary-light);
+  border-color: var(--nexus-primary-light);
+}
+
+/* Dark mode accordion */
+[data-bs-theme="dark"] .accordion-item {
+  background-color: var(--nexus-bg-secondary);
+  border-color: var(--nexus-border);
+}
+
+[data-bs-theme="dark"] .accordion-header .accordion-button {
+  background-color: var(--nexus-bg-secondary);
+  color: var(--nexus-text-primary);
+}
+
+[data-bs-theme="dark"] .accordion-button:not(.collapsed) {
+  background-color: var(--nexus-bg-tertiary);
+  color: var(--nexus-primary-light);
+}
+
+/* Enhanced dark mode transitions */
+[data-bs-theme="dark"] .fade {
+  transition: opacity 0.4s ease-in-out;
+}
+
+[data-bs-theme="dark"] .collapse {
+  transition: height 0.4s ease-in-out;
+}
+
+/* Dark mode spinner customization */
+[data-bs-theme="dark"] .spinner-border {
+  color: var(--nexus-primary-light);
+}
+
+[data-bs-theme="dark"] .spinner-grow {
+  color: var(--nexus-primary-light);
+}
+
+/* Dark mode close button */
+[data-bs-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Dark mode offcanvas */
+[data-bs-theme="dark"] .offcanvas {
+  background-color: var(--nexus-bg-primary);
+  color: var(--nexus-text-primary);
+}
+
+[data-bs-theme="dark"] .offcanvas-header {
+  border-bottom-color: var(--nexus-border);
+}
+
+/* Dark mode text selection for specific elements */
+[data-bs-theme="dark"] .card ::selection {
+  background-color: rgba(110, 168, 254, 0.2);
+}
+
+[data-bs-theme="dark"] .navbar ::selection {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode print styles */
+@media print {
+  [data-bs-theme="dark"] {
+    --nexus-bg-primary: white !important;
+    --nexus-text-primary: black !important;
+    --nexus-border: #ccc !important;
+  }
+
+  [data-bs-theme="dark"] .navbar-custom,
+  [data-bs-theme="dark"] footer {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* Dark mode high contrast accessibility */
+@media (prefers-contrast: high) {
+  [data-bs-theme="dark"] {
+    --nexus-bg-primary: #000000;
+    --nexus-bg-secondary: #1a1a1a;
+    --nexus-text-primary: #ffffff;
+    --nexus-border: #ffffff;
+    --nexus-primary-light: #66b3ff;
+  }
+}
+
+/* Dark mode reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  [data-bs-theme="dark"] * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Dark mode color scheme for better browser integration */
+[data-bs-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Dark mode system UI elements */
+[data-bs-theme="dark"] input[type="date"],
+[data-bs-theme="dark"] input[type="time"],
+[data-bs-theme="dark"] input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+/* Dark mode custom scrollbar for specific containers */
+[data-bs-theme="dark"] .modal-body,
+[data-bs-theme="dark"] .offcanvas-body {
+  scrollbar-width: thin;
+  scrollbar-color: var(--nexus-border) transparent;
+}
+
+/* Dark mode loading states */
+[data-bs-theme="dark"] .placeholder {
+  background: linear-gradient(
+    90deg,
+    var(--nexus-bg-tertiary) 25%,
+    var(--nexus-bg-secondary) 50%,
+    var(--nexus-bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: placeholder-wave 1.5s linear infinite;
+}
+
+@keyframes placeholder-wave {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Dark mode glass morphism effects */
+[data-bs-theme="dark"] .glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .glass-effect:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Dark mode neon accent effects */
+[data-bs-theme="dark"] .neon-accent {
+  text-shadow: 0 0 5px var(--nexus-primary-light),
+    0 0 10px var(--nexus-primary-light), 0 0 15px var(--nexus-primary-light);
+}
+
+[data-bs-theme="dark"] .neon-border {
+  border: 1px solid var(--nexus-primary-light);
+  box-shadow: 0 0 5px var(--nexus-primary-light),
+    inset 0 0 5px rgba(110, 168, 254, 0.1);
+}
+
+/* Dark mode custom form elements */
+[data-bs-theme="dark"] input[type="range"] {
+  background: transparent;
+}
+
+[data-bs-theme="dark"] input[type="range"]::-webkit-slider-track {
+  background: var(--nexus-bg-tertiary);
+  border-radius: 3px;
+}
+
+[data-bs-theme="dark"] input[type="range"]::-webkit-slider-thumb {
+  background: var(--nexus-primary-light);
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(110, 168, 254, 0.5);
+}
+
+[data-bs-theme="dark"] input[type="range"]::-moz-range-track {
+  background: var(--nexus-bg-tertiary);
+  border-radius: 3px;
+}
+
+[data-bs-theme="dark"] input[type="range"]::-moz-range-thumb {
+  background: var(--nexus-primary-light);
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 0 5px rgba(110, 168, 254, 0.5);
+}
+
+/* Dark mode syntax highlighting for code blocks */
+[data-bs-theme="dark"] .code-keyword {
+  color: #ff79c6;
+}
+
+[data-bs-theme="dark"] .code-string {
+  color: #f1fa8c;
+}
+
+[data-bs-theme="dark"] .code-comment {
+  color: #6272a4;
+  font-style: italic;
+}
+
+[data-bs-theme="dark"] .code-number {
+  color: #bd93f9;
+}
+
+[data-bs-theme="dark"] .code-function {
+  color: #50fa7b;
+}

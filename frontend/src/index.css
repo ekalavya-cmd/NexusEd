@@ -1,4 +1,4 @@
-/* Global styles for NexusEd */
+/* Global styles for NexusEd with Enhanced Theme Support */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 @import "./styles/authStyles.css";
@@ -7,6 +7,9 @@
 @import "./styles/navbarStyles.css";
 @import "./styles/calendarStyles.css";
 @import "./styles/profileStyles.css";
+@import "./styles/debugTheme.css";
+@import "./styles/performanceOptimization.css";
+@import "./styles/advancedDarkMode.css";
 
 :root {
   /* Primary brand colors */
@@ -31,6 +34,11 @@
   --nexus-hover-bg: rgba(13, 110, 253, 0.1);
   --nexus-active-bg: rgba(13, 110, 253, 0.15);
   --nexus-focus-ring: rgba(13, 110, 253, 0.25);
+
+  /* Enhanced shadow system */
+  --nexus-shadow-light: rgba(0, 0, 0, 0.05);
+  --nexus-shadow-medium: rgba(0, 0, 0, 0.1);
+  --nexus-shadow-strong: rgba(0, 0, 0, 0.15);
 }
 
 /* Dark mode color overrides */
@@ -49,6 +57,11 @@
   --nexus-hover-bg: rgba(110, 168, 254, 0.1);
   --nexus-active-bg: rgba(110, 168, 254, 0.15);
   --nexus-focus-ring: rgba(110, 168, 254, 0.25);
+
+  /* Enhanced shadow system for dark mode */
+  --nexus-shadow-light: rgba(255, 255, 255, 0.05);
+  --nexus-shadow-medium: rgba(255, 255, 255, 0.1);
+  --nexus-shadow-strong: rgba(255, 255, 255, 0.15);
 }
 
 /* ===== NAVBAR STYLES ===== */
@@ -62,6 +75,8 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   box-shadow: 0 2px 20px var(--nexus-shadow);
+  contain: layout style;
+  will-change: background-color, transform;
 }
 
 .navbar-custom.scrolled {
@@ -197,6 +212,7 @@ main {
   background-color: var(--nexus-bg-primary);
   min-height: calc(100vh - 200px);
   transition: background-color 0.3s ease;
+  contain: layout;
 }
 
 /* Page containers */
@@ -210,6 +226,8 @@ main {
   border: 1px solid var(--nexus-border);
   box-shadow: 0 2px 10px var(--nexus-shadow);
   transition: all 0.3s ease;
+  contain: layout style;
+  will-change: background-color, transform;
 }
 
 .card:hover {
@@ -258,6 +276,7 @@ main {
   );
   border: none;
   transition: all 0.3s ease;
+  will-change: background-color, transform;
 }
 
 .btn-primary:hover {
@@ -293,134 +312,7 @@ main {
   color: var(--nexus-bg-primary);
 }
 
-/* ===== COMPONENT HARMONIZATION ===== */
-
-/* Alert components */
-.alert {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px var(--nexus-shadow);
-}
-
-.alert-primary {
-  background: linear-gradient(
-    135deg,
-    rgba(13, 110, 253, 0.1) 0%,
-    rgba(102, 16, 242, 0.1) 100%
-  );
-  color: var(--nexus-primary);
-  border-left: 4px solid var(--nexus-primary);
-}
-
-[data-bs-theme="dark"] .alert-primary {
-  background: linear-gradient(
-    135deg,
-    rgba(110, 168, 254, 0.1) 0%,
-    rgba(124, 58, 237, 0.1) 100%
-  );
-  color: var(--nexus-primary-light);
-  border-left-color: var(--nexus-primary-light);
-}
-
-/* Modal components */
-.modal-content {
-  background-color: var(--nexus-bg-primary);
-  border: 1px solid var(--nexus-border);
-  box-shadow: 0 10px 40px var(--nexus-shadow);
-  border-radius: 16px;
-}
-
-.modal-header {
-  border-bottom: 1px solid var(--nexus-border);
-  background: linear-gradient(
-    135deg,
-    rgba(13, 110, 253, 0.05) 0%,
-    rgba(102, 16, 242, 0.05) 100%
-  );
-}
-
-[data-bs-theme="dark"] .modal-content {
-  background-color: var(--nexus-bg-secondary);
-}
-
-[data-bs-theme="dark"] .modal-header {
-  background: linear-gradient(
-    135deg,
-    rgba(110, 168, 254, 0.05) 0%,
-    rgba(124, 58, 237, 0.05) 100%
-  );
-}
-
-/* List group items */
-.list-group-item {
-  background-color: var(--nexus-bg-primary);
-  border: 1px solid var(--nexus-border);
-  color: var(--nexus-text-primary);
-  transition: all 0.3s ease;
-}
-
-.list-group-item:hover {
-  background-color: var(--nexus-hover-bg);
-}
-
-[data-bs-theme="dark"] .list-group-item {
-  background-color: var(--nexus-bg-secondary);
-  border-color: var(--nexus-border);
-}
-
-/* Dropdown menus */
-.dropdown-menu {
-  background-color: var(--nexus-bg-primary);
-  border: 1px solid var(--nexus-border);
-  box-shadow: 0 10px 30px var(--nexus-shadow);
-  border-radius: 12px;
-}
-
-.dropdown-item {
-  color: var(--nexus-text-primary);
-  transition: all 0.3s ease;
-}
-
-.dropdown-item:hover {
-  background-color: var(--nexus-hover-bg);
-  color: var(--nexus-text-primary);
-}
-
-[data-bs-theme="dark"] .dropdown-menu {
-  background-color: var(--nexus-bg-secondary);
-}
-
-/* ===== RESPONSIVE ADJUSTMENTS ===== */
-@media (max-width: 991.98px) {
-  .navbar-collapse {
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    margin-top: 1rem;
-    padding: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-}
-
-@media (max-width: 575.98px) {
-  .footer-main {
-    padding: 2rem 0;
-  }
-
-  .footer-section {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-}
-
-/* ===== ACCESSIBILITY & PERFORMANCE ===== */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
-  }
-}
-
+/* Enhanced accessibility */
 @media (prefers-contrast: high) {
   :root {
     --nexus-border: #000000;
@@ -430,5 +322,21 @@ main {
   [data-bs-theme="dark"] {
     --nexus-border: #ffffff;
     --nexus-shadow: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-collapse {
+    background: rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card {
+    margin: 0.5rem 0;
   }
 }
