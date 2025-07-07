@@ -1,12 +1,14 @@
-/* Enhanced Footer Styles with Dark Mode Optimizations */
+/* Enhanced Footer Styles - FINAL VERSION WITH WORKING SCROLL BUTTON */
 
-/* Main footer styling */
+/* Main footer styling - FIXED FOR SCROLL FUNCTIONALITY */
 footer {
   background: var(--nexus-gradient-primary);
   position: relative;
   overflow: hidden;
-  contain: layout style;
   margin-top: auto;
+  /* CRITICAL: Remove CSS containment that blocks scroll functionality */
+  contain: none !important;
+  isolation: auto !important;
 }
 
 footer::before {
@@ -20,7 +22,8 @@ footer::before {
     repeat-x;
   background-size: 100px 20px;
   opacity: 0.3;
-  will-change: opacity;
+  /* Remove will-change that creates stacking contexts */
+  will-change: auto !important;
 }
 
 .footer-main {
@@ -58,15 +61,34 @@ footer::before {
   margin-bottom: 1rem;
 }
 
+/* ONLY section headings get extending underlines on hover */
+.footer-section h6 {
+  cursor: default;
+  transition: all 0.3s ease;
+}
+
 .footer-section h6::after {
   content: "";
   position: absolute;
   bottom: -5px;
   left: 0;
-  width: 30px;
+  width: 30px; /* Default half-width underline */
   height: 2px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 2px;
+  transition: width 0.3s ease; /* Smooth width transition */
+}
+
+/* HOVER EFFECT: Extend underline when hovering over the section heading */
+.footer-section h6:hover::after {
+  width: 60px; /* Extended underline on hover */
+  background: rgba(255, 255, 255, 0.8); /* Slightly brighter on hover */
+}
+
+/* ENHANCED: Extend underlines when hovering over links within sections */
+.footer-section:hover h6::after {
+  width: 80px; /* Even more extended when hovering over any link in the section */
+  background: rgba(255, 255, 255, 0.9); /* Brighter when section is active */
 }
 
 .footer-section p,
@@ -74,40 +96,37 @@ footer::before {
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* Footer links */
-.footer-link {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  transition: all 0.2s ease;
+/* UPDATED: Footer links with NO underlines - only hover color changes */
+.footer-link,
+.hover-link,
+.footer-links a,
+.footer-links button {
+  color: rgba(255, 255, 255, 0.7) !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
   position: relative;
   display: inline-block;
   padding: 3px 0;
+  background: transparent !important;
+  border: none !important;
+  font-size: inherit;
+  text-align: left;
+  width: auto;
 }
 
-.footer-link:hover {
-  color: #ffffff;
+.footer-link:hover,
+.hover-link:hover,
+.footer-links a:hover,
+.footer-links button:hover {
+  color: #ffffff !important;
   transform: translateX(3px);
-}
-
-.footer-link::after {
-  content: "";
-  position: absolute;
-  width: 0;
-  height: 1px;
-  bottom: 0;
-  left: 0;
-  background-color: #ffffff;
-  transition: all 0.3s ease;
-}
-
-.footer-link:hover::after {
-  width: 100%;
 }
 
 /* Social icons */
 .social-icons {
   display: flex;
   gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .social-icon {
@@ -120,15 +139,16 @@ footer::before {
   background: rgba(255, 255, 255, 0.1);
   color: white;
   transition: all 0.3s ease;
+  text-decoration: none !important;
 }
 
 .social-icon:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-3px);
-  color: white;
+  color: white !important;
 }
 
-/* Quick links */
+/* Quick links styling */
 .quick-links {
   list-style: none;
   padding: 0;
@@ -188,6 +208,112 @@ footer::before {
   opacity: 1;
 }
 
+/* CRITICAL FIX: Back to top button styling that works */
+.back-to-top-btn {
+  /* Force specific styling to override any Bootstrap conflicts */
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  user-select: none !important;
+
+  /* Positioning and z-index */
+  position: relative !important;
+  z-index: 1000 !important;
+
+  /* Transitions */
+  transition: all 0.3s ease !important;
+
+  /* Remove any containment or isolation */
+  contain: none !important;
+  isolation: auto !important;
+
+  /* Font and text */
+  font-family: inherit !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  text-align: center !important;
+
+  /* Override any Bootstrap button styling */
+  box-shadow: none !important;
+  text-decoration: none !important;
+  vertical-align: middle !important;
+}
+
+.back-to-top-btn:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+}
+
+.back-to-top-btn:focus,
+.back-to-top-btn:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3) !important;
+}
+
+.back-to-top-btn:active {
+  transform: translateY(-1px) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Ensure button icon is visible and clickable */
+.back-to-top-btn i {
+  font-size: 14px !important;
+  color: white !important;
+  pointer-events: none !important;
+  display: block !important;
+  width: 14px !important;
+  height: 14px !important;
+  line-height: 14px !important;
+}
+
+/* Dark mode back to top button */
+[data-bs-theme="dark"] .back-to-top-btn {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+[data-bs-theme="dark"] .back-to-top-btn:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Features list styling - NO underlines */
+.footer-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-features li {
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+  transition: all 0.2s ease;
+}
+
+.footer-features li:hover {
+  transform: translateX(3px);
+}
+
+.footer-features li:hover i {
+  opacity: 1;
+}
+
+.footer-features li:hover span {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .footer-section {
@@ -206,26 +332,86 @@ footer::before {
   .footer-bottom {
     text-align: center;
   }
+
+  .footer-bottom .row {
+    flex-direction: column-reverse;
+  }
+
+  .footer-bottom .col-md-6:last-child {
+    margin-bottom: 1rem;
+  }
+
+  /* Adjust underline effects for mobile - ONLY for section headings */
+  .footer-section h6::after {
+    width: 40px; /* Slightly larger base underline on mobile */
+  }
+
+  .footer-section h6:hover::after,
+  .footer-section:hover h6::after {
+    width: 60px; /* Less extension on mobile to fit smaller screens */
+  }
+
+  /* Mobile scroll button adjustments */
+  .back-to-top-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .back-to-top-btn i {
+    font-size: 12px !important;
+  }
 }
 
 /* Accessibility enhancements */
 @media (prefers-contrast: high) {
-  .footer-link {
-    text-decoration: underline;
-  }
-
   .social-icon {
     border: 1px solid white;
   }
+
+  .back-to-top-btn {
+    border: 2px solid white !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+  }
 }
 
-/* Performance optimizations */
+/* Performance optimizations - FIXED FOR DROPDOWN COMPATIBILITY */
 @media (prefers-reduced-motion: reduce) {
-  .footer-link:hover {
+  .footer-link:hover,
+  .hover-link:hover,
+  .footer-links a:hover,
+  .footer-links button:hover {
     transform: none;
   }
 
   .social-icon:hover {
     transform: none;
   }
+
+  .back-to-top-btn:hover {
+    transform: none !important;
+  }
+
+  .footer-features li:hover {
+    transform: none;
+  }
+
+  /* Remove all transitions for reduced motion users */
+  .footer-section h6::after,
+  .back-to-top-btn {
+    transition: none !important;
+  }
+}
+
+/* Additional button reset to ensure it works in all contexts */
+.back-to-top-btn,
+.back-to-top-btn:link,
+.back-to-top-btn:visited,
+.back-to-top-btn:hover,
+.back-to-top-btn:active {
+  text-decoration: none !important;
+  border-style: solid !important;
+  border-width: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }

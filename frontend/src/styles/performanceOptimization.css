@@ -1,11 +1,18 @@
-/* Performance optimizations for theme switching */
+/* Performance optimizations for theme switching - DROPDOWN OVERLAP FIXED */
 
-/* Use CSS containment for better performance */
-.card,
-.modal,
+/* ===== CRITICAL DROPDOWN FIXES ===== */
+/* Modified CSS containment to not block dropdowns */
+.card {
+  contain: style !important; /* Only style containment, not layout */
+}
+
+.modal {
+  contain: style !important; /* Only style containment, not layout */
+}
+
 .navbar-custom,
 .footer {
-  contain: layout style;
+  contain: none !important; /* Remove containment that blocks dropdowns */
 }
 
 /* Optimize transitions for better performance */
@@ -31,12 +38,15 @@
   }
 }
 
-/* GPU acceleration for smooth transitions */
-.navbar-custom,
+/* GPU acceleration for smooth transitions - MODIFIED FOR DROPDOWN COMPATIBILITY */
 .card,
-.btn,
+.btn {
+  will-change: auto !important; /* Remove will-change that creates stacking contexts */
+}
+
+.navbar-custom,
 .modal-content {
-  will-change: background-color, transform;
+  will-change: auto !important; /* Remove will-change that creates stacking contexts */
 }
 
 /* Remove will-change after animations complete */
@@ -44,16 +54,16 @@
   will-change: auto;
 }
 
-/* Reduce reflows during theme changes */
+/* Reduce reflows during theme changes - FIXED FOR DROPDOWNS */
 .main-content,
 .container {
-  contain: layout;
+  contain: none !important; /* Remove containment that blocks dropdowns */
 }
 
-/* Optimize expensive operations */
+/* Optimize expensive operations - MODIFIED FOR DROPDOWN COMPATIBILITY */
 .navbar-custom::before,
 footer::before {
-  will-change: opacity;
+  will-change: auto !important; /* Remove will-change that creates stacking contexts */
 }
 
 /* Batch DOM updates for theme changes */
@@ -65,18 +75,27 @@ footer::before {
   transition-delay: 0s !important;
 }
 
-/* Optimize shadow rendering */
+/* Optimize shadow rendering - MODIFIED FOR DROPDOWN COMPATIBILITY */
 .card,
-.modal-content,
+.modal-content {
+  transform: none !important; /* Remove transform that creates stacking contexts */
+}
+
 .dropdown-menu {
-  transform: translateZ(0); /* Force GPU acceleration */
+  transform: translateZ(
+    0
+  ) !important; /* Only force GPU for dropdowns when needed */
+  z-index: 1070 !important; /* Ensure dropdowns appear above content */
+  contain: none !important; /* Remove containment that blocks positioning */
 }
 
 /* Memory optimization */
 @media (max-width: 768px) {
   /* Reduce animations on mobile for better performance */
   .card:hover {
-    transform: none;
+    transform: translateY(
+      -1px
+    ) !important; /* Minimal transform to avoid stacking issues */
   }
 
   .btn:hover {
@@ -104,9 +123,9 @@ footer {
   }
 }
 
-/* Critical rendering path optimization */
+/* Critical rendering path optimization - MODIFIED FOR DROPDOWN COMPATIBILITY */
 .above-fold {
-  contain: layout style paint;
+  contain: style !important; /* Only style containment, not layout or paint */
 }
 
 /* Optimize font loading */
@@ -115,10 +134,10 @@ footer {
   font-display: swap;
 }
 
-/* Reduce paint area during animations */
+/* Reduce paint area during animations - FIXED FOR DROPDOWN COMPATIBILITY */
 .navbar-custom,
 .footer {
-  isolation: isolate;
+  isolation: auto !important; /* Remove isolation that blocks dropdowns */
 }
 
 /* Optimize expensive CSS operations */
@@ -135,12 +154,18 @@ footer {
 :root {
   /* Group all color properties for atomic updates */
   --theme-transition-duration: 0.3s;
+
+  /* CRITICAL: Override Bootstrap z-index for dropdown compatibility */
+  --bs-zindex-dropdown: 1070 !important;
+  --bs-zindex-sticky: 1065 !important;
+  --bs-zindex-modal: 1080 !important;
+  --bs-zindex-modal-backdrop: 1075 !important;
 }
 
-/* Performance monitoring hooks */
+/* Performance monitoring hooks - FIXED FOR DROPDOWN COMPATIBILITY */
 .perf-monitor {
   /* Use for performance tracking elements */
-  contain: strict;
+  contain: style !important; /* Only style containment */
 }
 
 /* Optimize for high refresh rate displays */
@@ -174,13 +199,23 @@ footer {
   color-scheme: light;
 }
 
-/* Layer management for better compositing */
-.navbar-custom,
-.modal,
+/* Layer management for better compositing - FIXED FOR DROPDOWN COMPATIBILITY */
+.navbar-custom {
+  z-index: 1060 !important; /* Explicit z-index for navbar */
+  position: sticky !important; /* Change from relative to sticky */
+  isolation: auto !important; /* Remove isolation that blocks dropdowns */
+}
+
+.modal {
+  z-index: 1080 !important; /* Explicit z-index for modals */
+  position: fixed;
+  isolation: auto !important;
+}
+
 .dropdown-menu {
-  z-index: var(--bs-zindex-sticky);
-  position: relative;
-  isolation: isolate;
+  z-index: 1070 !important; /* Explicit z-index for dropdowns */
+  position: absolute !important;
+  isolation: auto !important; /* Remove isolation that blocks positioning */
 }
 
 /* Optimize scrolling performance */
@@ -202,4 +237,40 @@ img {
 
 [data-bs-theme="dark"] img:not(.preserve-colors) {
   filter: brightness(0.9);
+}
+
+/* ===== ADDITIONAL DROPDOWN COMPATIBILITY FIXES ===== */
+
+/* Ensure navbar dropdowns work properly */
+.navbar-custom .dropdown-menu {
+  z-index: 1075 !important; /* Higher than navbar */
+  top: calc(100% + 0.25rem) !important;
+  margin-top: 0 !important;
+}
+
+/* Ensure user and notification dropdowns position correctly */
+.navbar-custom .notification-btn + .dropdown-menu,
+.navbar-custom .user-dropdown .dropdown-menu {
+  right: 0 !important;
+  left: auto !important;
+}
+
+/* Container fixes */
+.container,
+.container-fluid,
+.App {
+  contain: none !important; /* Remove all containment that could block dropdowns */
+  isolation: auto !important;
+  position: static;
+  z-index: auto;
+}
+
+/* Toast positioning to avoid dropdown conflicts */
+.toast-container {
+  z-index: 1065 !important; /* Between navbar and dropdowns */
+}
+
+/* Modal backdrop positioning */
+.modal-backdrop {
+  z-index: 1075 !important; /* Between dropdowns and modals */
 }

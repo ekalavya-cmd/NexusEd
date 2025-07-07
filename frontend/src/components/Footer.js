@@ -11,11 +11,55 @@ function Footer() {
 
   const currentYear = new Date().getFullYear();
 
+  // ROOT CAUSE FIX: The scroll issue is caused by CSS containment
+  // This version forces scroll without containment interference
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    console.log("ScrollToTop function called");
+
+    // Get current scroll position
+    const currentScroll =
+      window.pageYOffset ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
+    console.log("Current scroll position:", currentScroll);
+
+    if (currentScroll === 0) {
+      console.log("Already at top of page!");
+      return;
+    }
+
+    // Method 1: Force immediate scroll first (as fallback)
+    try {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      console.log("Immediate scroll executed");
+    } catch (error) {
+      console.log("Immediate scroll failed:", error);
+    }
+
+    // Method 2: Then apply smooth scroll for visual effect
+    try {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+      console.log("Smooth scroll initiated");
+    } catch (error) {
+      console.log("Smooth scroll failed:", error);
+
+      // Method 3: Manual smooth scroll animation
+      const smoothScrollToTop = () => {
+        const c = document.documentElement.scrollTop || document.body.scrollTop;
+        if (c > 0) {
+          window.requestAnimationFrame(smoothScrollToTop);
+          window.scrollTo(0, c - c / 8);
+        }
+      };
+      smoothScrollToTop();
+    }
   };
 
   return (
@@ -25,7 +69,7 @@ function Footer() {
           <div className="container">
             <Row className="g-4">
               {/* Brand Section */}
-              <Col lg={4} md={6}>
+              <Col lg={3} md={6}>
                 <div className="footer-section">
                   <div className="d-flex align-items-center mb-3">
                     <i className="fas fa-graduation-cap me-2 fs-2"></i>
@@ -36,53 +80,79 @@ function Footer() {
                     sharing, and community building. Join thousands of students
                     already learning together.
                   </p>
-                  <div className="social-links">
-                    <h6 className="mb-2">Connect With Us</h6>
-                    <div className="d-flex gap-2">
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        className="social-btn"
-                        href="https://github.com/nexused"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <i className="fab fa-github"></i>
-                      </Button>
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        className="social-btn"
-                        href="https://twitter.com/nexused"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <i className="fab fa-twitter"></i>
-                      </Button>
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        className="social-btn"
-                        href="https://linkedin.com/company/nexused"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <i className="fab fa-linkedin"></i>
-                      </Button>
-                      <Button
-                        variant="outline-light"
-                        size="sm"
-                        className="social-btn"
-                        href="mailto:support@nexused.com"
-                      >
-                        <i className="fas fa-envelope"></i>
-                      </Button>
-                    </div>
-                  </div>
                 </div>
               </Col>
 
-              {/* Quick Links */}
+              {/* Connect With Us Section (with Social Icons) */}
+              <Col lg={3} md={6}>
+                <div className="footer-section">
+                  <h6 className="mb-3 fw-bold">Connect With Us</h6>
+
+                  {/* Social Icons */}
+                  <div className="social-icons mb-4">
+                    <a
+                      href="https://facebook.com/nexused"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-icon"
+                      title="Follow us on Facebook"
+                    >
+                      <i className="fab fa-facebook-f"></i>
+                    </a>
+                    <a
+                      href="https://twitter.com/nexused"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-icon"
+                      title="Follow us on Twitter"
+                    >
+                      <i className="fab fa-twitter"></i>
+                    </a>
+                    <a
+                      href="https://instagram.com/nexused"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-icon"
+                      title="Follow us on Instagram"
+                    >
+                      <i className="fab fa-instagram"></i>
+                    </a>
+                    <a
+                      href="https://linkedin.com/company/nexused"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="social-icon"
+                      title="Connect with us on LinkedIn"
+                    >
+                      <i className="fab fa-linkedin-in"></i>
+                    </a>
+                  </div>
+
+                  {/* Contact Links */}
+                  <ul className="list-unstyled footer-links">
+                    <li>
+                      <a
+                        href="mailto:hello@nexused.com"
+                        className="text-white-50 text-decoration-none hover-link"
+                      >
+                        <i className="fas fa-envelope me-2"></i>
+                        Contact Us
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="tel:+1234567890"
+                        className="text-white-50 text-decoration-none hover-link"
+                      >
+                        <i className="fas fa-phone me-2"></i>
+                        Call Support
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </Col>
+
+              {/* Quick Links Section (Navigation Links) */}
               <Col lg={2} md={6}>
                 <div className="footer-section">
                   <h6 className="mb-3 fw-bold">Quick Links</h6>
@@ -147,8 +217,8 @@ function Footer() {
                 </div>
               </Col>
 
-              {/* Features */}
-              <Col lg={3} md={6}>
+              {/* Features Section */}
+              <Col lg={2} md={6}>
                 <div className="footer-section">
                   <h6 className="mb-3 fw-bold">Features</h6>
                   <ul className="list-unstyled footer-features">
@@ -176,8 +246,8 @@ function Footer() {
                 </div>
               </Col>
 
-              {/* Support & Info */}
-              <Col lg={3} md={6}>
+              {/* Support & Info Section */}
+              <Col lg={2} md={6}>
                 <div className="footer-section">
                   <h6 className="mb-3 fw-bold">Support & Info</h6>
                   <ul className="list-unstyled footer-links">
@@ -241,20 +311,26 @@ function Footer() {
                 </p>
               </Col>
               <Col md={6} className="text-md-end">
-                <div className="d-flex justify-content-md-end justify-content-start align-items-center gap-3">
+                <div className="d-flex justify-content-md-end justify-content-center align-items-center gap-3">
                   <span className="text-white-50 small">
                     <i className="fas fa-code me-1"></i>
                     Version 1.0.0
                   </span>
-                  <Button
-                    variant="outline-light"
-                    size="sm"
-                    onClick={scrollToTop}
+                  {/* ROOT CAUSE FIX: Direct button without Bootstrap component wrapper */}
+                  <button
+                    type="button"
                     className="back-to-top-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Back to top button clicked directly");
+                      scrollToTop();
+                    }}
                     title="Back to top"
+                    aria-label="Scroll to top of page"
                   >
-                    <i className="fas fa-arrow-up"></i>
-                  </Button>
+                    <i className="fas fa-arrow-up" aria-hidden="true"></i>
+                  </button>
                 </div>
               </Col>
             </Row>
@@ -315,7 +391,8 @@ function Footer() {
                 <i className="fas fa-share-alt text-primary me-2"></i>
                 <strong>Resource Sharing</strong>
                 <p className="mb-0 small text-muted">
-                  Share notes, documents, and study materials with your peers.
+                  Share notes, documents, and learning materials with your
+                  peers.
                 </p>
               </div>
             </Col>
@@ -324,13 +401,17 @@ function Footer() {
                 <i className="fas fa-comments text-primary me-2"></i>
                 <strong>Real-time Chat</strong>
                 <p className="mb-0 small text-muted">
-                  Communicate instantly with group members through integrated
-                  chat.
+                  Communicate with group members through integrated messaging.
                 </p>
               </div>
             </Col>
           </Row>
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAbout(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
 
       {/* Privacy Policy Modal */}
@@ -346,54 +427,57 @@ function Footer() {
             Privacy Policy
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ maxHeight: "60vh", overflowY: "auto" }}>
-          <div className="privacy-content">
+        <Modal.Body>
+          <div className="mb-4">
             <p>
-              <strong>Last updated: January 2025</strong>
+              <strong>Last updated:</strong> {new Date().toLocaleDateString()}
             </p>
-
-            <h6>Information We Collect</h6>
             <p>
-              We collect information you provide directly to us, such as when
-              you create an account, join study groups, or contact us for
-              support. This may include your name, email address, profile
-              information, and content you post.
-            </p>
-
-            <h6>How We Use Your Information</h6>
-            <ul>
-              <li>To provide and maintain our service</li>
-              <li>To facilitate study group interactions</li>
-              <li>To send you important updates and notifications</li>
-              <li>To improve our platform and user experience</li>
-            </ul>
-
-            <h6>Information Sharing</h6>
-            <p>
-              We do not sell, trade, or otherwise transfer your personal
-              information to third parties. Information shared within study
-              groups is visible to other group members as part of the
-              collaborative learning experience.
-            </p>
-
-            <h6>Data Security</h6>
-            <p>
-              We implement appropriate security measures to protect your
-              personal information against unauthorized access, alteration,
-              disclosure, or destruction.
-            </p>
-
-            <h6>Contact Us</h6>
-            <p>
-              If you have any questions about this Privacy Policy, please
-              contact us at
-              <a href="mailto:privacy@nexused.com" className="text-primary">
-                {" "}
-                privacy@nexused.com
-              </a>
+              At NexusEd, we take your privacy seriously. This Privacy Policy
+              explains how we collect, use, and protect your personal
+              information when you use our platform.
             </p>
           </div>
+
+          <h5>Information We Collect</h5>
+          <p>
+            We collect information you provide directly to us, such as when you
+            create an account, join study groups, or contact us for support.
+            This may include your name, email address, and profile information.
+          </p>
+
+          <h5>How We Use Your Information</h5>
+          <p>
+            We use the information we collect to provide, maintain, and improve
+            our services, facilitate study group connections, and communicate
+            with you about your account and our services.
+          </p>
+
+          <h5>Information Sharing</h5>
+          <p>
+            We do not sell, trade, or otherwise transfer your personal
+            information to third parties without your consent, except as
+            described in this policy or as required by law.
+          </p>
+
+          <h5>Data Security</h5>
+          <p>
+            We implement appropriate security measures to protect your personal
+            information against unauthorized access, alteration, disclosure, or
+            destruction.
+          </p>
+
+          <h5>Contact Us</h5>
+          <p>
+            If you have any questions about this Privacy Policy, please contact
+            us at <a href="mailto:privacy@nexused.com">privacy@nexused.com</a>.
+          </p>
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowPrivacy(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
 
       {/* Terms of Service Modal */}
@@ -409,56 +493,63 @@ function Footer() {
             Terms of Service
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ maxHeight: "60vh", overflowY: "auto" }}>
-          <div className="terms-content">
+        <Modal.Body>
+          <div className="mb-4">
             <p>
-              <strong>Last updated: January 2025</strong>
+              <strong>Last updated:</strong> {new Date().toLocaleDateString()}
             </p>
-
-            <h6>Acceptance of Terms</h6>
             <p>
-              By accessing and using NexusEd, you accept and agree to be bound
-              by the terms and provision of this agreement.
-            </p>
-
-            <h6>Use License</h6>
-            <p>
-              Permission is granted to temporarily use NexusEd for personal,
-              non-commercial educational purposes. This is the grant of a
-              license, not a transfer of title.
-            </p>
-
-            <h6>User Conduct</h6>
-            <ul>
-              <li>Use the platform respectfully and constructively</li>
-              <li>Do not share inappropriate or harmful content</li>
-              <li>Respect other users' privacy and intellectual property</li>
-              <li>Do not attempt to disrupt or harm the platform</li>
-            </ul>
-
-            <h6>Content Guidelines</h6>
-            <p>
-              Users are responsible for the content they post. We reserve the
-              right to remove content that violates our community guidelines or
-              terms of service.
-            </p>
-
-            <h6>Account Termination</h6>
-            <p>
-              We may terminate or suspend your account if you violate these
-              terms or engage in behavior that harms the community.
-            </p>
-
-            <h6>Contact Information</h6>
-            <p>
-              Questions about the Terms of Service should be sent to us at
-              <a href="mailto:legal@nexused.com" className="text-primary">
-                {" "}
-                legal@nexused.com
-              </a>
+              Welcome to NexusEd. These Terms of Service govern your use of our
+              platform and services.
             </p>
           </div>
+
+          <h5>Acceptance of Terms</h5>
+          <p>
+            By accessing and using NexusEd, you accept and agree to be bound by
+            the terms and provision of this agreement.
+          </p>
+
+          <h5>User Responsibilities</h5>
+          <p>
+            You are responsible for maintaining the confidentiality of your
+            account credentials and for all activities that occur under your
+            account. You agree to use the platform in a respectful and lawful
+            manner.
+          </p>
+
+          <h5>Content Guidelines</h5>
+          <p>
+            Users must not post content that is offensive, harmful, or violates
+            any laws. We reserve the right to remove content that violates these
+            guidelines.
+          </p>
+
+          <h5>Intellectual Property</h5>
+          <p>
+            The platform and its original content, features, and functionality
+            are owned by NexusEd and are protected by international copyright,
+            trademark, and other intellectual property laws.
+          </p>
+
+          <h5>Limitation of Liability</h5>
+          <p>
+            NexusEd shall not be liable for any indirect, incidental, special,
+            consequential, or punitive damages resulting from your use of the
+            platform.
+          </p>
+
+          <h5>Contact Information</h5>
+          <p>
+            For questions about these Terms of Service, please contact us at{" "}
+            <a href="mailto:legal@nexused.com">legal@nexused.com</a>.
+          </p>
         </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowTerms(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
       </Modal>
     </>
   );

@@ -1,4 +1,4 @@
-/* Global styles for NexusEd with Enhanced Theme Support */
+/* Global styles for NexusEd with Enhanced Theme Support - SCROLL BUTTON FIXED */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 @import "./styles/authStyles.css";
@@ -11,7 +11,18 @@
 @import "./styles/performanceOptimization.css";
 @import "./styles/advancedDarkMode.css";
 
+/* ===== CRITICAL SCROLL BUTTON FIX ===== */
+/* Override Bootstrap z-index variables for proper dropdown hierarchy */
 :root {
+  /* Bootstrap z-index overrides for dropdown fix */
+  --bs-zindex-dropdown: 1070 !important;
+  --bs-zindex-sticky: 1065 !important;
+  --bs-zindex-fixed: 1060 !important;
+  --bs-zindex-modal-backdrop: 1055 !important;
+  --bs-zindex-modal: 1080 !important;
+  --bs-zindex-popover: 1075 !important;
+  --bs-zindex-tooltip: 1085 !important;
+
   /* Primary brand colors */
   --nexus-primary: #0d6efd;
   --nexus-primary-dark: #0b5ed7;
@@ -94,7 +105,7 @@
   );
 }
 
-/* Base styles */
+/* Base styles - CRITICAL SCROLL FIX */
 html,
 body {
   height: 100%;
@@ -106,6 +117,22 @@ body {
   background-color: var(--nexus-bg-primary);
   color: var(--nexus-text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
+  /* CRITICAL: Remove CSS containment that blocks scroll functionality */
+  contain: none !important;
+  overflow-x: hidden;
+  /* CRITICAL: Ensure scroll behavior works */
+  scroll-behavior: smooth;
+}
+
+/* Root container fixes */
+#root {
+  height: 100%;
+  /* CRITICAL: Remove containment that blocks scroll */
+  contain: none !important;
+  position: static;
+  z-index: auto;
+  /* Ensure smooth scrolling works */
+  scroll-behavior: inherit;
 }
 
 /* Global link styles */
@@ -128,28 +155,53 @@ a:hover {
   color: var(--nexus-primary);
 }
 
-/* ===== MAIN CONTENT STYLES ===== */
+/* ===== MAIN CONTENT STYLES - SCROLL FIXED ===== */
 main {
   background-color: var(--nexus-bg-primary);
   min-height: calc(100vh - 200px);
   transition: background-color 0.3s ease;
-  contain: layout;
+  /* CRITICAL: Remove CSS containment that blocks scroll */
+  contain: none !important;
+  position: static;
+  z-index: auto;
+  isolation: auto !important;
 }
 
-/* Card components */
+/* ===== APP CONTAINER - SCROLL FIXED ===== */
+.App {
+  min-height: 100vh;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  /* CRITICAL: Remove CSS containment that blocks scroll */
+  contain: none !important;
+  position: static;
+  z-index: auto;
+  isolation: auto !important;
+}
+
+/* Card components - MODIFIED FOR SCROLL COMPATIBILITY */
 .card {
   background-color: var(--nexus-bg-primary);
   border: 1px solid var(--nexus-border);
   box-shadow: 0 2px 10px var(--nexus-shadow);
   transition: all 0.3s ease;
-  contain: layout style;
-  will-change: background-color, transform;
   border-radius: 0.5rem;
   overflow: hidden;
+  /* CRITICAL: Only style containment, not layout */
+  contain: style !important;
+  position: relative;
+  z-index: auto;
+  /* Remove stacking context creators */
+  will-change: auto !important;
+  isolation: auto !important;
 }
 
 .card:hover {
   box-shadow: 0 4px 20px var(--nexus-shadow);
+  /* Reduced transform to prevent stacking context issues */
+  transform: translateY(-1px) !important;
 }
 
 [data-bs-theme="dark"] .card {
@@ -184,12 +236,13 @@ main {
   box-shadow: 0 0 0 0.2rem var(--nexus-focus-ring);
 }
 
-/* Buttons */
+/* Buttons - SCROLL COMPATIBLE */
 .btn-primary {
   background: var(--nexus-gradient-primary);
   border: none;
   transition: all 0.3s ease;
-  will-change: background-color, transform;
+  /* Remove stacking context creator */
+  will-change: auto !important;
 }
 
 .btn-primary:hover {
@@ -219,6 +272,34 @@ main {
   background: var(--nexus-primary-light);
   border-color: var(--nexus-primary-light);
   color: var(--nexus-bg-primary);
+}
+
+/* ===== CONTAINER FIXES FOR SCROLL ===== */
+.container,
+.container-fluid {
+  /* Remove CSS containment that blocks scroll */
+  contain: none !important;
+  position: static;
+  z-index: auto;
+  isolation: auto !important;
+}
+
+/* ===== CRITICAL SCROLL BUTTON OVERRIDES ===== */
+/* Ensure scroll functionality works everywhere */
+* {
+  /* Allow scroll behavior to work properly */
+  scroll-behavior: smooth;
+}
+
+/* Override any performance optimizations that break scroll */
+.main-content,
+.App,
+footer,
+.footer {
+  /* Force removal of containment */
+  contain: none !important;
+  isolation: auto !important;
+  will-change: auto !important;
 }
 
 /* Enhanced accessibility */

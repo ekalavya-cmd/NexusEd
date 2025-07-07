@@ -1,10 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import {
-  Link,
-  NavLink as RouterNavLink,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { Link, NavLink as RouterNavLink, useNavigate } from "react-router-dom";
 import {
   Navbar as BsNavbar,
   Nav,
@@ -17,7 +12,6 @@ import { AuthContext } from "../context/AuthContext";
 function Navbar() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
   const [expanded, setExpanded] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -57,94 +51,38 @@ function Navbar() {
   useEffect(() => {
     const startTime = performance.now();
     const theme = darkMode ? "dark" : "light";
-
-    // Apply theme to DOM
     document.documentElement.setAttribute("data-bs-theme", theme);
-
-    // Store preference
     localStorage.setItem("darkMode", darkMode.toString());
 
-    // Update debug attribute in development
-    if (process.env.NODE_ENV === "development") {
-      document.documentElement.setAttribute("data-theme-debug", theme);
-    }
-
+    // Performance logging for theme switching
     const endTime = performance.now();
-    const switchDuration = endTime - startTime;
-
-    // Log theme change to file in development
-    if (process.env.NODE_ENV === "development") {
-      logThemeChange(theme, switchDuration);
-
-      setTimeout(() => {
-        const { validateThemeConsistency } = require("../utils/themeValidator");
-        validateThemeConsistency();
-      }, 100);
-    }
+    console.log(`Theme switch took ${endTime - startTime} milliseconds`);
   }, [darkMode]);
-
-  // Enhanced theme change logging
-  const logThemeChange = (theme, duration) => {
-    const logEntry = {
-      timestamp: new Date().toISOString(),
-      theme: theme,
-      duration: `${duration.toFixed(2)}ms`,
-      userAgent: navigator.userAgent,
-      url: window.location.pathname,
-    };
-
-    console.log(
-      `[${logEntry.timestamp}] Theme changed to: ${theme} (${logEntry.duration})`
-    );
-
-    // Store logs in sessionStorage for debugging
-    const logs = JSON.parse(sessionStorage.getItem("themeLogs") || "[]");
-    logs.push(logEntry);
-    sessionStorage.setItem("themeLogs", JSON.stringify(logs.slice(-50))); // Keep last 50 logs
-  };
-
-  // Listen for theme changes from other tabs
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === "darkMode") {
-        const newDarkMode = e.newValue === "true";
-        if (newDarkMode !== darkMode) {
-          setDarkMode(newDarkMode);
-        }
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, [darkMode]);
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setExpanded(false);
-  }, [location.pathname]);
 
   const toggleDarkMode = () => {
-    setDarkMode((prevMode) => !prevMode);
+    setDarkMode(!darkMode);
   };
 
-  const markNotificationAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === id ? { ...notif, unread: false } : notif
+  const markNotificationAsRead = (notificationId) => {
+    setNotifications((prevNotifications) =>
+      prevNotifications.map((notif) =>
+        notif.id === notificationId ? { ...notif, unread: false } : notif
       )
     );
   };
 
+  // FIXED: Improved logout with immediate UI updates
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
+      // Start logout process
       await logout();
-      // Add a delay to show the logout animation
-      setTimeout(() => {
-        navigate("/login");
-        // Reset state after successful logout
-        setIsLoggingOut(false);
-      }, 1000);
+
+      // Navigate immediately without delay for better UX
+      navigate("/login");
+
+      // Reset state after navigation
+      setIsLoggingOut(false);
     } catch (error) {
       console.error("Logout failed:", error);
       setIsLoggingOut(false);
@@ -153,14 +91,19 @@ function Navbar() {
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
-  // Custom dropdown toggle components to fix positioning issues
+  // IMPROVED Custom dropdown toggle components to prevent overlap
   const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     <button
       className="notification-btn position-relative"
       ref={ref}
       onClick={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         onClick(e);
+      }}
+      style={{
+        position: "relative",
+        zIndex: 1031,
       }}
     >
       {children}
@@ -173,7 +116,12 @@ function Navbar() {
       ref={ref}
       onClick={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         onClick(e);
+      }}
+      style={{
+        position: "relative",
+        zIndex: 1031,
       }}
     >
       {children}
@@ -188,7 +136,7 @@ function Navbar() {
     >
       <Container>
         {/* Brand */}
-        <Link to="/" className="brand-logo">
+        <Link to="/" className="brand-logo" onFocus={(e) => e.target.blur()}>
           <div className="logo-container">
             <i className="fas fa-graduation-cap logo-icon"></i>
           </div>
@@ -199,6 +147,7 @@ function Navbar() {
         <BsNavbar.Toggle
           aria-controls="basic-navbar-nav"
           onClick={() => setExpanded(!expanded)}
+          onFocus={(e) => e.target.blur()}
         >
           <span className="navbar-toggler-icon"></span>
         </BsNavbar.Toggle>
@@ -210,6 +159,7 @@ function Navbar() {
               className={({ isActive }) =>
                 `nav-link nav-link-custom ${isActive ? "active" : ""}`
               }
+              onFocus={(e) => e.target.blur()}
             >
               <i className="fas fa-home"></i>
               Home
@@ -220,6 +170,7 @@ function Navbar() {
               className={({ isActive }) =>
                 `nav-link nav-link-custom ${isActive ? "active" : ""}`
               }
+              onFocus={(e) => e.target.blur()}
             >
               <i className="fas fa-users"></i>
               Study Groups
@@ -231,6 +182,7 @@ function Navbar() {
                 className={({ isActive }) =>
                   `nav-link nav-link-custom ${isActive ? "active" : ""}`
                 }
+                onFocus={(e) => e.target.blur()}
               >
                 <i className="fas fa-calendar-alt"></i>
                 Calendar
@@ -244,6 +196,7 @@ function Navbar() {
             <button
               className="theme-toggle-btn"
               onClick={toggleDarkMode}
+              onFocus={(e) => e.target.blur()}
               title={`Switch to ${darkMode ? "light" : "dark"} mode`}
             >
               <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
@@ -251,8 +204,8 @@ function Navbar() {
 
             {user ? (
               <>
-                {/* Notifications - Using custom toggle */}
-                <Dropdown align="end">
+                {/* Notifications - Using improved custom toggle with better positioning */}
+                <Dropdown align="end" className="position-relative">
                   <Dropdown.Toggle
                     as={CustomToggle}
                     id="dropdown-notifications"
@@ -265,7 +218,14 @@ function Navbar() {
                     )}
                   </Dropdown.Toggle>
 
-                  <Dropdown.Menu>
+                  <Dropdown.Menu
+                    style={{
+                      marginTop: "0.25rem",
+                      zIndex: 1055,
+                      minWidth: "280px",
+                      maxWidth: "350px",
+                    }}
+                  >
                     <Dropdown.Header>Notifications</Dropdown.Header>
                     {notifications.length === 0 ? (
                       <Dropdown.Item disabled>
@@ -278,6 +238,7 @@ function Navbar() {
                           onClick={() =>
                             markNotificationAsRead(notification.id)
                           }
+                          onFocus={(e) => e.target.blur()}
                           className={`notification-item ${
                             notification.unread ? "unread" : ""
                           }`}
@@ -299,14 +260,20 @@ function Navbar() {
                       ))
                     )}
                     <Dropdown.Divider />
-                    <Dropdown.Item className="text-center">
+                    <Dropdown.Item
+                      className="text-center"
+                      onFocus={(e) => e.target.blur()}
+                    >
                       <small>See all notifications</small>
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
 
-                {/* User Dropdown - Using custom toggle */}
-                <Dropdown align="end" className="user-dropdown">
+                {/* User Dropdown - Using improved custom toggle with better positioning */}
+                <Dropdown
+                  align="end"
+                  className="user-dropdown position-relative"
+                >
                   <Dropdown.Toggle as={UserToggle} id="dropdown-user">
                     {user.profilePicture ? (
                       <img
@@ -322,18 +289,33 @@ function Navbar() {
                     <span>{user.username || user.email.split("@")[0]}</span>
                   </Dropdown.Toggle>
 
-                  <Dropdown.Menu>
-                    <Dropdown.Item as={Link} to="/profile">
+                  <Dropdown.Menu
+                    style={{
+                      marginTop: "0.25rem",
+                      zIndex: 1055,
+                      minWidth: "200px",
+                    }}
+                  >
+                    <Dropdown.Item
+                      as={Link}
+                      to="/profile"
+                      onFocus={(e) => e.target.blur()}
+                    >
                       <i className="fas fa-user"></i>
                       Profile
                     </Dropdown.Item>
-                    <Dropdown.Item as={Link} to="/settings">
+                    <Dropdown.Item
+                      as={Link}
+                      to="/settings"
+                      onFocus={(e) => e.target.blur()}
+                    >
                       <i className="fas fa-cog"></i>
                       Settings
                     </Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item
                       onClick={handleLogout}
+                      onFocus={(e) => e.target.blur()}
                       className={`logout-btn ${
                         isLoggingOut ? "logging-out" : ""
                       }`}
@@ -360,11 +342,22 @@ function Navbar() {
                 </Dropdown>
               </>
             ) : (
+              /* FIXED: Consistent auth button styling with navbar elements */
               <div className="auth-buttons">
-                <Link to="/login" className="btn btn-outline-light btn-sm">
+                <Link
+                  to="/login"
+                  className="auth-btn auth-btn-login"
+                  onFocus={(e) => e.target.blur()}
+                >
+                  <i className="fas fa-sign-in-alt"></i>
                   Login
                 </Link>
-                <Link to="/register" className="btn btn-light btn-sm">
+                <Link
+                  to="/register"
+                  className="auth-btn auth-btn-register"
+                  onFocus={(e) => e.target.blur()}
+                >
+                  <i className="fas fa-user-plus"></i>
                   Register
                 </Link>
               </div>

@@ -1,4 +1,4 @@
-/* Final Refined Navbar Styles */
+/* Final Refined Navbar Styles - CONSISTENT AUTH BUTTON STYLING */
 
 /* Main navbar styling */
 .navbar-custom {
@@ -10,8 +10,11 @@
   height: 64px;
   display: flex;
   align-items: center;
-  position: relative; /* Important for dropdown positioning */
-  z-index: 1030; /* Ensure navbar is above other elements */
+  position: sticky;
+  top: 0;
+  z-index: 1060 !important;
+  contain: none !important;
+  isolation: auto !important;
 }
 
 .navbar-custom .container {
@@ -32,13 +35,18 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Brand logo - NO rotation effect */
+/* Brand logo - NO rotation effect, NO blue outline */
 .brand-logo {
   text-decoration: none !important;
   margin-right: 3rem;
   display: flex;
   align-items: center;
   height: 100%;
+}
+
+.brand-logo:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .logo-container {
@@ -50,7 +58,6 @@
   align-items: center;
   justify-content: center;
   margin-right: 0.75rem;
-  /* No transition needed since we're removing the rotation */
 }
 
 .brand-text {
@@ -72,11 +79,11 @@
   gap: 1.5rem;
 }
 
-/* Navigation links - with underline hover effect instead of box */
+/* Navigation links - FIXED UNDERLINE STYLING LIKE FOOTER */
 .nav-link-custom {
   color: rgba(255, 255, 255, 0.9) !important;
   position: relative;
-  padding: 0.5rem 0; /* Removed horizontal padding */
+  padding: 0.5rem 0;
   font-weight: 500;
   font-size: 0.95rem;
   letter-spacing: 0.01em;
@@ -84,7 +91,21 @@
   align-items: center;
   height: 40px;
   transition: all 0.25s ease;
-  background: transparent !important; /* Ensure no background on hover */
+  background: transparent !important;
+  border: none !important;
+  text-decoration: none !important;
+}
+
+/* COMPLETELY REMOVE ALL FOCUS OUTLINES AND BLUE BOXES */
+.nav-link-custom:focus,
+.nav-link-custom:focus-visible,
+.nav-link-custom:active,
+.nav-link-custom:visited {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .nav-link-custom i {
@@ -93,36 +114,41 @@
   opacity: 0.9;
 }
 
-/* Underline hover effect - similar to footer */
+/* FIXED: Half underline for active state, extending on hover (like footer) */
 .nav-link-custom::after {
   content: "";
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 0; /* Start with zero width */
   height: 2px;
   background: white;
   transition: width 0.3s ease;
   opacity: 0.8;
+  width: 0;
 }
 
+/* Active link - show HALF underline (like footer headings) */
+.nav-link-custom.active::after {
+  width: 50%;
+}
+
+/* Hover effect - extend underline to full width */
 .nav-link-custom:hover::after {
-  width: 100%; /* Expand to full width on hover */
+  width: 100%;
 }
 
-.nav-link-custom:hover {
-  color: white !important;
-  transform: translateY(-1px);
-}
-
-/* Active link - always show underline */
+/* Active link styles */
 .nav-link-custom.active {
   color: white !important;
   font-weight: 600;
+  background: transparent !important;
 }
 
-.nav-link-custom.active::after {
-  width: 100%; /* Full width for active link */
+/* Hover styles */
+.nav-link-custom:hover {
+  color: white !important;
+  transform: translateY(-1px);
+  background: transparent !important;
 }
 
 /* Right side elements */
@@ -132,11 +158,11 @@
   gap: 1rem;
 }
 
-/* Theme toggle and notification buttons - MATCHED SIZES */
+/* Theme toggle and notification buttons - REMOVE BLUE OUTLINE */
 .theme-toggle-btn,
 .notification-btn {
-  width: 34px; /* Matched size */
-  height: 34px; /* Matched size */
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,7 +172,17 @@
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
-  font-size: 0.85rem; /* Consistent icon size */
+  font-size: 0.85rem;
+  position: relative;
+  z-index: 1061;
+}
+
+.theme-toggle-btn:focus,
+.theme-toggle-btn:focus-visible,
+.notification-btn:focus,
+.notification-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .theme-toggle-btn:hover,
@@ -160,7 +196,7 @@
   transform: translateY(0);
 }
 
-/* User dropdown */
+/* User dropdown - REMOVE BLUE OUTLINE */
 .user-dropdown .dropdown-toggle {
   display: flex;
   align-items: center;
@@ -173,6 +209,14 @@
   color: white;
   transition: all 0.2s ease;
   cursor: pointer;
+  position: relative;
+  z-index: 1061;
+}
+
+.user-dropdown .dropdown-toggle:focus,
+.user-dropdown .dropdown-toggle:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .user-dropdown .dropdown-toggle:hover {
@@ -184,7 +228,7 @@
   margin-right: 0.5rem;
 }
 
-/* Navbar toggle button for mobile */
+/* Navbar toggle button for mobile - REMOVE BLUE OUTLINE */
 .navbar-toggler {
   border: none;
   padding: 0.5rem;
@@ -192,9 +236,10 @@
   border-radius: 6px;
 }
 
-.navbar-toggler:focus {
-  box-shadow: none;
-  outline: 2px solid rgba(255, 255, 255, 0.3);
+.navbar-toggler:focus,
+.navbar-toggler:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .navbar-toggler-icon {
@@ -202,38 +247,40 @@
   height: 1.3em;
 }
 
-/* Dropdown menus - FIX POSITIONING ISSUES */
+/* IMPROVED Dropdown menus - FIXED POSITIONING ISSUES */
 .dropdown-menu {
-  margin-top: 0.75rem; /* Increased space to avoid overlap */
+  margin-top: 0.25rem;
   border: none;
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
   padding: 0.5rem;
   min-width: 220px;
-  z-index: 1040; /* Higher z-index to ensure visibility */
-  position: absolute !important; /* Force absolute positioning */
+  z-index: 1075 !important;
+  position: absolute !important;
+  top: 100% !important;
+  transform: translateZ(0) !important;
+  contain: none !important;
+  isolation: auto !important;
 }
 
-/* Add a pseudo-element to help prevent overlap */
-.dropdown::after {
-  content: "";
-  position: absolute;
-  height: 12px; /* Create a gap */
-  width: 100%;
-  bottom: -12px;
-  left: 0;
-  z-index: 1035;
-}
-
-[data-bs-theme="dark"] .dropdown-menu {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-/* Position notifications dropdown properly */
+/* Ensure proper positioning for notification dropdown */
 .notification-btn + .dropdown-menu {
   right: 0 !important;
   left: auto !important;
-  transform: none !important;
+  transform: translateZ(0) !important;
+  margin-top: 0.25rem;
+}
+
+/* Ensure proper positioning for user dropdown */
+.user-dropdown .dropdown-menu {
+  right: 0 !important;
+  left: auto !important;
+  transform: translateZ(0) !important;
+  margin-top: 0.25rem;
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
 }
 
 .dropdown-item {
@@ -241,6 +288,12 @@
   padding: 0.6rem 0.8rem;
   font-size: 0.95rem;
   transition: all 0.2s ease;
+}
+
+.dropdown-item:focus,
+.dropdown-item:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .dropdown-item i {
@@ -266,18 +319,57 @@
   letter-spacing: 0.05em;
 }
 
-/* Login/Register buttons */
+/* UPDATED: Consistent auth button styling matching navbar elements */
 .auth-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  align-items: center;
 }
 
-.auth-buttons .btn {
-  border-radius: 6px;
+.auth-btn {
+  display: flex;
+  align-items: center;
   padding: 0.4rem 0.8rem;
   font-size: 0.9rem;
   font-weight: 500;
+  border-radius: 20px;
   transition: all 0.2s ease;
+  text-decoration: none !important;
+  position: relative;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white !important;
+}
+
+.auth-btn i {
+  margin-right: 0.4rem;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.auth-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white !important;
+  transform: translateY(-1px);
+}
+
+.auth-btn:focus,
+.auth-btn:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.auth-btn-register {
+  /* Register button gets slightly more prominent styling */
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.auth-btn-register:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 /* Notification badge */
@@ -335,11 +427,31 @@
     justify-content: center;
   }
 
+  /* Stack auth buttons vertically on mobile */
+  .auth-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .auth-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
   /* Fix dropdown positioning on mobile */
   .dropdown-menu {
     position: static !important;
     margin-top: 0.5rem;
     width: 100%;
+    box-shadow: none;
+    background-color: rgba(255, 255, 255, 0.95);
+    z-index: auto;
+  }
+
+  [data-bs-theme="dark"] .dropdown-menu {
+    background-color: rgba(33, 37, 41, 0.95);
   }
 }
 
@@ -364,21 +476,28 @@
   }
 }
 
-/* Enhanced accessibility */
-.navbar-custom *:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
-  outline-offset: 2px;
+/* GLOBAL FOCUS OUTLINE REMOVAL FOR NAVBAR ELEMENTS */
+.navbar-custom *:focus,
+.navbar-custom *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-[data-bs-theme="dark"] .navbar-custom *:focus {
-  outline-color: var(--nexus-primary-light);
+/* Keep accessibility for keyboard users with a subtle visual indicator */
+.navbar-custom .nav-link-custom:focus-visible,
+.navbar-custom .theme-toggle-btn:focus-visible,
+.navbar-custom .notification-btn:focus-visible,
+.navbar-custom .auth-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 4px;
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .navbar-custom *,
   .dropdown-item,
-  .nav-link-custom {
+  .nav-link-custom,
+  .auth-btn {
     transition: none !important;
     animation: none !important;
   }
