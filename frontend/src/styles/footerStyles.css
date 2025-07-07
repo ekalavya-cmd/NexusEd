@@ -47,7 +47,7 @@ footer::before {
 
 [data-bs-theme="dark"] .footer-bottom {
   background: rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--nexus-border) !important;
 }
 
 /* Footer sections */

@@ -58,7 +58,7 @@
   );
 }
 
-/* Dark mode color overrides */
+/* Dark mode color overrides - Updated gradient colors */
 [data-bs-theme="dark"] {
   /* Dark mode backgrounds */
   --nexus-bg-primary: #212529;
@@ -80,17 +80,17 @@
   --nexus-shadow-medium: rgba(255, 255, 255, 0.1);
   --nexus-shadow-strong: rgba(255, 255, 255, 0.15);
 
-  /* Dark mode gradients */
-  --nexus-gradient-primary: linear-gradient(135deg, #1a1d29 0%, #2d1b3d 100%);
+  /* Updated dark mode gradients to match the theme better */
+  --nexus-gradient-primary: linear-gradient(135deg, #212529 0%, #2d3748 100%);
   --nexus-gradient-primary-light: linear-gradient(
     135deg,
-    #2c2f3f 0%,
-    #3d2b4d 100%
+    #2d3748 0%,
+    #374151 100%
   );
   --nexus-gradient-primary-dark: linear-gradient(
     135deg,
-    #0f1117 0%,
-    #1f0f2a 100%
+    #1a1e21 0%,
+    #252f3f 100%
   );
 }
 

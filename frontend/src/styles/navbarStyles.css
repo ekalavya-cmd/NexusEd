@@ -21,18 +21,18 @@
   transform: translateZ(0); /* GPU acceleration */
 }
 
-/* Dark mode navbar */
+/* Dark mode navbar - Enhanced consistent styling */
 [data-bs-theme="dark"] .navbar-custom {
   background: var(--nexus-gradient-primary) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(110, 168, 254, 0.1);
+  border-bottom-color: var(--nexus-border);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
 }
 
 [data-bs-theme="dark"] .navbar-custom.scrolled {
   background: linear-gradient(
     135deg,
-    rgba(26, 29, 41, 0.95) 0%,
-    rgba(45, 27, 61, 0.95) 100%
+    rgba(33, 37, 41, 0.95) 0%,
+    rgba(45, 55, 72, 0.95) 100%
   ) !important;
 }
 
