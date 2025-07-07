@@ -1,87 +1,113 @@
-/* Enhanced Navbar Styles with Performance Optimizations */
+/* Final Refined Navbar Styles */
 
 /* Main navbar styling */
 .navbar-custom {
   background: var(--nexus-gradient-primary) !important;
-  backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
-  box-shadow: 0 2px 20px var(--nexus-shadow-medium);
-  contain: layout style;
-  will-change: background-color, transform;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  position: relative; /* Important for dropdown positioning */
+  z-index: 1030; /* Ensure navbar is above other elements */
+}
+
+.navbar-custom .container {
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .navbar-custom.scrolled {
-  background: linear-gradient(
-    135deg,
-    rgba(13, 110, 253, 0.95) 0%,
-    rgba(102, 16, 242, 0.95) 100%
-  ) !important;
-  backdrop-filter: blur(15px);
-  transform: translateZ(0); /* GPU acceleration */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  height: 56px;
 }
 
-/* Dark mode navbar - Enhanced consistent styling */
+/* Dark mode navbar */
 [data-bs-theme="dark"] .navbar-custom {
   background: var(--nexus-gradient-primary) !important;
-  border-bottom-color: var(--nexus-border);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+  border-bottom-color: rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-[data-bs-theme="dark"] .navbar-custom.scrolled {
-  background: linear-gradient(
-    135deg,
-    rgba(33, 37, 41, 0.95) 0%,
-    rgba(45, 55, 72, 0.95) 100%
-  ) !important;
-}
-
-/* Brand logo */
+/* Brand logo - NO rotation effect */
 .brand-logo {
-  transition: all 0.3s ease;
   text-decoration: none !important;
-  will-change: transform;
-}
-
-.brand-logo:hover {
-  transform: scale(1.05);
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  margin-right: 3rem;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .logo-container {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  will-change: background-color, transform;
-}
-
-.brand-logo:hover .logo-container {
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(10deg);
+  margin-right: 0.75rem;
+  /* No transition needed since we're removing the rotation */
 }
 
 .brand-text {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   background: linear-gradient(45deg, #ffffff, #f8f9fa);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
+  letter-spacing: -0.02em;
 }
 
-/* Navigation links */
+/* Main navigation container */
+.navbar-nav {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Navigation links - with underline hover effect instead of box */
 .nav-link-custom {
-  color: rgba(255, 255, 255, 0.8) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
   position: relative;
-  padding: 0.5rem 1rem;
-  transition: all 0.3s ease;
-  border-radius: 0.375rem;
+  padding: 0.5rem 0; /* Removed horizontal padding */
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  transition: all 0.25s ease;
+  background: transparent !important; /* Ensure no background on hover */
+}
+
+.nav-link-custom i {
+  margin-right: 0.4rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Underline hover effect - similar to footer */
+.nav-link-custom::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0; /* Start with zero width */
+  height: 2px;
+  background: white;
+  transition: width 0.3s ease;
+  opacity: 0.8;
+}
+
+.nav-link-custom:hover::after {
+  width: 100%; /* Expand to full width on hover */
 }
 
 .nav-link-custom:hover {
@@ -89,93 +115,258 @@
   transform: translateY(-1px);
 }
 
+/* Active link - always show underline */
 .nav-link-custom.active {
   color: white !important;
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Animated indicator for active nav link */
-.nav-link-custom::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.8);
-  transition: all 0.3s ease;
-  transform: translateX(-50%);
-  opacity: 0;
+  font-weight: 600;
 }
 
 .nav-link-custom.active::after {
-  width: 30px;
-  opacity: 1;
+  width: 100%; /* Full width for active link */
 }
 
-.nav-link-custom:hover::after {
+/* Right side elements */
+.ms-auto.d-flex {
+  height: 100%;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Theme toggle and notification buttons - MATCHED SIZES */
+.theme-toggle-btn,
+.notification-btn {
+  width: 34px; /* Matched size */
+  height: 34px; /* Matched size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 0.85rem; /* Consistent icon size */
+}
+
+.theme-toggle-btn:hover,
+.notification-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.theme-toggle-btn:active,
+.notification-btn:active {
+  transform: translateY(0);
+}
+
+/* User dropdown */
+.user-dropdown .dropdown-toggle {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 20px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.user-dropdown .dropdown-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.user-dropdown img,
+.user-dropdown .fa-user-circle {
+  margin-right: 0.5rem;
+}
+
+/* Navbar toggle button for mobile */
+.navbar-toggler {
+  border: none;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.navbar-toggler-icon {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+/* Dropdown menus - FIX POSITIONING ISSUES */
+.dropdown-menu {
+  margin-top: 0.75rem; /* Increased space to avoid overlap */
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem;
+  min-width: 220px;
+  z-index: 1040; /* Higher z-index to ensure visibility */
+  position: absolute !important; /* Force absolute positioning */
+}
+
+/* Add a pseudo-element to help prevent overlap */
+.dropdown::after {
+  content: "";
+  position: absolute;
+  height: 12px; /* Create a gap */
+  width: 100%;
+  bottom: -12px;
+  left: 0;
+  z-index: 1035;
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Position notifications dropdown properly */
+.notification-btn + .dropdown-menu {
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+.dropdown-item {
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item i {
   width: 20px;
+  text-align: center;
+  margin-right: 0.5rem;
   opacity: 0.7;
 }
 
-/* Dark mode adaptations */
-[data-bs-theme="dark"] .nav-link-custom {
-  color: rgba(255, 255, 255, 0.7) !important;
+.dropdown-item:hover i {
+  opacity: 1;
 }
 
-[data-bs-theme="dark"] .nav-link-custom.active {
-  background: rgba(255, 255, 255, 0.1);
+.dropdown-divider {
+  margin: 0.5rem 0;
+}
+
+.dropdown-header {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Login/Register buttons */
+.auth-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.auth-buttons .btn {
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 /* Notification badge */
 .notification-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  min-width: 18px;
+  top: -2px;
+  right: -2px;
+  width: 18px;
   height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background-color: #dc3545;
+  border-radius: 50%;
+  background-color: #ef4444;
   color: white;
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+  border: 2px solid var(--nexus-gradient-primary-dark);
 }
 
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+/* Collapsed navbar on mobile */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    background: var(--nexus-gradient-primary);
+    margin-top: 0.5rem;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  [data-bs-theme="dark"] .navbar-collapse {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  .navbar-nav {
+    gap: 0.75rem;
+  }
+
+  /* Adjust the nav links for mobile */
+  .nav-link-custom {
+    padding: 0.6rem 0;
+    width: 100%;
+  }
+
+  /* Keep the underline effect on mobile */
+  .nav-link-custom::after {
+    bottom: -2px;
+  }
+
+  /* Additional space for the right-side elements */
+  .ms-auto.d-flex {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: center;
+  }
+
+  /* Fix dropdown positioning on mobile */
+  .dropdown-menu {
+    position: static !important;
+    margin-top: 0.5rem;
+    width: 100%;
   }
 }
 
-/* Logout button states */
-.logout-btn {
-  transition: all 0.3s ease;
-  position: relative;
-}
+/* Small mobile screens */
+@media (max-width: 576px) {
+  .navbar-custom {
+    height: 56px;
+    padding: 0.4rem 0;
+  }
 
-.logout-btn:hover {
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #dc3545;
-}
+  .brand-logo {
+    margin-right: 1rem;
+  }
 
-.logout-btn.logging-out {
-  opacity: 0.7;
-  pointer-events: none;
+  .logo-container {
+    width: 32px;
+    height: 32px;
+  }
+
+  .brand-text {
+    font-size: 1.2rem;
+  }
 }
 
 /* Enhanced accessibility */
 .navbar-custom *:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline: 2px solid rgba(255, 255, 255, 0.5);
   outline-offset: 2px;
 }
 
@@ -183,51 +374,12 @@
   outline-color: var(--nexus-primary-light);
 }
 
-/* Performance optimization for mobile */
-@media (max-width: 768px) {
-  .navbar-custom {
-    backdrop-filter: blur(5px); /* Reduce blur on mobile */
-  }
-
-  .brand-logo:hover {
-    transform: none; /* Disable hover effects on touch devices */
-  }
-
-  .nav-link-custom:hover {
-    transform: none;
-  }
-}
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .navbar-custom {
-    background: #000000 !important;
-    border-bottom: 2px solid #ffffff;
-  }
-
-  .nav-link-custom {
-    color: #ffffff !important;
-    border: 1px solid transparent;
-  }
-
-  .nav-link-custom:focus,
-  .nav-link-custom:hover {
-    border-color: #ffffff;
-    background: #333333;
-  }
-}
-
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .navbar-custom,
-  .brand-logo,
-  .nav-link-custom,
-  .logo-container {
+  .navbar-custom *,
+  .dropdown-item,
+  .nav-link-custom {
     transition: none !important;
     animation: none !important;
-  }
-
-  .brand-logo:hover .logo-container {
-    transform: none !important;
   }
 }

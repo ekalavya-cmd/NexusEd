@@ -9,12 +9,8 @@ import {
   Navbar as BsNavbar,
   Nav,
   Container,
-  Button,
   Dropdown,
   Badge,
-  Offcanvas,
-  Form,
-  InputGroup,
 } from "react-bootstrap";
 import { AuthContext } from "../context/AuthContext";
 
@@ -24,8 +20,6 @@ function Navbar() {
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -47,7 +41,7 @@ function Navbar() {
     },
   ]);
 
-  // Initialize darkMode from localStorage (theme is already applied by index.html script)
+  // Initialize darkMode from localStorage
   const [darkMode, setDarkMode] = useState(() => {
     const stored = localStorage.getItem("darkMode");
     if (stored !== null) {
@@ -59,7 +53,7 @@ function Navbar() {
     );
   });
 
-  // Enhanced theme switching with detailed logging and performance tracking
+  // Theme switching with performance tracking
   useEffect(() => {
     const startTime = performance.now();
     const theme = darkMode ? "dark" : "light";
@@ -75,40 +69,13 @@ function Navbar() {
       document.documentElement.setAttribute("data-theme-debug", theme);
     }
 
-    // Enhanced logging with component detection and performance metrics
-    const componentsWithTheme = document.querySelectorAll(
-      '[class*="nexus-"], .card, .btn, .form-control, .navbar-custom, footer'
-    );
-
-    const primaryColor = getComputedStyle(
-      document.documentElement
-    ).getPropertyValue("--nexus-primary");
-
     const endTime = performance.now();
     const switchDuration = endTime - startTime;
-
-    console.log(`🎨 Theme Switch Summary:
-    - New Theme: ${theme}
-    - Components Updated: ${componentsWithTheme.length}
-    - Switch Duration: ${switchDuration.toFixed(2)}ms
-    - Primary Color: ${primaryColor.trim()}
-    - Timestamp: ${new Date().toLocaleTimeString()}
-    - CSS Variables Active: ${primaryColor ? "✅" : "❌"}
-    - Performance: ${
-      switchDuration < 50
-        ? "Excellent"
-        : switchDuration < 100
-        ? "Good"
-        : "Needs Optimization"
-    }`);
 
     // Log theme change to file in development
     if (process.env.NODE_ENV === "development") {
       logThemeChange(theme, switchDuration);
-    }
 
-    // Validate theme consistency after switch (development only)
-    if (process.env.NODE_ENV === "development") {
       setTimeout(() => {
         const { validateThemeConsistency } = require("../utils/themeValidator");
         validateThemeConsistency();
@@ -126,13 +93,11 @@ function Navbar() {
       url: window.location.pathname,
     };
 
-    // Log to console (visible in VS Code terminal)
     console.log(
       `[${logEntry.timestamp}] Theme changed to: ${theme} (${logEntry.duration})`
     );
 
-    // In a real app, you might send this to a logging service
-    // For now, we'll store it in sessionStorage for debugging
+    // Store logs in sessionStorage for debugging
     const logs = JSON.parse(sessionStorage.getItem("themeLogs") || "[]");
     logs.push(logEntry);
     sessionStorage.setItem("themeLogs", JSON.stringify(logs.slice(-50))); // Keep last 50 logs
@@ -162,18 +127,6 @@ function Navbar() {
     setDarkMode((prevMode) => !prevMode);
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // Implement search functionality
-      console.log("Searching for:", searchQuery);
-      setShowSearch(false);
-      setSearchQuery("");
-      // Navigate to search results or filter current page
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-
   const markNotificationAsRead = (id) => {
     setNotifications((prev) =>
       prev.map((notif) =>
@@ -182,311 +135,244 @@ function Navbar() {
     );
   };
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
-
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    setExpanded(false);
-
-    // Add fade-out effect to the main content
-    const mainContent = document.querySelector("main");
-    const footer = document.querySelector("footer");
-
-    if (mainContent) {
-      mainContent.style.transition =
-        "opacity 0.5s ease-out, transform 0.5s ease-out";
-      mainContent.style.opacity = "0";
-      mainContent.style.transform = "translateY(-20px)";
-    }
-
-    if (footer) {
-      footer.style.transition = "opacity 0.5s ease-out";
-      footer.style.opacity = "0";
-    }
-
-    // Show logout success message
-    const logoutMessage = document.createElement("div");
-    logoutMessage.innerHTML = `
-      <div class="position-fixed top-50 start-50 translate-middle" style="z-index: 9999;">
-        <div class="card shadow-lg border-0 logout-message-card" style="min-width: 300px;">
-          <div class="card-body text-center py-4">
-            <div class="mb-3">
-              <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
-            </div>
-            <h5 class="card-title text-success mb-2">Logged Out Successfully!</h5>
-            <p class="card-text text-muted mb-0">Redirecting to homepage...</p>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Add backdrop
-    const backdrop = document.createElement("div");
-    backdrop.className =
-      "position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50";
-    backdrop.style.zIndex = "9998";
-
-    document.body.appendChild(backdrop);
-    document.body.appendChild(logoutMessage);
-
-    // Wait for animation, then logout
-    setTimeout(async () => {
-      try {
-        await logout();
-        navigate("/");
-      } catch (error) {
-        console.error("Logout error:", error);
-      } finally {
-        // Clean up
-        document.body.removeChild(backdrop);
-        document.body.removeChild(logoutMessage);
+    try {
+      await logout();
+      // Add a delay to show the logout animation
+      setTimeout(() => {
+        navigate("/login");
+        // Reset state after successful logout
         setIsLoggingOut(false);
-
-        // Restore main content opacity
-        if (mainContent) {
-          mainContent.style.opacity = "1";
-          mainContent.style.transform = "translateY(0)";
-        }
-        if (footer) {
-          footer.style.opacity = "1";
-        }
-      }
-    }, 2000);
+      }, 1000);
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setIsLoggingOut(false);
+    }
   };
 
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  // Custom dropdown toggle components to fix positioning issues
+  const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
+    <button
+      className="notification-btn position-relative"
+      ref={ref}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick(e);
+      }}
+    >
+      {children}
+    </button>
+  ));
+
+  const UserToggle = React.forwardRef(({ children, onClick }, ref) => (
+    <div
+      className="dropdown-toggle"
+      ref={ref}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick(e);
+      }}
+    >
+      {children}
+    </div>
+  ));
+
   return (
-    <>
-      <BsNavbar
-        expand="lg"
-        className="navbar-custom sticky-top"
-        expanded={expanded}
-      >
-        <Container>
-          {/* Brand */}
-          <Link to="/" className="brand-logo">
-            <div className="d-flex align-items-center">
-              <div className="logo-container me-3">
-                <i className="fas fa-graduation-cap logo-icon"></i>
-              </div>
-              <span className="brand-text">NexusEd</span>
-            </div>
-          </Link>
+    <BsNavbar
+      expand="lg"
+      className="navbar-custom sticky-top"
+      expanded={expanded}
+    >
+      <Container>
+        {/* Brand */}
+        <Link to="/" className="brand-logo">
+          <div className="logo-container">
+            <i className="fas fa-graduation-cap logo-icon"></i>
+          </div>
+          <span className="brand-text">NexusEd</span>
+        </Link>
 
-          {/* Mobile toggle */}
-          <BsNavbar.Toggle
-            aria-controls="basic-navbar-nav"
-            onClick={() => setExpanded(!expanded)}
-            className="border-0"
-            style={{ boxShadow: "none" }}
-          >
-            <span className="navbar-toggler-icon"></span>
-          </BsNavbar.Toggle>
+        {/* Mobile toggle */}
+        <BsNavbar.Toggle
+          aria-controls="basic-navbar-nav"
+          onClick={() => setExpanded(!expanded)}
+        >
+          <span className="navbar-toggler-icon"></span>
+        </BsNavbar.Toggle>
 
-          <BsNavbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
+        <BsNavbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto">
+            <RouterNavLink
+              to="/"
+              className={({ isActive }) =>
+                `nav-link nav-link-custom ${isActive ? "active" : ""}`
+              }
+            >
+              <i className="fas fa-home"></i>
+              Home
+            </RouterNavLink>
+
+            <RouterNavLink
+              to="/study-groups"
+              className={({ isActive }) =>
+                `nav-link nav-link-custom ${isActive ? "active" : ""}`
+              }
+            >
+              <i className="fas fa-users"></i>
+              Study Groups
+            </RouterNavLink>
+
+            {user && (
               <RouterNavLink
-                to="/"
+                to="/calendar"
                 className={({ isActive }) =>
                   `nav-link nav-link-custom ${isActive ? "active" : ""}`
                 }
               >
-                <i className="fas fa-home me-1"></i>
-                Home
+                <i className="fas fa-calendar-alt"></i>
+                Calendar
               </RouterNavLink>
+            )}
+          </Nav>
 
-              <RouterNavLink
-                to="/study-groups"
-                className={({ isActive }) =>
-                  `nav-link nav-link-custom ${isActive ? "active" : ""}`
-                }
-              >
-                <i className="fas fa-users me-1"></i>
-                Study Groups
-              </RouterNavLink>
+          {/* Right side navigation */}
+          <Nav className="ms-auto d-flex align-items-center">
+            {/* Theme Toggle */}
+            <button
+              className="theme-toggle-btn"
+              onClick={toggleDarkMode}
+              title={`Switch to ${darkMode ? "light" : "dark"} mode`}
+            >
+              <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
+            </button>
 
-              {user && (
-                <RouterNavLink
-                  to="/calendar"
-                  className={({ isActive }) =>
-                    `nav-link nav-link-custom ${isActive ? "active" : ""}`
-                  }
-                >
-                  <i className="fas fa-calendar-alt me-1"></i>
-                  Calendar
-                </RouterNavLink>
-              )}
-            </Nav>
+            {user ? (
+              <>
+                {/* Notifications - Using custom toggle */}
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    as={CustomToggle}
+                    id="dropdown-notifications"
+                  >
+                    <i className="fas fa-bell"></i>
+                    {unreadCount > 0 && (
+                      <Badge bg="danger" pill className="notification-badge">
+                        {unreadCount}
+                      </Badge>
+                    )}
+                  </Dropdown.Toggle>
 
-            {/* Right side navigation */}
-            <Nav className="ms-auto d-flex align-items-center">
-              {/* Search Button */}
-              <Button
-                variant="outline-light"
-                size="sm"
-                className="me-2"
-                onClick={() => setShowSearch(true)}
-              >
-                <i className="fas fa-search"></i>
-              </Button>
-
-              {/* Theme Toggle */}
-              <Button
-                variant="outline-light"
-                size="sm"
-                className="me-2"
-                onClick={toggleDarkMode}
-                title={`Switch to ${darkMode ? "light" : "dark"} mode`}
-              >
-                <i className={`fas ${darkMode ? "fa-sun" : "fa-moon"}`}></i>
-              </Button>
-
-              {user ? (
-                <>
-                  {/* Notifications */}
-                  <Dropdown className="me-2">
-                    <Dropdown.Toggle
-                      variant="outline-light"
-                      size="sm"
-                      className="position-relative"
-                    >
-                      <i className="fas fa-bell"></i>
-                      {unreadCount > 0 && (
-                        <Badge
-                          bg="danger"
-                          className="position-absolute top-0 start-100 translate-middle"
-                          style={{ fontSize: "0.7rem" }}
-                        >
-                          {unreadCount}
-                        </Badge>
-                      )}
-                    </Dropdown.Toggle>
-
-                    <Dropdown.Menu align="end" style={{ minWidth: "300px" }}>
-                      <Dropdown.Header>Notifications</Dropdown.Header>
-                      {notifications.map((notification) => (
+                  <Dropdown.Menu>
+                    <Dropdown.Header>Notifications</Dropdown.Header>
+                    {notifications.length === 0 ? (
+                      <Dropdown.Item disabled>
+                        No notifications yet
+                      </Dropdown.Item>
+                    ) : (
+                      notifications.map((notification) => (
                         <Dropdown.Item
                           key={notification.id}
-                          className={`${
-                            notification.unread ? "bg-light" : ""
-                          } border-bottom`}
                           onClick={() =>
                             markNotificationAsRead(notification.id)
                           }
+                          className={`notification-item ${
+                            notification.unread ? "unread" : ""
+                          }`}
                         >
-                          <div className="d-flex">
-                            <div className="flex-grow-1">
-                              <small className="text-muted">
-                                {notification.text}
-                              </small>
-                              <br />
-                              <small className="text-muted">
-                                {notification.time}
-                              </small>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                              {notification.unread && (
+                                <Badge bg="primary" className="me-2" pill>
+                                  New
+                                </Badge>
+                              )}
+                              {notification.text}
                             </div>
-                            {notification.unread && (
-                              <div className="text-primary">
-                                <i
-                                  className="fas fa-circle"
-                                  style={{ fontSize: "0.5rem" }}
-                                ></i>
-                              </div>
-                            )}
                           </div>
+                          <small className="text-muted d-block mt-1">
+                            {notification.time}
+                          </small>
                         </Dropdown.Item>
-                      ))}
-                    </Dropdown.Menu>
-                  </Dropdown>
+                      ))
+                    )}
+                    <Dropdown.Divider />
+                    <Dropdown.Item className="text-center">
+                      <small>See all notifications</small>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
 
-                  {/* User Profile Dropdown */}
-                  <Dropdown>
-                    <Dropdown.Toggle
-                      variant="outline-light"
-                      size="sm"
-                      className="d-flex align-items-center"
+                {/* User Dropdown - Using custom toggle */}
+                <Dropdown align="end" className="user-dropdown">
+                  <Dropdown.Toggle as={UserToggle} id="dropdown-user">
+                    {user.profilePicture ? (
+                      <img
+                        src={user.profilePicture}
+                        alt="Profile"
+                        width="24"
+                        height="24"
+                        className="rounded-circle"
+                      />
+                    ) : (
+                      <i className="fas fa-user-circle"></i>
+                    )}
+                    <span>{user.username || user.email.split("@")[0]}</span>
+                  </Dropdown.Toggle>
+
+                  <Dropdown.Menu>
+                    <Dropdown.Item as={Link} to="/profile">
+                      <i className="fas fa-user"></i>
+                      Profile
+                    </Dropdown.Item>
+                    <Dropdown.Item as={Link} to="/settings">
+                      <i className="fas fa-cog"></i>
+                      Settings
+                    </Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Item
+                      onClick={handleLogout}
+                      className={`logout-btn ${
+                        isLoggingOut ? "logging-out" : ""
+                      }`}
+                      disabled={isLoggingOut}
                     >
-                      <i className="fas fa-user me-1"></i>
-                      {user.username}
-                    </Dropdown.Toggle>
-
-                    <Dropdown.Menu align="end">
-                      <Link to="/profile" className="dropdown-item">
-                        <i className="fas fa-user-circle me-2"></i>
-                        Profile
-                      </Link>
-                      <Dropdown.Divider />
-                      <Dropdown.Item
-                        onClick={handleLogout}
-                        disabled={isLoggingOut}
-                        className="logout-btn"
-                      >
-                        {isLoggingOut ? (
-                          <>
-                            <div
-                              className="spinner-border spinner-border-sm me-2"
-                              role="status"
-                            >
-                              <span className="visually-hidden">
-                                Loading...
-                              </span>
-                            </div>
-                            Logging out...
-                          </>
-                        ) : (
-                          <>
-                            <i className="fas fa-sign-out-alt me-2"></i>
-                            Logout
-                          </>
-                        )}
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </>
-              ) : (
-                <div className="d-flex">
-                  <Link
-                    to="/login"
-                    className="btn btn-outline-light btn-sm me-2"
-                  >
-                    Login
-                  </Link>
-                  <Link to="/register" className="btn btn-light btn-sm">
-                    Register
-                  </Link>
-                </div>
-              )}
-            </Nav>
-          </BsNavbar.Collapse>
-        </Container>
-      </BsNavbar>
-
-      {/* Search Offcanvas */}
-      <Offcanvas
-        show={showSearch}
-        onHide={() => setShowSearch(false)}
-        placement="top"
-        className="search-offcanvas"
-      >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Search NexusEd</Offcanvas.Title>
-        </Offcanvas.Header>
-        <Offcanvas.Body>
-          <Form onSubmit={handleSearch}>
-            <InputGroup size="lg">
-              <Form.Control
-                type="text"
-                placeholder="Search for study groups, posts, or users..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-              />
-              <Button variant="primary" type="submit">
-                <i className="fas fa-search"></i>
-              </Button>
-            </InputGroup>
-          </Form>
-        </Offcanvas.Body>
-      </Offcanvas>
-    </>
+                      {isLoggingOut ? (
+                        <>
+                          <div
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                          >
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                          Logging out...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-sign-out-alt"></i>
+                          Logout
+                        </>
+                      )}
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </>
+            ) : (
+              <div className="auth-buttons">
+                <Link to="/login" className="btn btn-outline-light btn-sm">
+                  Login
+                </Link>
+                <Link to="/register" className="btn btn-light btn-sm">
+                  Register
+                </Link>
+              </div>
+            )}
+          </Nav>
+        </BsNavbar.Collapse>
+      </Container>
+    </BsNavbar>
   );
 }
 
