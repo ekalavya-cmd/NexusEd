@@ -8,6 +8,13 @@ function Footer() {
   const [showAbout, setShowAbout] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  // New state for feature descriptions
+  const [showFeatureDescription, setShowFeatureDescription] = useState(false);
+  const [featureDetails, setFeatureDetails] = useState({
+    title: "",
+    icon: "",
+    description: "",
+  });
 
   const currentYear = new Date().getFullYear();
 
@@ -62,33 +69,43 @@ function Footer() {
     }
   };
 
+  // Function to show feature descriptions
+  const handleFeatureClick = (title, icon, description) => {
+    setFeatureDetails({
+      title,
+      icon,
+      description,
+    });
+    setShowFeatureDescription(true);
+  };
+
   return (
     <>
       <footer className="bg-gradient-primary text-white mt-auto">
         <div className="footer-main py-5">
           <div className="container">
-            <Row className="g-4">
-              {/* Brand Section */}
-              <Col lg={3} md={6}>
+            <Row className="g-5">
+              {/* NexusEd Section with Connect With Us */}
+              <Col lg={3} md={6} className="footer-section-col mb-4 mb-lg-0">
                 <div className="footer-section">
                   <div className="d-flex align-items-center mb-3">
                     <i className="fas fa-graduation-cap me-2 fs-2"></i>
                     <h5 className="mb-0 fw-bold">NexusEd</h5>
                   </div>
-                  <p className="text-white-50 mb-3">
-                    Empowering students through collaborative learning, resource
-                    sharing, and community building. Join thousands of students
-                    already learning together.
-                  </p>
-                </div>
-              </Col>
+                  <div className="footer-description mb-3">
+                    <p className="text-white-50 mb-2">
+                      Empowering students through collaborative learning,
+                      resource sharing, and community building.
+                    </p>
+                    <p className="text-white-50">
+                      Join thousands of students already learning together.
+                    </p>
+                  </div>
 
-              {/* Connect With Us Section (with Social Icons) */}
-              <Col lg={3} md={6}>
-                <div className="footer-section">
+                  {/* Connect With Us Section (with Social Icons) - Moved under NexusEd description */}
                   <h6 className="mb-3 fw-bold">Connect With Us</h6>
 
-                  {/* Social Icons */}
+                  {/* Social Icons - Without rectangular box */}
                   <div className="social-icons mb-4">
                     <a
                       href="https://facebook.com/nexused"
@@ -127,10 +144,126 @@ function Footer() {
                       <i className="fab fa-linkedin-in"></i>
                     </a>
                   </div>
+                </div>
+              </Col>
 
-                  {/* Contact Links */}
+              {/* Features Section - With clickable items */}
+              <Col lg={3} md={6} className="footer-section-col mb-4 mb-lg-0">
+                <div className="footer-section">
+                  <h6 className="mb-3 fw-bold">Features</h6>
+                  <ul className="list-unstyled footer-features">
+                    <li className="mb-2">
+                      <button
+                        className="bg-transparent border-0 p-0 d-flex align-items-center"
+                        onClick={() =>
+                          handleFeatureClick(
+                            "Study Groups",
+                            "fas fa-users",
+                            "Create or join study groups based on your courses, interests, or learning goals. Collaborate with peers, share resources, and organize study sessions to enhance your learning experience."
+                          )
+                        }
+                      >
+                        <i className="fas fa-users text-white-50 me-2"></i>
+                        <span className="text-white-50">Study Groups</span>
+                      </button>
+                    </li>
+                    <li className="mb-2">
+                      <button
+                        className="bg-transparent border-0 p-0 d-flex align-items-center"
+                        onClick={() =>
+                          handleFeatureClick(
+                            "Event Calendar",
+                            "fas fa-calendar-alt",
+                            "Keep track of all your academic events, study sessions, and group meetings in one place. Create, edit, and manage events with customizable notifications to stay organized throughout your academic journey."
+                          )
+                        }
+                      >
+                        <i className="fas fa-calendar-alt text-white-50 me-2"></i>
+                        <span className="text-white-50">Event Calendar</span>
+                      </button>
+                    </li>
+                    <li className="mb-2">
+                      <button
+                        className="bg-transparent border-0 p-0 d-flex align-items-center"
+                        onClick={() =>
+                          handleFeatureClick(
+                            "Group Chat",
+                            "fas fa-comments",
+                            "Communicate with your study group members in real-time. Share ideas, ask questions, and collaborate efficiently with integrated messaging that supports text, images, and file sharing."
+                          )
+                        }
+                      >
+                        <i className="fas fa-comments text-white-50 me-2"></i>
+                        <span className="text-white-50">Group Chat</span>
+                      </button>
+                    </li>
+                    <li className="mb-2">
+                      <button
+                        className="bg-transparent border-0 p-0 d-flex align-items-center"
+                        onClick={() =>
+                          handleFeatureClick(
+                            "Resource Sharing",
+                            "fas fa-share-alt",
+                            "Easily share study materials, lecture notes, practice problems, and helpful resources with your peers. Upload, organize, and access a wide range of educational content to support collaborative learning."
+                          )
+                        }
+                      >
+                        <i className="fas fa-share-alt text-white-50 me-2"></i>
+                        <span className="text-white-50">Resource Sharing</span>
+                      </button>
+                    </li>
+                    <li className="mb-2">
+                      <button
+                        className="bg-transparent border-0 p-0 d-flex align-items-center"
+                        onClick={() =>
+                          handleFeatureClick(
+                            "Dark Mode",
+                            "fas fa-moon",
+                            "Reduce eye strain during late-night study sessions with our customizable dark mode. Toggle between light and dark themes based on your preference for a comfortable viewing experience."
+                          )
+                        }
+                      >
+                        <i className="fas fa-moon text-white-50 me-2"></i>
+                        <span className="text-white-50">Dark Mode</span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </Col>
+
+              {/* Support & Info Section */}
+              <Col lg={3} md={6} className="footer-section-col mb-4 mb-lg-0">
+                <div className="footer-section">
+                  <h6 className="mb-3 fw-bold">Support & Info</h6>
                   <ul className="list-unstyled footer-links">
-                    <li>
+                    <li className="mb-3">
+                      <button
+                        className="text-white-50 text-decoration-none hover-link bg-transparent border-0 p-0"
+                        onClick={() => setShowAbout(true)}
+                      >
+                        <i className="fas fa-info-circle me-2"></i>
+                        About Us
+                      </button>
+                    </li>
+                    <li className="mb-3">
+                      <button
+                        className="text-white-50 text-decoration-none hover-link bg-transparent border-0 p-0"
+                        onClick={() => setShowPrivacy(true)}
+                      >
+                        <i className="fas fa-shield-alt me-2"></i>
+                        Privacy Policy
+                      </button>
+                    </li>
+                    <li className="mb-3">
+                      <button
+                        className="text-white-50 text-decoration-none hover-link bg-transparent border-0 p-0"
+                        onClick={() => setShowTerms(true)}
+                      >
+                        <i className="fas fa-file-contract me-2"></i>
+                        Terms of Service
+                      </button>
+                    </li>
+                    <li className="mb-3">
                       <a
                         href="mailto:hello@nexused.com"
                         className="text-white-50 text-decoration-none hover-link"
@@ -139,7 +272,7 @@ function Footer() {
                         Contact Us
                       </a>
                     </li>
-                    <li>
+                    <li className="mb-3">
                       <a
                         href="tel:+1234567890"
                         className="text-white-50 text-decoration-none hover-link"
@@ -153,40 +286,40 @@ function Footer() {
               </Col>
 
               {/* Quick Links Section (Navigation Links) */}
-              <Col lg={2} md={6}>
+              <Col lg={3} md={6} className="footer-section-col mb-4 mb-lg-0">
                 <div className="footer-section">
                   <h6 className="mb-3 fw-bold">Quick Links</h6>
                   <ul className="list-unstyled footer-links">
-                    <li>
+                    <li className="mb-3">
                       <Link
                         to="/"
-                        className="text-white-50 text-decoration-none hover-link"
+                        className="text-white-50 text-decoration-none hover-link border-0"
                       >
                         Home
                       </Link>
                     </li>
-                    <li>
+                    <li className="mb-3">
                       <Link
                         to="/study-groups"
-                        className="text-white-50 text-decoration-none hover-link"
+                        className="text-white-50 text-decoration-none hover-link border-0"
                       >
                         Study Groups
                       </Link>
                     </li>
                     {user && (
                       <>
-                        <li>
+                        <li className="mb-3">
                           <Link
                             to="/calendar"
-                            className="text-white-50 text-decoration-none hover-link"
+                            className="text-white-50 text-decoration-none hover-link border-0"
                           >
                             Calendar
                           </Link>
                         </li>
-                        <li>
+                        <li className="mb-3">
                           <Link
                             to="/profile"
-                            className="text-white-50 text-decoration-none hover-link"
+                            className="text-white-50 text-decoration-none hover-link border-0"
                           >
                             Profile
                           </Link>
@@ -195,18 +328,18 @@ function Footer() {
                     )}
                     {!user && (
                       <>
-                        <li>
+                        <li className="mb-3">
                           <Link
                             to="/login"
-                            className="text-white-50 text-decoration-none hover-link"
+                            className="text-white-50 text-decoration-none hover-link border-0"
                           >
                             Login
                           </Link>
                         </li>
-                        <li>
+                        <li className="mb-3">
                           <Link
                             to="/register"
-                            className="text-white-50 text-decoration-none hover-link"
+                            className="text-white-50 text-decoration-none hover-link border-0"
                           >
                             Register
                           </Link>
@@ -216,96 +349,16 @@ function Footer() {
                   </ul>
                 </div>
               </Col>
-
-              {/* Features Section */}
-              <Col lg={2} md={6}>
-                <div className="footer-section">
-                  <h6 className="mb-3 fw-bold">Features</h6>
-                  <ul className="list-unstyled footer-features">
-                    <li className="mb-2">
-                      <i className="fas fa-users text-white-50 me-2"></i>
-                      <span className="text-white-50">Study Groups</span>
-                    </li>
-                    <li className="mb-2">
-                      <i className="fas fa-calendar-alt text-white-50 me-2"></i>
-                      <span className="text-white-50">Event Calendar</span>
-                    </li>
-                    <li className="mb-2">
-                      <i className="fas fa-comments text-white-50 me-2"></i>
-                      <span className="text-white-50">Group Chat</span>
-                    </li>
-                    <li className="mb-2">
-                      <i className="fas fa-share-alt text-white-50 me-2"></i>
-                      <span className="text-white-50">Resource Sharing</span>
-                    </li>
-                    <li className="mb-2">
-                      <i className="fas fa-moon text-white-50 me-2"></i>
-                      <span className="text-white-50">Dark Mode</span>
-                    </li>
-                  </ul>
-                </div>
-              </Col>
-
-              {/* Support & Info Section */}
-              <Col lg={2} md={6}>
-                <div className="footer-section">
-                  <h6 className="mb-3 fw-bold">Support & Info</h6>
-                  <ul className="list-unstyled footer-links">
-                    <li>
-                      <button
-                        className="btn btn-link text-white-50 p-0 text-decoration-none hover-link"
-                        onClick={() => setShowAbout(true)}
-                      >
-                        About NexusEd
-                      </button>
-                    </li>
-                    <li>
-                      <a
-                        href="mailto:support@nexused.com"
-                        className="text-white-50 text-decoration-none hover-link"
-                      >
-                        Contact Support
-                      </a>
-                    </li>
-                    <li>
-                      <button
-                        className="btn btn-link text-white-50 p-0 text-decoration-none hover-link"
-                        onClick={() => setShowPrivacy(true)}
-                      >
-                        Privacy Policy
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        className="btn btn-link text-white-50 p-0 text-decoration-none hover-link"
-                        onClick={() => setShowTerms(true)}
-                      >
-                        Terms of Service
-                      </button>
-                    </li>
-                    <li>
-                      <a
-                        href="https://github.com/nexused/nexused/issues"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-white-50 text-decoration-none hover-link"
-                      >
-                        Report Issue
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </Col>
             </Row>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="footer-bottom border-top border-white-50 py-3">
+        {/* Footer Bottom with Copyright */}
+        <div className="footer-bottom py-3">
           <div className="container">
             <Row className="align-items-center">
               <Col md={6}>
-                <p className="mb-0 text-white-50 small">
+                <p className="mb-md-0 text-white-50 small copyright">
                   © {currentYear} NexusEd. All rights reserved.
                   <span className="ms-2">Built with ❤️ for students</span>
                 </p>
@@ -337,6 +390,31 @@ function Footer() {
           </div>
         </div>
       </footer>
+
+      {/* Feature Description Modal */}
+      <Modal
+        show={showFeatureDescription}
+        onHide={() => setShowFeatureDescription(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className={`${featureDetails.icon} text-primary me-2`}></i>
+            {featureDetails.title}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>{featureDetails.description}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowFeatureDescription(false)}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* About Modal */}
       <Modal
@@ -441,30 +519,37 @@ function Footer() {
 
           <h5>Information We Collect</h5>
           <p>
-            We collect information you provide directly to us, such as when you
-            create an account, join study groups, or contact us for support.
-            This may include your name, email address, and profile information.
+            We collect information that you provide directly to us, such as when
+            you create an account, update your profile, participate in community
+            features, or contact us for support.
           </p>
 
           <h5>How We Use Your Information</h5>
           <p>
-            We use the information we collect to provide, maintain, and improve
-            our services, facilitate study group connections, and communicate
-            with you about your account and our services.
+            We use your information to provide, maintain, and improve our
+            services, communicate with you, and personalize your experience on
+            the platform.
           </p>
 
           <h5>Information Sharing</h5>
           <p>
-            We do not sell, trade, or otherwise transfer your personal
-            information to third parties without your consent, except as
-            described in this policy or as required by law.
+            We do not sell your personal information. We may share information
+            with third-party service providers who help us operate our platform,
+            but they are obligated to protect your information.
           </p>
 
           <h5>Data Security</h5>
           <p>
             We implement appropriate security measures to protect your personal
-            information against unauthorized access, alteration, disclosure, or
-            destruction.
+            information from unauthorized access, alteration, or disclosure.
+          </p>
+
+          <h5>Your Choices</h5>
+          <p>
+            You can access, update, or delete your account information at any
+            time through your profile settings. You can also opt out of
+            promotional communications by following the instructions in the
+            messages.
           </p>
 
           <h5>Contact Us</h5>
@@ -499,8 +584,9 @@ function Footer() {
               <strong>Last updated:</strong> {new Date().toLocaleDateString()}
             </p>
             <p>
-              Welcome to NexusEd. These Terms of Service govern your use of our
-              platform and services.
+              Please read these Terms of Service carefully before using the
+              NexusEd platform. These terms govern your access to and use of our
+              services.
             </p>
           </div>
 

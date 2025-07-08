@@ -112,6 +112,8 @@ footer::before {
   font-size: inherit;
   text-align: left;
   width: auto;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .footer-link:hover,
@@ -120,6 +122,16 @@ footer::before {
 .footer-links button:hover {
   color: #ffffff !important;
   transform: translateX(3px);
+}
+
+/* Focus state styling for footer links */
+.footer-links a:focus,
+.footer-features button:focus,
+.footer-section button:focus,
+.footer-section a:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Social icons */
@@ -163,84 +175,19 @@ footer::before {
   margin-bottom: 0;
 }
 
-/* Newsletter form */
-.newsletter-form .form-control {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-}
-
-.newsletter-form .form-control:focus {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
-}
-
-.newsletter-form .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.newsletter-form .btn {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: white;
-}
-
-.newsletter-form .btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Copyright text */
-.copyright {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.875rem;
-}
-
-/* Footer logo */
-.footer-logo {
-  filter: brightness(0) invert(1);
-  opacity: 0.8;
-  transition: opacity 0.3s ease;
-}
-
-.footer-logo:hover {
-  opacity: 1;
-}
-
-/* CRITICAL FIX: Back to top button styling that works */
+/* Back to top button */
 .back-to-top-btn {
-  /* Force specific styling to override any Bootstrap conflicts */
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
   width: 40px !important;
   height: 40px !important;
   border-radius: 50% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  cursor: pointer !important;
-  user-select: none !important;
-
-  /* Positioning and z-index */
-  position: relative !important;
-  z-index: 1000 !important;
-
-  /* Transitions */
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
   transition: all 0.3s ease !important;
-
-  /* Remove any containment or isolation */
-  contain: none !important;
-  isolation: auto !important;
-
-  /* Font and text */
-  font-family: inherit !important;
-  font-size: 14px !important;
-  line-height: 1 !important;
-  text-align: center !important;
+  position: relative !important;
+  z-index: 10 !important;
+  cursor: pointer !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
 
   /* Override any Bootstrap button styling */
   box-shadow: none !important;
@@ -312,6 +259,28 @@ footer::before {
 
 .footer-features li:hover span {
   color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Styling for better text wrapping in footer description */
+.nowrap {
+  white-space: nowrap !important;
+  display: inline-block !important;
+}
+
+/* Footer description styling */
+.footer-description p {
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.01em;
+}
+
+.footer-description p:last-child {
+  margin-bottom: 0;
+}
+
+/* Footer section column styles */
+.footer-section-col {
+  padding: 0 15px;
 }
 
 /* Responsive adjustments */
