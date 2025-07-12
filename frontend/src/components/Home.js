@@ -5,15 +5,25 @@ import { Link } from "react-router-dom";
 function Home() {
   return (
     <div className="animate-fade-in-up">
+      {/* Reduced size Welcome to NexusEd container */}
+      <Card className="shadow mb-4">
+        <Card.Body className="p-3 p-md-4">
+          <Row>
+            <Col lg={8} className="mx-auto text-center">
+              <h1 className="fs-2 fw-bold text-primary mb-2">
+                Welcome to NexusEd
+              </h1>
+              <p className="text-secondary mb-0">
+                A community platform for students to collaborate, share
+                resources, and organize study groups.
+              </p>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
+
       <Card className="shadow mb-5">
-        <Card.Body className="p-4 p-md-5">
-          <h1 className="display-5 fw-bold text-primary mb-4">
-            Welcome to NexusEd
-          </h1>
-          <p className="lead text-secondary mb-5">
-            A community platform for students to collaborate, share resources,
-            and organize study groups.
-          </p>
+        <Card.Body className="p-4">
           <Row xs={1} md={3} className="g-4">
             <Col>
               <Card className="h-100 bg-light text-center">
@@ -99,12 +109,32 @@ function Home() {
         </Card.Body>
       </Card>
 
-      <Card className="shadow mb-5 bg-gradient-primary text-white">
+      <Card
+        className="shadow mb-5"
+        style={{
+          background: "var(--nexus-gradient-primary)",
+          color: "#ffffff",
+        }}
+      >
         <Card.Body className="p-4 p-md-5">
           <Row className="align-items-center">
             <Col md={8}>
-              <h2 className="fs-2 fw-bold mb-3">Ready to get started?</h2>
-              <p className="mb-md-0">
+              <h2
+                className="fs-2 fw-bold mb-3"
+                style={{
+                  color: "#ffffff",
+                  textShadow: "0 1px 3px rgba(0, 0, 0, 0.3)",
+                }}
+              >
+                Ready to get started?
+              </h2>
+              <p
+                className="mb-md-0"
+                style={{
+                  color: "#ffffff",
+                  textShadow: "0 1px 3px rgba(0, 0, 0, 0.3)",
+                }}
+              >
                 Join our community of students and start collaborating today!
               </p>
             </Col>

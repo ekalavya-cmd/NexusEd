@@ -192,6 +192,14 @@ body {
 /* Utility classes */
 .bg-gradient-primary {
   background: var(--nexus-gradient-primary);
+  color: #ffffff !important; /* Ensure text is always white for better contrast */
+}
+
+/* Ensure text in the "Ready to Get Started" section is always visible */
+.bg-gradient-primary h2,
+.bg-gradient-primary p {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Add subtle text shadow for better readability */
 }
 
 [data-bs-theme="dark"] .bg-gradient-primary {
@@ -418,4 +426,29 @@ body {
     opacity: 1;
     transform: none;
   }
+}
+/* Add these styles to the end of your App.css file */
+
+/* Override for the Ready to Get Started section */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%) !important;
+  color: #ffffff !important;
+}
+
+/* Force white text color and add shadow for better contrast */
+.bg-gradient-primary h2,
+.bg-gradient-primary p {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Light theme specific overrides to ensure visibility */
+html[data-bs-theme="light"] .bg-gradient-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%) !important;
+}
+
+html[data-bs-theme="light"] .bg-gradient-primary h2,
+html[data-bs-theme="light"] .bg-gradient-primary p {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
