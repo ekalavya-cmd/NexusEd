@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Row, Col, Button, Modal } from "react-bootstrap";
 import { AuthContext } from "../context/AuthContext";
@@ -8,15 +8,29 @@ function Footer() {
   const [showAbout, setShowAbout] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
-  // New state for feature descriptions
   const [showFeatureDescription, setShowFeatureDescription] = useState(false);
   const [featureDetails, setFeatureDetails] = useState({
     title: "",
     icon: "",
     description: "",
   });
+  // New state for animation
+  const [animateIcons, setAnimateIcons] = useState(false);
 
   const currentYear = new Date().getFullYear();
+
+  // Trigger animation on component mount
+  useEffect(() => {
+    setAnimateIcons(true);
+
+    // Add logging for debugging
+    console.log("Footer component mounted");
+
+    // Return cleanup function
+    return () => {
+      console.log("Footer component unmounted");
+    };
+  }, []);
 
   // ROOT CAUSE FIX: The scroll issue is caused by CSS containment
   // This version forces scroll without containment interference
@@ -81,16 +95,19 @@ function Footer() {
 
   return (
     <>
-      <footer className="bg-gradient-primary text-white mt-auto">
+      <footer className="bg-gradient-primary text-white mt-auto footer-enhanced">
+        {/* Enhanced background pattern */}
+        <div className="footer-particles"></div>
+
         <div className="footer-main py-5">
           <div className="container">
             <Row className="g-5">
               {/* NexusEd Section with Connect With Us */}
               <Col lg={3} md={6} className="footer-section-col mb-4 mb-lg-0">
                 <div className="footer-section">
-                  <div className="d-flex align-items-center mb-3">
-                    <i className="fas fa-graduation-cap me-2 fs-2"></i>
-                    <h5 className="mb-0 fw-bold">NexusEd</h5>
+                  <div className="d-flex align-items-center mb-3 footer-brand">
+                    <i className="fas fa-graduation-cap me-2 fs-2 footer-logo-icon"></i>
+                    <h5 className="mb-0 fw-bold footer-logo-text">NexusEd</h5>
                   </div>
                   <div className="footer-description mb-3">
                     <p className="text-white-50 mb-2">
@@ -102,17 +119,24 @@ function Footer() {
                     </p>
                   </div>
 
-                  {/* Connect With Us Section (with Social Icons) - Moved under NexusEd description */}
-                  <h6 className="mb-3 fw-bold">Connect With Us</h6>
+                  {/* Connect With Us Section with animated reveal */}
+                  <h6 className="mb-3 fw-bold footer-heading-animated">
+                    Connect With Us
+                  </h6>
 
-                  {/* Social Icons - Without rectangular box */}
-                  <div className="social-icons mb-4">
+                  {/* Social Icons with animations */}
+                  <div
+                    className={`social-icons mb-4 ${
+                      animateIcons ? "social-icons-animated" : ""
+                    }`}
+                  >
                     <a
                       href="https://facebook.com/nexused"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="social-icon"
+                      className="social-icon social-icon-facebook"
                       title="Follow us on Facebook"
+                      style={{ animationDelay: "0.1s" }}
                     >
                       <i className="fab fa-facebook-f"></i>
                     </a>
@@ -120,8 +144,9 @@ function Footer() {
                       href="https://twitter.com/nexused"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="social-icon"
+                      className="social-icon social-icon-twitter"
                       title="Follow us on Twitter"
+                      style={{ animationDelay: "0.2s" }}
                     >
                       <i className="fab fa-twitter"></i>
                     </a>
@@ -129,8 +154,9 @@ function Footer() {
                       href="https://instagram.com/nexused"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="social-icon"
+                      className="social-icon social-icon-instagram"
                       title="Follow us on Instagram"
+                      style={{ animationDelay: "0.3s" }}
                     >
                       <i className="fab fa-instagram"></i>
                     </a>
@@ -138,8 +164,9 @@ function Footer() {
                       href="https://linkedin.com/company/nexused"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="social-icon"
+                      className="social-icon social-icon-linkedin"
                       title="Connect with us on LinkedIn"
+                      style={{ animationDelay: "0.4s" }}
                     >
                       <i className="fab fa-linkedin-in"></i>
                     </a>
@@ -147,12 +174,14 @@ function Footer() {
                 </div>
               </Col>
 
-              {/* Features Section - With clickable items */}
+              {/* Features Section - With enhanced interactive elements */}
               <Col lg={3} md={6} className="footer-section-col mb-4 mb-lg-0">
                 <div className="footer-section">
-                  <h6 className="mb-3 fw-bold">Features</h6>
+                  <h6 className="mb-3 fw-bold footer-heading-animated">
+                    Features
+                  </h6>
                   <ul className="list-unstyled footer-features">
-                    <li className="mb-2">
+                    <li className="mb-2 feature-item">
                       <button
                         className="bg-transparent border-0 p-0 d-flex align-items-center"
                         onClick={() =>
@@ -163,56 +192,64 @@ function Footer() {
                           )
                         }
                       >
-                        <i className="fas fa-users text-white-50 me-2"></i>
+                        <div className="feature-icon">
+                          <i className="fas fa-users text-white-50"></i>
+                        </div>
                         <span className="text-white-50">Study Groups</span>
                       </button>
                     </li>
-                    <li className="mb-2">
+                    <li className="mb-2 feature-item">
                       <button
                         className="bg-transparent border-0 p-0 d-flex align-items-center"
                         onClick={() =>
                           handleFeatureClick(
                             "Event Calendar",
                             "fas fa-calendar-alt",
-                            "Keep track of all your academic events, study sessions, and group meetings in one place. Create, edit, and manage events with customizable notifications to stay organized throughout your academic journey."
+                            "Keep track of important academic events, study group meetings, and assignment deadlines with our interactive calendar feature. Never miss an important date again!"
                           )
                         }
                       >
-                        <i className="fas fa-calendar-alt text-white-50 me-2"></i>
+                        <div className="feature-icon">
+                          <i className="fas fa-calendar-alt text-white-50"></i>
+                        </div>
                         <span className="text-white-50">Event Calendar</span>
                       </button>
                     </li>
-                    <li className="mb-2">
+                    <li className="mb-2 feature-item">
                       <button
                         className="bg-transparent border-0 p-0 d-flex align-items-center"
                         onClick={() =>
                           handleFeatureClick(
                             "Group Chat",
                             "fas fa-comments",
-                            "Communicate with your study group members in real-time. Share ideas, ask questions, and collaborate efficiently with integrated messaging that supports text, images, and file sharing."
+                            "Communicate with your study group members in real-time through our integrated chat system. Share ideas, ask questions, and build connections with your peers."
                           )
                         }
                       >
-                        <i className="fas fa-comments text-white-50 me-2"></i>
+                        <div className="feature-icon">
+                          <i className="fas fa-comments text-white-50"></i>
+                        </div>
                         <span className="text-white-50">Group Chat</span>
                       </button>
                     </li>
-                    <li className="mb-2">
+                    <li className="mb-2 feature-item">
                       <button
                         className="bg-transparent border-0 p-0 d-flex align-items-center"
                         onClick={() =>
                           handleFeatureClick(
                             "Resource Sharing",
                             "fas fa-share-alt",
-                            "Easily share study materials, lecture notes, practice problems, and helpful resources with your peers. Upload, organize, and access a wide range of educational content to support collaborative learning."
+                            "Upload, organize, and access a wide range of educational content to support collaborative learning."
                           )
                         }
                       >
-                        <i className="fas fa-share-alt text-white-50 me-2"></i>
+                        <div className="feature-icon">
+                          <i className="fas fa-share-alt text-white-50"></i>
+                        </div>
                         <span className="text-white-50">Resource Sharing</span>
                       </button>
                     </li>
-                    <li className="mb-2">
+                    <li className="mb-2 feature-item">
                       <button
                         className="bg-transparent border-0 p-0 d-flex align-items-center"
                         onClick={() =>
@@ -223,7 +260,9 @@ function Footer() {
                           )
                         }
                       >
-                        <i className="fas fa-moon text-white-50 me-2"></i>
+                        <div className="feature-icon">
+                          <i className="fas fa-moon text-white-50"></i>
+                        </div>
                         <span className="text-white-50">Dark Mode</span>
                       </button>
                     </li>
@@ -234,9 +273,11 @@ function Footer() {
               {/* Support & Info Section */}
               <Col lg={3} md={6} className="footer-section-col mb-4 mb-lg-0">
                 <div className="footer-section">
-                  <h6 className="mb-3 fw-bold">Support & Info</h6>
+                  <h6 className="mb-3 fw-bold footer-heading-animated">
+                    Support & Info
+                  </h6>
                   <ul className="list-unstyled footer-links">
-                    <li className="mb-3">
+                    <li className="mb-3 footer-link-item">
                       <button
                         className="text-white-50 text-decoration-none hover-link bg-transparent border-0 p-0"
                         onClick={() => setShowAbout(true)}
@@ -245,7 +286,7 @@ function Footer() {
                         About Us
                       </button>
                     </li>
-                    <li className="mb-3">
+                    <li className="mb-3 footer-link-item">
                       <button
                         className="text-white-50 text-decoration-none hover-link bg-transparent border-0 p-0"
                         onClick={() => setShowPrivacy(true)}
@@ -254,7 +295,7 @@ function Footer() {
                         Privacy Policy
                       </button>
                     </li>
-                    <li className="mb-3">
+                    <li className="mb-3 footer-link-item">
                       <button
                         className="text-white-50 text-decoration-none hover-link bg-transparent border-0 p-0"
                         onClick={() => setShowTerms(true)}
@@ -263,7 +304,7 @@ function Footer() {
                         Terms of Service
                       </button>
                     </li>
-                    <li className="mb-3">
+                    <li className="mb-3 footer-link-item">
                       <a
                         href="mailto:hello@nexused.com"
                         className="text-white-50 text-decoration-none hover-link"
@@ -272,7 +313,7 @@ function Footer() {
                         Contact Us
                       </a>
                     </li>
-                    <li className="mb-3">
+                    <li className="mb-3 footer-link-item">
                       <a
                         href="tel:+1234567890"
                         className="text-white-50 text-decoration-none hover-link"
@@ -288,9 +329,11 @@ function Footer() {
               {/* Quick Links Section (Navigation Links) */}
               <Col lg={3} md={6} className="footer-section-col mb-4 mb-lg-0">
                 <div className="footer-section">
-                  <h6 className="mb-3 fw-bold">Quick Links</h6>
+                  <h6 className="mb-3 fw-bold footer-heading-animated">
+                    Quick Links
+                  </h6>
                   <ul className="list-unstyled footer-links">
-                    <li className="mb-3">
+                    <li className="mb-3 footer-link-item">
                       <Link
                         to="/"
                         className="text-white-50 text-decoration-none hover-link border-0"
@@ -298,7 +341,7 @@ function Footer() {
                         Home
                       </Link>
                     </li>
-                    <li className="mb-3">
+                    <li className="mb-3 footer-link-item">
                       <Link
                         to="/study-groups"
                         className="text-white-50 text-decoration-none hover-link border-0"
@@ -308,7 +351,7 @@ function Footer() {
                     </li>
                     {user && (
                       <>
-                        <li className="mb-3">
+                        <li className="mb-3 footer-link-item">
                           <Link
                             to="/calendar"
                             className="text-white-50 text-decoration-none hover-link border-0"
@@ -316,7 +359,7 @@ function Footer() {
                             Calendar
                           </Link>
                         </li>
-                        <li className="mb-3">
+                        <li className="mb-3 footer-link-item">
                           <Link
                             to="/profile"
                             className="text-white-50 text-decoration-none hover-link border-0"
@@ -328,7 +371,7 @@ function Footer() {
                     )}
                     {!user && (
                       <>
-                        <li className="mb-3">
+                        <li className="mb-3 footer-link-item">
                           <Link
                             to="/login"
                             className="text-white-50 text-decoration-none hover-link border-0"
@@ -336,7 +379,7 @@ function Footer() {
                             Login
                           </Link>
                         </li>
-                        <li className="mb-3">
+                        <li className="mb-3 footer-link-item">
                           <Link
                             to="/register"
                             className="text-white-50 text-decoration-none hover-link border-0"
@@ -353,26 +396,29 @@ function Footer() {
           </div>
         </div>
 
-        {/* Footer Bottom with Copyright */}
+        {/* Footer Bottom with enhanced styling */}
         <div className="footer-bottom py-3">
           <div className="container">
             <Row className="align-items-center">
               <Col md={6}>
                 <p className="mb-md-0 text-white-50 small copyright">
                   © {currentYear} NexusEd. All rights reserved.
-                  <span className="ms-2">Built with ❤️ for students</span>
+                  <span className="ms-2">
+                    Built with
+                    <span className="heart-pulse mx-1">❤️</span> for students
+                  </span>
                 </p>
               </Col>
               <Col md={6} className="text-md-end">
                 <div className="d-flex justify-content-md-end justify-content-center align-items-center gap-3">
-                  <span className="text-white-50 small">
+                  <span className="text-white-50 small version-badge">
                     <i className="fas fa-code me-1"></i>
                     Version 1.0.0
                   </span>
-                  {/* ROOT CAUSE FIX: Direct button without Bootstrap component wrapper */}
+                  {/* Enhanced back to top button */}
                   <button
                     type="button"
-                    className="back-to-top-btn"
+                    className="back-to-top-btn pulse-animation"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -396,6 +442,7 @@ function Footer() {
         show={showFeatureDescription}
         onHide={() => setShowFeatureDescription(false)}
         centered
+        className="feature-modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>
@@ -444,46 +491,6 @@ function Footer() {
             where students can connect, collaborate, and achieve academic
             success together.
           </p>
-          <Row className="g-3 mt-3">
-            <Col md={6}>
-              <div className="feature-highlight p-3 bg-light rounded">
-                <i className="fas fa-users text-primary me-2"></i>
-                <strong>Study Groups</strong>
-                <p className="mb-0 small text-muted">
-                  Join or create study groups based on your interests and
-                  subjects.
-                </p>
-              </div>
-            </Col>
-            <Col md={6}>
-              <div className="feature-highlight p-3 bg-light rounded">
-                <i className="fas fa-calendar text-primary me-2"></i>
-                <strong>Event Management</strong>
-                <p className="mb-0 small text-muted">
-                  Schedule and manage study sessions, meetings, and events.
-                </p>
-              </div>
-            </Col>
-            <Col md={6}>
-              <div className="feature-highlight p-3 bg-light rounded">
-                <i className="fas fa-share-alt text-primary me-2"></i>
-                <strong>Resource Sharing</strong>
-                <p className="mb-0 small text-muted">
-                  Share notes, documents, and learning materials with your
-                  peers.
-                </p>
-              </div>
-            </Col>
-            <Col md={6}>
-              <div className="feature-highlight p-3 bg-light rounded">
-                <i className="fas fa-comments text-primary me-2"></i>
-                <strong>Real-time Chat</strong>
-                <p className="mb-0 small text-muted">
-                  Communicate with group members through integrated messaging.
-                </p>
-              </div>
-            </Col>
-          </Row>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowAbout(false)}>
@@ -511,9 +518,8 @@ function Footer() {
               <strong>Last updated:</strong> {new Date().toLocaleDateString()}
             </p>
             <p>
-              At NexusEd, we take your privacy seriously. This Privacy Policy
-              explains how we collect, use, and protect your personal
-              information when you use our platform.
+              This Privacy Policy explains how we collect, use, and protect your
+              personal information when you use our platform.
             </p>
           </div>
 

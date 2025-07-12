@@ -49,50 +49,53 @@
   box-shadow: none !important;
 }
 
-/* Logo container with improved visibility for light mode while preserving hover effects */
+/* Remove hover effects from NexusEd logo */
 .logo-container {
   width: 38px;
   height: 38px;
-  background: rgba(
-    0,
-    0,
-    0,
-    0.2
-  ); /* Darker background for better visibility in light mode */
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 0.75rem;
-  transition: all 0.3s ease;
+  /* Remove transition */
 }
 
 /* Ensure logo icon is always visible */
 .logo-icon {
-  color: #ffffff !important; /* Always white for better contrast */
+  color: #ffffff !important;
   font-size: 1.2rem;
 }
 
-/* Hover effects for light mode */
+/* Remove hover effects for light mode */
 .brand-logo:hover .logo-container {
-  background: rgba(0, 0, 0, 0.3); /* Slightly darker on hover for light mode */
-  transform: translateY(-2px); /* Subtle lift effect */
+  background: rgba(0, 0, 0, 0.2); /* Same as non-hover state */
+  transform: none; /* Remove transform effect */
 }
 
-/* Dark mode styling */
+/* Dark mode styling - keep the background color */
 [data-bs-theme="dark"] .logo-container {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Preserve hover effects for dark mode */
+/* Remove hover effects for dark mode */
 [data-bs-theme="dark"] .brand-logo:hover .logo-container {
-  background: rgba(
-    255,
-    255,
-    255,
-    0.2
-  ); /* Slightly brighter on hover for dark mode */
-  transform: translateY(-2px); /* Same lift effect */
+  background: rgba(255, 255, 255, 0.1); /* Same as non-hover state */
+  transform: none; /* Remove transform effect */
+}
+
+/* Update performance optimizations to match these changes */
+@media (prefers-reduced-motion: reduce) {
+  .navbar-custom *,
+  .dropdown-item,
+  .nav-link-custom,
+  .auth-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* No need to include logo container here since transitions are removed */
 }
 
 .brand-text {
