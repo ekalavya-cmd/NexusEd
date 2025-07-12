@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { useTemporaryMessage } from "../utils/formatUtils";
@@ -34,11 +34,24 @@ const useProfile = () => {
   const DEFAULT_BIO =
     "A student passionate about learning and sharing knowledge.";
 
+  // Memoize cleanup function to prevent useEffect dependency warnings
+  const memoizedCleanup = useCallback(() => {
+    return cleanup();
+  }, [cleanup]);
+
   useEffect(() => {
     return () => {
-      cleanup();
+      memoizedCleanup();
     };
-  }, []);
+  }, [memoizedCleanup]);
+
+  // Memoize setTemporaryMessage to prevent useEffect dependency warnings
+  const memoizedSetTemporaryMessage = useCallback(
+    (setter, successSetter, message) => {
+      setTemporaryMessage(setter, successSetter, message);
+    },
+    [setTemporaryMessage]
+  );
 
   useEffect(() => {
     if (user) {
@@ -66,7 +79,7 @@ const useProfile = () => {
           setUsername(response.data.username || "");
         } catch (err) {
           console.error("Failed to fetch user profile:", err.message);
-          setTemporaryMessage(
+          memoizedSetTemporaryMessage(
             setError,
             setSuccess,
             "Failed to fetch user profile"
@@ -86,7 +99,11 @@ const useProfile = () => {
           const data = await response.json();
           setPosts(data);
         } catch (err) {
-          setTemporaryMessage(setError, setSuccess, "Failed to fetch posts");
+          memoizedSetTemporaryMessage(
+            setError,
+            setSuccess,
+            "Failed to fetch posts"
+          );
         } finally {
           setIsPostsLoading(false);
         }
@@ -107,7 +124,7 @@ const useProfile = () => {
           );
           setJoinedGroups(userGroups);
         } catch (err) {
-          setTemporaryMessage(
+          memoizedSetTemporaryMessage(
             setError,
             setSuccess,
             "Failed to fetch study groups"
@@ -121,7 +138,7 @@ const useProfile = () => {
       fetchUserPosts();
       fetchUserGroups();
     }
-  }, [user?.id, setUser]);
+  }, [user, setUser, memoizedSetTemporaryMessage]);
 
   const handleProfilePictureChange = async (e, fileInputRef) => {
     const file = e.target.files[0];
@@ -146,7 +163,7 @@ const useProfile = () => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem("token");
-      const response = await axios.post(
+      await axios.post(
         `${process.env.REACT_APP_API_URL}/api/users/upload-profile-picture`,
         formData,
         {
@@ -166,7 +183,7 @@ const useProfile = () => {
         bio: profileResponse.data.bio,
         username: profileResponse.data.username,
         email: profileResponse.data.email,
-        profilePicture: response.data.profilePicture,
+        profilePicture: profileResponse.data.profilePicture,
         createdAt: profileResponse.data.createdAt,
       };
       setUser(updatedUser);
@@ -201,7 +218,7 @@ const useProfile = () => {
         throw new Error("Authentication token missing. Please log in again.");
       }
 
-      const response = await axios.delete(
+      await axios.delete(
         `${process.env.REACT_APP_API_URL}/api/users/me/profile-picture`,
         {
           headers: {

@@ -22,6 +22,7 @@ function ProfileHeader({
   uploadError,
   isLoading,
   imageLoadError,
+  setImageLoadError, // ✅ FIXED: Added missing prop definition
   handleProfilePictureChange,
   handleRemoveProfilePicture,
   handleBioUpdate,
@@ -63,7 +64,7 @@ function ProfileHeader({
                     src={profilePicture}
                     alt={username}
                     className="w-100 h-100 object-fit-cover"
-                    onError={() => setImageLoadError(true)}
+                    onError={() => setImageLoadError(true)} // ✅ This line 66 now works correctly
                     style={{ display: imageLoadError ? "none" : "block" }}
                   />
                 ) : (
@@ -105,50 +106,50 @@ function ProfileHeader({
           <Col md={9}>
             {isEditing ? (
               <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Username</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    maxLength={USERNAME_MAX_LENGTH}
-                    required
-                  />
+                <div className="mb-3">
+                  <Form.Label htmlFor="username">Username</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      id="username"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      minLength={USERNAME_MIN_LENGTH}
+                      maxLength={USERNAME_MAX_LENGTH}
+                      required
+                    />
+                  </InputGroup>
                   <Form.Text className="text-muted">
-                    {username.length}/{USERNAME_MAX_LENGTH} characters (min{" "}
-                    {USERNAME_MIN_LENGTH})
+                    {USERNAME_MIN_LENGTH}-{USERNAME_MAX_LENGTH} characters
                   </Form.Text>
-                </Form.Group>
+                </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Bio</Form.Label>
+                <div className="mb-3">
+                  <Form.Label htmlFor="bio">Bio</Form.Label>
                   <Form.Control
+                    id="bio"
                     as="textarea"
                     rows={3}
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     maxLength={BIO_MAX_LENGTH}
+                    placeholder={DEFAULT_BIO}
                   />
                   <Form.Text className="text-muted">
                     {bio.length}/{BIO_MAX_LENGTH} characters
                   </Form.Text>
-                </Form.Group>
+                </div>
 
-                <div className="d-flex justify-content-end gap-2">
+                <div className="d-flex gap-2">
                   <Button
+                    type="button"
                     variant="secondary"
                     onClick={handleCancel}
                     disabled={isLoading}
                   >
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="primary"
-                    disabled={
-                      isLoading || username.length < USERNAME_MIN_LENGTH
-                    }
-                  >
+                  <Button type="submit" variant="primary" disabled={isLoading}>
                     {isLoading ? (
                       <>
                         <Spinner

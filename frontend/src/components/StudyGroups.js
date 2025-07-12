@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import {
-  Container,
   Row,
   Col,
   Card,
-  Form,
   Button,
   ButtonGroup,
   Alert,
@@ -108,9 +106,8 @@ function StudyGroups() {
 
   const handleCreateGroup = async (e) => {
     e.preventDefault();
-
-    if (!newGroup.name || !newGroup.description) {
-      setTemporaryMessage("error", "Please fill out all required fields.");
+    if (!user) {
+      setTemporaryMessage("error", "Please log in to create a group.");
       return;
     }
 
@@ -125,7 +122,6 @@ function StudyGroups() {
           },
         }
       );
-
       setGroups([response.data, ...groups]);
       setNewGroup({
         name: "",
@@ -137,10 +133,7 @@ function StudyGroups() {
       setTemporaryMessage("success", "Study group created successfully!");
     } catch (err) {
       console.error("Error creating study group:", err);
-      setTemporaryMessage(
-        "error",
-        err.response?.data?.message || "Failed to create study group."
-      );
+      setTemporaryMessage("error", "Failed to create study group.");
     } finally {
       setIsLoading(false);
     }
@@ -148,11 +141,7 @@ function StudyGroups() {
 
   const handleUpdateGroup = async (e) => {
     e.preventDefault();
-
-    if (!editGroup.name || !editGroup.description) {
-      setTemporaryMessage("error", "Please fill out all required fields.");
-      return;
-    }
+    if (!user || !editGroup) return;
 
     try {
       setIsLoading(true);
@@ -165,7 +154,6 @@ function StudyGroups() {
           },
         }
       );
-
       setGroups(
         groups.map((group) =>
           group._id === editGroup._id ? response.data : group
@@ -175,16 +163,18 @@ function StudyGroups() {
       setTemporaryMessage("success", "Study group updated successfully!");
     } catch (err) {
       console.error("Error updating study group:", err);
-      setTemporaryMessage(
-        "error",
-        err.response?.data?.message || "Failed to update study group."
-      );
+      setTemporaryMessage("error", "Failed to update study group.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleJoinGroup = async (groupId) => {
+    if (!user) {
+      setTemporaryMessage("error", "Please log in to join a group.");
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/study-groups/${groupId}/join`,
@@ -195,17 +185,13 @@ function StudyGroups() {
           },
         }
       );
-
       setGroups(
         groups.map((group) => (group._id === groupId ? response.data : group))
       );
-      setTemporaryMessage("success", "Joined study group successfully!");
+      setTemporaryMessage("success", "Successfully joined the group!");
     } catch (err) {
-      console.error("Error joining study group:", err);
-      setTemporaryMessage(
-        "error",
-        err.response?.data?.message || "Failed to join study group."
-      );
+      console.error("Error joining group:", err);
+      setTemporaryMessage("error", "Failed to join group.");
     }
   };
 
@@ -220,22 +206,18 @@ function StudyGroups() {
           },
         }
       );
-
       setGroups(
         groups.map((group) => (group._id === groupId ? response.data : group))
       );
-      setTemporaryMessage("success", "Left study group successfully!");
+      setTemporaryMessage("success", "Successfully left the group!");
     } catch (err) {
-      console.error("Error leaving study group:", err);
-      setTemporaryMessage(
-        "error",
-        err.response?.data?.message || "Failed to leave study group."
-      );
+      console.error("Error leaving group:", err);
+      setTemporaryMessage("error", "Failed to leave group.");
     }
   };
 
-  const handleDeleteConfirmation = (groupId) => {
-    setDeleteConfirmation(groupId);
+  const handleDeleteConfirmation = (group) => {
+    setDeleteConfirmation(group);
   };
 
   const handleDeleteGroup = async (groupId) => {
@@ -248,16 +230,12 @@ function StudyGroups() {
           },
         }
       );
-
       setGroups(groups.filter((group) => group._id !== groupId));
       setDeleteConfirmation(null);
       setTemporaryMessage("success", "Study group deleted successfully!");
     } catch (err) {
       console.error("Error deleting study group:", err);
-      setTemporaryMessage(
-        "error",
-        err.response?.data?.message || "Failed to delete study group."
-      );
+      setTemporaryMessage("error", "Failed to delete study group.");
     }
   };
 

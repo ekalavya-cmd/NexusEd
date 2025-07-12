@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Row, Col, Button, ButtonGroup, Spinner, Alert } from "react-bootstrap";
+import { Button, ButtonGroup, Spinner, Alert } from "react-bootstrap";
 import axios from "axios";
 import PostCard from "./PostCard";
 import PostForm from "./PostForm";
@@ -134,6 +134,7 @@ function UserPosts({
       setPosts(
         posts.map((post) => (post._id === postId ? response.data : post))
       );
+      setTemporarySuccess("Comment added successfully!");
     } catch (err) {
       console.error("Error adding comment:", err);
       setTemporaryMessage("Failed to add comment. Please try again.");
@@ -165,7 +166,7 @@ function UserPosts({
 
   if (isLoading) {
     return (
-      <div className="text-center py-5">
+      <div className="text-center py-4">
         <Spinner animation="border" variant="primary" />
         <p className="mt-3 text-secondary">Loading posts...</p>
       </div>
@@ -173,13 +174,13 @@ function UserPosts({
   }
 
   return (
-    <div className="mt-3">
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+      <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <Button
-            variant="primary"
-            className="btn-hover-shadow"
+            variant={showPostForm ? "outline-secondary" : "primary"}
             onClick={() => setShowPostForm(!showPostForm)}
+            className="btn-hover-shadow"
           >
             <i className={`fas fa-${showPostForm ? "times" : "plus"} me-2`}></i>
             {showPostForm ? "Cancel" : "Create Post"}
