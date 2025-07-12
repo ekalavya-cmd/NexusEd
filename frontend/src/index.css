@@ -1,6 +1,7 @@
 /* Global styles for NexusEd with Enhanced Theme Support - SCROLL BUTTON FIXED */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
+@import "./styles/formStyles.css";
 @import "./styles/authStyles.css";
 @import "./styles/unifiedTheme.css";
 @import "./styles/footerStyles.css";
@@ -10,6 +11,7 @@
 @import "./styles/debugTheme.css";
 @import "./styles/performanceOptimization.css";
 @import "./styles/advancedDarkMode.css";
+@import "./styles/studyGroupsStyles.css";
 
 /* ===== CRITICAL SCROLL BUTTON FIX ===== */
 /* Override Bootstrap z-index variables for proper dropdown hierarchy */

@@ -6,9 +6,10 @@ import {
   Card,
   Button,
   ButtonGroup,
-  Alert,
   Spinner,
   Modal,
+  InputGroup,
+  FormControl,
 } from "react-bootstrap";
 import axios from "axios";
 import GroupForm from "./GroupForm";
@@ -33,6 +34,7 @@ function StudyGroups() {
   const [confirmation, setConfirmation] = useState(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const timeoutRef = useRef(null);
   const confirmationTimeoutRef = useRef(null);
   const confirmationMessageRef = useRef(null);
@@ -74,7 +76,7 @@ function StudyGroups() {
       setError("");
       setSuccess("");
       timeoutRef.current = null;
-    }, 3000);
+    }, 1500); // Reduced to 1.5 seconds
   };
 
   const clearConfirmation = () => {
@@ -196,6 +198,8 @@ function StudyGroups() {
   };
 
   const handleLeaveGroup = async (groupId) => {
+    if (!user) return;
+
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/study-groups/${groupId}/leave`,
@@ -216,11 +220,13 @@ function StudyGroups() {
     }
   };
 
-  const handleDeleteConfirmation = (group) => {
-    setDeleteConfirmation(group);
+  const handleDeleteConfirmation = (groupId) => {
+    setDeleteConfirmation(groupId);
   };
 
   const handleDeleteGroup = async (groupId) => {
+    if (!user) return;
+
     try {
       await axios.delete(
         `${process.env.REACT_APP_API_URL}/api/study-groups/${groupId}`,
@@ -258,10 +264,18 @@ function StudyGroups() {
     }));
   };
 
-  const filteredGroups =
-    selectedCategory === "All"
-      ? groups
-      : groups.filter((group) => group.category === selectedCategory);
+  // Filter groups by category and search term
+  const filteredGroups = groups
+    .filter(
+      (group) =>
+        selectedCategory === "All" || group.category === selectedCategory
+    )
+    .filter(
+      (group) =>
+        searchTerm === "" ||
+        group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   if (authLoading) {
     return (
@@ -273,7 +287,7 @@ function StudyGroups() {
   }
 
   return (
-    <div className="animate-fade-in-up">
+    <div className="study-groups-container animate-fade-in-up">
       {error && (
         <ConfirmationMessage
           message={error}
@@ -297,66 +311,121 @@ function StudyGroups() {
         />
       )}
 
-      <h1 className="display-6 fw-bold text-primary mb-4">Study Groups</h1>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h1 className="study-groups-title mb-3 mb-md-0">Study Groups</h1>
 
-      {user && (
-        <div className="mb-4 text-end">
+        {user && (
           <Button
             variant="primary"
-            className="btn-hover-shadow"
+            className="create-group-btn"
             onClick={() => setShowCreateModal(true)}
           >
             <i className="fas fa-plus me-2"></i>
             Create New Group
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
-      <Card className="mb-4 shadow-sm">
+      <Card className="filter-card mb-4">
         <Card.Body>
-          <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-            <h2 className="fs-4 fw-semibold text-primary mb-3 mb-md-0">
-              Filter Study Groups
-            </h2>
-            <div className="d-flex flex-wrap gap-2">
-              <ButtonGroup>
-                <Button
-                  variant={
-                    selectedCategory === "All" ? "primary" : "outline-primary"
-                  }
-                  onClick={() => setSelectedCategory("All")}
-                >
-                  All
-                </Button>
-                {categories.map((category) => (
+          <div className="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+            <div className="search-container">
+              <InputGroup className="search-input">
+                <InputGroup.Text>
+                  <i className="fas fa-search"></i>
+                </InputGroup.Text>
+                <FormControl
+                  placeholder="Search groups..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  aria-label="Search groups"
+                />
+                {searchTerm && (
                   <Button
-                    key={category}
-                    variant={
-                      selectedCategory === category
-                        ? "primary"
-                        : "outline-primary"
-                    }
-                    onClick={() => setSelectedCategory(category)}
+                    variant="outline-secondary"
+                    onClick={() => setSearchTerm("")}
+                    aria-label="Clear search"
                   >
-                    {category}
+                    <i className="fas fa-times"></i>
                   </Button>
-                ))}
-              </ButtonGroup>
+                )}
+              </InputGroup>
+            </div>
+            <div className="filter-buttons">
+              <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+                <h6 className="filter-label mb-2 mb-md-0 me-0 me-md-2">
+                  Filter:
+                </h6>
+                <ButtonGroup className="category-filter">
+                  <Button
+                    variant={
+                      selectedCategory === "All" ? "primary" : "outline-primary"
+                    }
+                    onClick={() => setSelectedCategory("All")}
+                    className="category-btn"
+                  >
+                    All
+                  </Button>
+                  {categories.map((category) => (
+                    <Button
+                      key={category}
+                      variant={
+                        selectedCategory === category
+                          ? "primary"
+                          : "outline-primary"
+                      }
+                      onClick={() => setSelectedCategory(category)}
+                      className="category-btn"
+                    >
+                      {category}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </div>
             </div>
           </div>
         </Card.Body>
       </Card>
 
       {isLoading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-3 text-secondary">Loading study groups...</p>
+        <div className="loader-container">
+          <div className="loader-content">
+            <Spinner animation="border" variant="primary" size="lg" />
+            <p className="loading-text">Loading study groups...</p>
+          </div>
         </div>
       ) : filteredGroups.length === 0 ? (
-        <Alert variant="info">
-          <i className="fas fa-info-circle me-2"></i>
-          No study groups found. {user && "Create one to get started!"}
-        </Alert>
+        <div className="empty-state">
+          <div className="empty-icon">
+            <i className="fas fa-users-slash"></i>
+          </div>
+          <h3 className="empty-title">No study groups found</h3>
+          <p className="empty-description">
+            {searchTerm
+              ? "No results match your search criteria. Try different keywords or clear the search."
+              : selectedCategory !== "All"
+              ? `No ${selectedCategory} groups available yet.`
+              : user
+              ? "Create a new study group to get started!"
+              : "Join NexusEd to create and participate in study groups."}
+          </p>
+          {user && (
+            <Button
+              variant="primary"
+              className="mt-3"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <i className="fas fa-plus me-2"></i>
+              Create New Group
+            </Button>
+          )}
+          {!user && (
+            <Button variant="primary" className="mt-3" href="/login">
+              <i className="fas fa-sign-in-alt me-2"></i>
+              Login to Join
+            </Button>
+          )}
+        </div>
       ) : (
         <Row xs={1} md={2} lg={3} className="g-4">
           {filteredGroups.map((group, index) => (
@@ -386,9 +455,13 @@ function StudyGroups() {
         onHide={() => setShowCreateModal(false)}
         size="lg"
         centered
+        className="group-modal"
       >
         <Modal.Header closeButton>
-          <Modal.Title>Create Study Group</Modal.Title>
+          <Modal.Title>
+            <i className="fas fa-plus-circle text-primary me-2"></i>
+            Create Study Group
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <GroupForm
@@ -405,9 +478,18 @@ function StudyGroups() {
       </Modal>
 
       {/* Edit Group Modal */}
-      <Modal show={!!editGroup} onHide={cancelEditGroup} size="lg" centered>
+      <Modal
+        show={!!editGroup}
+        onHide={cancelEditGroup}
+        size="lg"
+        centered
+        className="group-modal"
+      >
         <Modal.Header closeButton>
-          <Modal.Title>Edit Study Group</Modal.Title>
+          <Modal.Title>
+            <i className="fas fa-edit text-primary me-2"></i>
+            Edit Study Group
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {editGroup && (

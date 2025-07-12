@@ -41,62 +41,100 @@ function GroupCard({
     }
   };
 
+  // Get icon color based on category
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case "Mathematics":
+        return "#0d6efd"; // Primary blue
+      case "Programming":
+        return "#6610f2"; // Purple
+      case "Literature":
+        return "#6f42c1"; // Indigo
+      case "Science":
+        return "#20c997"; // Teal
+      case "History":
+        return "#fd7e14"; // Orange
+      default:
+        return "#0d6efd"; // Default blue
+    }
+  };
+
+  // Format date to show "X days/months ago" or specific date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 1) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <Card
-      className="h-100 shadow-sm animate-fade-in-up"
+      className="group-card h-100 shadow-hover animate-fade-in-up"
       style={{ animationDelay }}
     >
-      <Card.Body>
-        <div className="d-flex align-items-center mb-3">
-          <div
-            className="bg-gradient-primary rounded-circle text-white d-flex align-items-center justify-content-center"
-            style={{ width: "48px", height: "48px" }}
-          >
-            <i
-              className={`fa-solid ${group.groupImage || "fa-users"} fs-4`}
-            ></i>
-          </div>
-          <div className="ms-3 flex-grow-1">
-            <div className="d-flex justify-content-between align-items-center">
-              <Link
-                to={`/groups/${group._id}`}
-                className="text-decoration-none"
-              >
-                <h5 className="card-title fw-bold mb-0">{group.name}</h5>
-              </Link>
-              {group.category && (
-                <Badge bg="primary" pill className="ms-2">
+      <div
+        className="group-card-header"
+        style={{ backgroundColor: getCategoryColor(group.category) + "15" }}
+      >
+        <Link
+          to={`/groups/${group._id}`}
+          className="text-decoration-none stretched-link-wrapper"
+        >
+          <div className="d-flex align-items-center">
+            <div
+              className="group-icon-container"
+              style={{ backgroundColor: getCategoryColor(group.category) }}
+            >
+              <i className={`fa-solid ${group.groupImage || "fa-users"}`}></i>
+            </div>
+            <div className="ms-3 flex-grow-1">
+              <h5 className="group-title">{group.name}</h5>
+              <div className="d-flex align-items-center">
+                <Badge
+                  className="category-badge"
+                  style={{
+                    backgroundColor: getCategoryColor(group.category),
+                    color: "white",
+                  }}
+                >
                   {group.category}
                 </Badge>
-              )}
+              </div>
             </div>
-            <p className="card-text text-muted mb-2 fst-italic">
-              {group.description}
-            </p>
           </div>
-        </div>
+        </Link>
+      </div>
 
-        <div className="d-flex flex-wrap mb-3">
-          <small className="me-3 text-muted">
-            <i className="fas fa-users me-1"></i> {group.members?.length || 0}{" "}
-            members
-          </small>
-          <small className="me-3 text-muted">
-            <i className="fas fa-calendar-alt me-1"></i>{" "}
-            {group.events?.length || 0} events
-          </small>
-          <small className="text-muted">
-            <i className="fas fa-clock me-1"></i> Created{" "}
-            {new Date(group.createdAt).toLocaleDateString()}
-          </small>
+      <Card.Body className="group-card-body">
+        <p className="group-description">{group.description}</p>
+
+        <div className="group-stats">
+          <div className="stat-item">
+            <i className="fas fa-users"></i>
+            <span>{group.members?.length || 0} members</span>
+          </div>
+          <div className="stat-item">
+            <i className="fas fa-calendar-alt"></i>
+            <span>{group.events?.length || 0} events</span>
+          </div>
+          <div className="stat-item">
+            <i className="fas fa-clock"></i>
+            <span>{formatDate(group.createdAt)}</span>
+          </div>
         </div>
 
         {group.members && group.members.length > 0 && (
-          <div className="mb-3">
+          <div className="members-section">
             <Button
-              variant="outline-secondary"
-              size="sm"
-              className="mb-2"
+              variant="link"
+              className="members-toggle"
               ref={toggleButtonRef}
               onClick={handleToggleMembers}
             >
@@ -109,22 +147,19 @@ function GroupCard({
             </Button>
 
             {visibleMembers[group._id] && (
-              <div className="d-flex flex-wrap mt-2">
+              <div className="members-list">
                 {group.members.map((member) => (
-                  <div key={member._id} className="tooltip-container me-2 mb-2">
-                    <div
-                      className="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        fontSize: "12px",
-                      }}
-                    >
+                  <div
+                    key={member._id}
+                    className="member-avatar"
+                    title={member.username || "Unknown"}
+                  >
+                    <div className="avatar-circle">
                       {member.username
                         ? member.username.charAt(0).toUpperCase()
                         : "U"}
                     </div>
-                    <span className="tooltip">
+                    <span className="member-tooltip">
                       {member.username || "Unknown"}
                     </span>
                   </div>
@@ -135,77 +170,82 @@ function GroupCard({
         )}
 
         {user && (
-          <div className="d-flex mt-2">
+          <div className="group-actions">
             {group.members?.some((member) => member._id === user.id) ? (
               group.creator._id === user.id ? (
-                <>
+                <div className="owner-actions">
                   <Button
-                    variant="warning"
+                    variant="outline-primary"
                     size="sm"
-                    className="me-2"
+                    className="action-btn edit-btn"
                     onClick={() => handleEditGroup(group)}
                   >
-                    <i className="fa-solid fa-edit me-1"></i>
-                    Edit Group
+                    <i className="fa-solid fa-edit"></i>
+                    <span>Edit</span>
                   </Button>
                   <Button
-                    variant="danger"
+                    variant="outline-danger"
                     size="sm"
+                    className="action-btn delete-btn"
                     onClick={() => handleDeleteConfirmation(group._id)}
                   >
-                    <i className="fa-solid fa-trash me-1"></i>
-                    Delete Group
+                    <i className="fa-solid fa-trash"></i>
+                    <span>Delete</span>
                   </Button>
-                </>
+                </div>
               ) : (
                 <Button
-                  variant="danger"
+                  variant="outline-danger"
                   size="sm"
+                  className="action-btn leave-btn"
                   onClick={handleLeaveClick}
                   ref={leaveButtonRef}
                 >
-                  <i className="fa-solid fa-right-from-bracket me-1"></i>
-                  Leave Group
+                  <i className="fa-solid fa-right-from-bracket"></i>
+                  <span>Leave Group</span>
                 </Button>
               )
             ) : (
               <Button
                 variant="primary"
                 size="sm"
+                className="action-btn join-btn"
                 onClick={handleJoinClick}
                 ref={joinButtonRef}
               >
-                <i className="fa-solid fa-right-to-bracket me-1"></i>
-                Join Group
+                <i className="fa-solid fa-right-to-bracket"></i>
+                <span>Join Group</span>
               </Button>
             )}
           </div>
         )}
 
         {deleteConfirmation === group._id && (
-          <Alert variant="warning" className="mt-3 animate-fade-in-up">
-            <div className="d-flex justify-content-between align-items-center">
-              <span>
-                Are you sure you want to delete "{group.name}"? This action
-                cannot be undone.
-              </span>
-              <div>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleDeleteGroup(group._id)}
-                >
-                  Yes
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={cancelDeleteGroup}
-                >
-                  No
-                </Button>
-              </div>
+          <Alert
+            variant="warning"
+            className="delete-confirmation animate-fade-in-up"
+          >
+            <p className="mb-2">
+              Are you sure you want to delete "{group.name}"?
+            </p>
+            <p className="mb-3 text-danger">
+              <small>This action cannot be undone.</small>
+            </p>
+            <div className="d-flex justify-content-end gap-2">
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={cancelDeleteGroup}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => handleDeleteGroup(group._id)}
+              >
+                Delete
+              </Button>
             </div>
           </Alert>
         )}

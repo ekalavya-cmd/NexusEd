@@ -24,12 +24,12 @@ function Login() {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
 
-  // Clear errors after 3 seconds
+  // Clear errors after 1.5 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
         setError("");
-      }, 3000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -108,29 +108,31 @@ function Login() {
   };
 
   return (
-    <Row className="justify-content-center">
-      <Col md={6} lg={5}>
-        <Card className="shadow animate-fade-in-up">
-          <Card.Body className="p-4">
-            <div className="text-center mb-4">
-              <i className="fas fa-user-circle fa-3x text-primary mb-3"></i>
-              <h2 className="fw-bold">Login to NexusEd</h2>
-              <p className="text-muted">Access your student community</p>
+    <Row className="justify-content-center align-items-center animate-fade-in-up">
+      <Col md={8} lg={6} xl={5}>
+        <Card className="auth-card shadow">
+          <Card.Body>
+            <div className="auth-header">
+              <div className="auth-logo mx-auto">
+                <i className="fas fa-graduation-cap text-primary fs-1"></i>
+              </div>
+              <h2>Welcome Back</h2>
+              <p className="text-muted">Sign in to continue to NexusEd</p>
             </div>
 
             {error && (
-              <Alert variant="danger" className="mb-4 fade-message">
+              <Alert variant="danger" className="mb-4">
                 <i className="fas fa-exclamation-circle me-2"></i>
                 {error}
               </Alert>
             )}
 
             <Form>
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-4">
                 <Form.Label>Email or Username</Form.Label>
                 <InputGroup>
                   <InputGroup.Text>
-                    <i className="fas fa-envelope"></i>
+                    <i className="fas fa-user"></i>
                   </InputGroup.Text>
                   <Form.Control
                     type="text"
@@ -139,14 +141,11 @@ function Login() {
                     onChange={(e) => setEmailOrUsername(e.target.value)}
                     onKeyDown={(e) => handleKeyDown(e, "email")}
                     placeholder="Enter your email or username"
-                    autoComplete="username"
+                    autoComplete="username email"
                     disabled={isLoading}
                     required
                   />
                 </InputGroup>
-                <Form.Text className="text-muted">
-                  Case insensitive - you can use any case
-                </Form.Text>
               </Form.Group>
 
               <Form.Group className="mb-4">

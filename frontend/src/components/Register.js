@@ -25,12 +25,12 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
-    feedback: "",
-    color: "danger",
+    feedback: "Enter a password",
+    color: "secondary",
     criteria: {
       length: false,
-      uppercase: false,
       lowercase: false,
+      uppercase: false,
       number: false,
       special: false,
     },
@@ -41,30 +41,19 @@ function Register() {
   const passwordRef = useRef(null);
   const confirmPasswordRef = useRef(null);
 
-  // Clear errors after 3 seconds
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError("");
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  // Password strength calculation
+  // Update password strength on change
   useEffect(() => {
     if (password) {
-      const strength = calculatePasswordStrength(password);
-      setPasswordStrength(strength);
+      setPasswordStrength(calculatePasswordStrength(password));
     } else {
       setPasswordStrength({
         score: 0,
-        feedback: "",
-        color: "danger",
+        feedback: "Enter a password",
+        color: "secondary",
         criteria: {
           length: false,
-          uppercase: false,
           lowercase: false,
+          uppercase: false,
           number: false,
           special: false,
         },
@@ -72,13 +61,63 @@ function Register() {
     }
   }, [password]);
 
+  // Clear errors after 1.5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  const handleSubmit = async () => {
+    addDebugLog("Form submission started");
+
+    if (!validateForm()) {
+      addDebugLog("Form validation failed");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError("");
+      addDebugLog("Attempting registration");
+
+      const result = await register(username, email, password);
+
+      if (result && result.success) {
+        addDebugLog("Registration successful, redirecting...");
+        // Add a small delay to show success state
+        setTimeout(() => {
+          navigate("/");
+        }, 500);
+      } else {
+        addDebugLog("Registration failed: " + JSON.stringify(result));
+        setError(
+          result?.message || "Registration failed. Please try again later."
+        );
+        setIsLoading(false);
+      }
+    } catch (err) {
+      addDebugLog("Registration error caught: " + err.message);
+      console.error("Registration error:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Registration failed. Please try again later."
+      );
+      setIsLoading(false);
+    }
+  };
+
   const calculatePasswordStrength = (pwd) => {
     const criteria = {
       length: pwd.length >= 8,
-      uppercase: /[A-Z]/.test(pwd),
       lowercase: /[a-z]/.test(pwd),
-      number: /\d/.test(pwd),
-      special: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pwd),
+      uppercase: /[A-Z]/.test(pwd),
+      number: /[0-9]/.test(pwd),
+      special: /[^A-Za-z0-9]/.test(pwd),
     };
 
     const score = Object.values(criteria).filter(Boolean).length;
@@ -186,71 +225,28 @@ function Register() {
     return true;
   };
 
-  const handleSubmit = async () => {
-    addDebugLog("Registration form submission started");
-
-    if (!validateForm()) {
-      addDebugLog("Form validation failed");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError("");
-      addDebugLog(
-        `Attempting registration for: ${username} (${email.toLowerCase()})`
-      );
-
-      // Convert email to lowercase for consistency
-      const lowerEmail = email.toLowerCase().trim();
-
-      const result = await register(username.trim(), lowerEmail, password);
-
-      if (result && result.success) {
-        addDebugLog("Registration successful, redirecting...");
-        // Add a small delay to show success state
-        setTimeout(() => {
-          navigate("/");
-        }, 500);
-      } else {
-        addDebugLog(
-          "Registration failed with result: " + JSON.stringify(result)
-        );
-        setError(result?.message || "Registration failed. Please try again.");
-        setIsLoading(false);
-      }
-    } catch (err) {
-      addDebugLog("Registration error caught: " + err.message);
-      console.error("Registration error:", err);
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Registration failed. Please try again."
-      );
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <Row className="justify-content-center">
-      <Col md={6} lg={5}>
-        <Card className="shadow animate-fade-in-up">
-          <Card.Body className="p-4">
-            <div className="text-center mb-4">
-              <i className="fas fa-user-plus fa-3x text-primary mb-3"></i>
-              <h2 className="fw-bold">Create an Account</h2>
+    <Row className="justify-content-center align-items-center animate-fade-in-up">
+      <Col md={8} lg={6} xl={5}>
+        <Card className="auth-card shadow">
+          <Card.Body>
+            <div className="auth-header">
+              <div className="auth-logo mx-auto">
+                <i className="fas fa-user-plus text-primary fs-1"></i>
+              </div>
+              <h2>Create an Account</h2>
               <p className="text-muted">Join the NexusEd student community</p>
             </div>
 
             {error && (
-              <Alert variant="danger" className="mb-4 fade-message">
+              <Alert variant="danger" className="mb-4">
                 <i className="fas fa-exclamation-circle me-2"></i>
                 {error}
               </Alert>
             )}
 
             <Form>
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-4">
                 <Form.Label>Username</Form.Label>
                 <InputGroup>
                   <InputGroup.Text>
@@ -273,7 +269,7 @@ function Register() {
                 </Form.Text>
               </Form.Group>
 
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-4">
                 <Form.Label>Email</Form.Label>
                 <InputGroup>
                   <InputGroup.Text>
@@ -296,7 +292,7 @@ function Register() {
                 </Form.Text>
               </Form.Group>
 
-              <Form.Group className="mb-3">
+              <Form.Group className="mb-4">
                 <Form.Label>Password</Form.Label>
                 <InputGroup>
                   <InputGroup.Text>
@@ -329,28 +325,24 @@ function Register() {
                   </Button>
                 </InputGroup>
 
-                {/* Password Strength Meter */}
                 {password && (
-                  <div className="mt-2">
+                  <div className="mt-3">
                     <div className="d-flex justify-content-between align-items-center mb-1">
-                      <small className="text-muted">Password Strength:</small>
-                      <small className={`text-${passwordStrength.color}`}>
-                        {passwordStrength.feedback}
-                      </small>
+                      <span className="small">{passwordStrength.feedback}</span>
+                      <span className="small">
+                        {Math.round(passwordStrength.score)}%
+                      </span>
                     </div>
                     <ProgressBar
-                      variant={passwordStrength.color}
                       now={passwordStrength.score}
+                      variant={passwordStrength.color}
+                      className="mb-3"
                       style={{ height: "6px" }}
                     />
 
-                    {/* Password Criteria */}
-                    <div className="mt-2">
-                      <small className="text-muted d-block mb-1">
-                        Requirements:
-                      </small>
+                    <div className="password-criteria">
                       <div className="row">
-                        <div className="col-6">
+                        <div className="col-12 col-sm-6">
                           <small
                             className={
                               passwordStrength.criteria.length
@@ -365,28 +357,10 @@ function Register() {
                                   : "fa-times"
                               } me-1`}
                             ></i>
-                            8+ characters
+                            At least 8 characters
                           </small>
                         </div>
-                        <div className="col-6">
-                          <small
-                            className={
-                              passwordStrength.criteria.uppercase
-                                ? "text-success"
-                                : "text-muted"
-                            }
-                          >
-                            <i
-                              className={`fas ${
-                                passwordStrength.criteria.uppercase
-                                  ? "fa-check"
-                                  : "fa-times"
-                              } me-1`}
-                            ></i>
-                            Uppercase
-                          </small>
-                        </div>
-                        <div className="col-6">
+                        <div className="col-12 col-sm-6">
                           <small
                             className={
                               passwordStrength.criteria.lowercase
@@ -401,10 +375,28 @@ function Register() {
                                   : "fa-times"
                               } me-1`}
                             ></i>
-                            Lowercase
+                            Lowercase letter
                           </small>
                         </div>
-                        <div className="col-6">
+                        <div className="col-12 col-sm-6">
+                          <small
+                            className={
+                              passwordStrength.criteria.uppercase
+                                ? "text-success"
+                                : "text-muted"
+                            }
+                          >
+                            <i
+                              className={`fas ${
+                                passwordStrength.criteria.uppercase
+                                  ? "fa-check"
+                                  : "fa-times"
+                              } me-1`}
+                            ></i>
+                            Uppercase letter
+                          </small>
+                        </div>
+                        <div className="col-12 col-sm-6">
                           <small
                             className={
                               passwordStrength.criteria.number
