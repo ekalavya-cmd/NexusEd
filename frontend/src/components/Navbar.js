@@ -277,7 +277,7 @@ function Navbar() {
                   <Dropdown.Toggle as={UserToggle} id="dropdown-user">
                     {user.profilePicture ? (
                       <img
-                        src={user.profilePicture}
+                        src={`${process.env.REACT_APP_API_URL}${user.profilePicture}`}
                         alt="Profile"
                         width="24"
                         height="24"

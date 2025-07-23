@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Form, Button, Spinner } from "react-bootstrap";
 
 function PostForm({ handleCreatePost, studyGroupId = null }) {
@@ -6,6 +6,16 @@ function PostForm({ handleCreatePost, studyGroupId = null }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const MAX_LENGTH = 500;
+
+  // Clear errors after 3 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

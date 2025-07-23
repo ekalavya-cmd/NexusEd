@@ -326,25 +326,29 @@ function StudyGroups() {
         )}
       </div>
 
-      <Card className="filter-card mb-4">
-        <Card.Body>
+      <Card className="shadow mb-4">
+        <Card.Body className="p-4">
           <div className="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
-            <div className="search-container">
-              <InputGroup className="search-input">
-                <InputGroup.Text>
-                  <i className="fas fa-search"></i>
+            <div className="search-container flex-grow-1">
+              <InputGroup className="search-input" style={{ maxWidth: "400px" }}>
+                <InputGroup.Text className="bg-light border-end-0">
+                  <i className="fas fa-search text-muted"></i>
                 </InputGroup.Text>
                 <FormControl
-                  placeholder="Search groups..."
+                  placeholder="Search groups by name or description..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   aria-label="Search groups"
+                  className="border-start-0 ps-0"
+                  style={{ boxShadow: "none" }}
                 />
                 {searchTerm && (
                   <Button
                     variant="outline-secondary"
                     onClick={() => setSearchTerm("")}
                     aria-label="Clear search"
+                    className="border-start-0"
+                    style={{ borderColor: "#ced4da" }}
                   >
                     <i className="fas fa-times"></i>
                   </Button>
@@ -353,8 +357,8 @@ function StudyGroups() {
             </div>
             <div className="filter-buttons">
               <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
-                <h6 className="filter-label mb-2 mb-md-0 me-0 me-md-2">
-                  Filter:
+                <h6 className="filter-label mb-2 mb-md-0 me-0 me-md-2 text-muted">
+                  Filter by:
                 </h6>
                 <ButtonGroup className="category-filter">
                   <Button
@@ -395,12 +399,12 @@ function StudyGroups() {
           </div>
         </div>
       ) : filteredGroups.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">
-            <i className="fas fa-users-slash"></i>
+        <div className="text-center py-5">
+          <div className="mb-4">
+            <i className="fas fa-users display-1 text-muted"></i>
           </div>
-          <h3 className="empty-title">No study groups found</h3>
-          <p className="empty-description">
+          <h4 className="mb-3">No Study Groups Found</h4>
+          <p className="text-muted mb-4">
             {searchTerm
               ? "No results match your search criteria. Try different keywords or clear the search."
               : selectedCategory !== "All"
@@ -412,7 +416,7 @@ function StudyGroups() {
           {user && (
             <Button
               variant="primary"
-              className="mt-3"
+              className="btn-hover-shadow"
               onClick={() => setShowCreateModal(true)}
             >
               <i className="fas fa-plus me-2"></i>
@@ -420,7 +424,7 @@ function StudyGroups() {
             </Button>
           )}
           {!user && (
-            <Button variant="primary" className="mt-3" href="/login">
+            <Button variant="primary" className="btn-hover-shadow" href="/login">
               <i className="fas fa-sign-in-alt me-2"></i>
               Login to Join
             </Button>

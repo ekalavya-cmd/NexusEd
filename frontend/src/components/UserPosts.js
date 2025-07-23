@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, ButtonGroup, Spinner, Alert } from "react-bootstrap";
+import { Button, ButtonGroup, Spinner } from "react-bootstrap";
 import axios from "axios";
 import PostCard from "./PostCard";
 import PostForm from "./PostForm";
@@ -175,7 +175,7 @@ function UserPosts({
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
           <Button
             variant={showPostForm ? "outline-secondary" : "primary"}
@@ -187,26 +187,34 @@ function UserPosts({
           </Button>
         </div>
 
-        <ButtonGroup>
-          <Button
-            variant={sortOption === "newest" ? "primary" : "outline-primary"}
-            onClick={() => sortPosts("newest")}
-          >
-            Newest
-          </Button>
-          <Button
-            variant={sortOption === "oldest" ? "primary" : "outline-primary"}
-            onClick={() => sortPosts("oldest")}
-          >
-            Oldest
-          </Button>
-          <Button
-            variant={sortOption === "popular" ? "primary" : "outline-primary"}
-            onClick={() => sortPosts("popular")}
-          >
-            Most Liked
-          </Button>
-        </ButtonGroup>
+        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+          <h6 className="mb-2 mb-md-0 me-0 me-md-2 text-muted">
+            Sort by:
+          </h6>
+          <ButtonGroup className="sort-filter">
+            <Button
+              variant={sortOption === "newest" ? "primary" : "outline-primary"}
+              onClick={() => sortPosts("newest")}
+              className="sort-btn"
+            >
+              Newest
+            </Button>
+            <Button
+              variant={sortOption === "oldest" ? "primary" : "outline-primary"}
+              onClick={() => sortPosts("oldest")}
+              className="sort-btn"
+            >
+              Oldest
+            </Button>
+            <Button
+              variant={sortOption === "popular" ? "primary" : "outline-primary"}
+              onClick={() => sortPosts("popular")}
+              className="sort-btn"
+            >
+              Most Liked
+            </Button>
+          </ButtonGroup>
+        </div>
       </div>
 
       {showPostForm && (
@@ -216,14 +224,23 @@ function UserPosts({
       )}
 
       {posts.length === 0 ? (
-        <Alert variant="info">
-          <div className="d-flex align-items-center">
-            <i className="fas fa-info-circle me-3 fs-5"></i>
-            <div>
-              <p className="mb-0">You haven't created any posts yet.</p>
-            </div>
+        <div className="text-center py-5">
+          <div className="mb-4">
+            <i className="fas fa-comment-alt display-1 text-muted"></i>
           </div>
-        </Alert>
+          <h4 className="mb-3">No Posts Yet</h4>
+          <p className="text-muted mb-4">
+            You haven&apos;t created any posts yet. Share your thoughts with the community!
+          </p>
+          <Button 
+            variant="primary" 
+            onClick={() => setShowPostForm(true)}
+            className="btn-hover-shadow"
+          >
+            <i className="fas fa-plus me-2"></i>
+            Create Your First Post
+          </Button>
+        </div>
       ) : (
         posts.map((post, index) => (
           <PostCard

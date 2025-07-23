@@ -68,6 +68,7 @@ const useProfile = () => {
     if (user && isMounted.current) {
       setBio(user.bio || DEFAULT_BIO);
       setUsername(user.username || "");
+      setProfilePicture(user.profilePicture || null);
       setImageLoadError(false);
     }
   }, [user, DEFAULT_BIO]);
@@ -93,6 +94,7 @@ const useProfile = () => {
             // Instead, just update the local state
             setBio(response.data.bio || DEFAULT_BIO);
             setUsername(response.data.username || "");
+            setProfilePicture(response.data.profilePicture || user.profilePicture || null);
           }
         } catch (err) {
           console.error("Failed to fetch user profile:", err.message);
@@ -217,6 +219,7 @@ const useProfile = () => {
           profilePicture: profileResponse.data.profilePicture,
         };
         setUser(updatedUser);
+        setProfilePicture(profileResponse.data.profilePicture);
         setImageLoadError(false);
         setTemporarySuccess(
           setError,

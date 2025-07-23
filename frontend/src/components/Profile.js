@@ -1,9 +1,10 @@
-import React, { memo } from "react";
-import { Row, Col, Tab, Nav, Spinner, Alert } from "react-bootstrap";
+import React, { memo, useEffect } from "react";
+import { Tab, Nav, Spinner, Alert } from "react-bootstrap";
 import useProfile from "../hooks/useProfile";
 import ProfileHeader from "./ProfileHeader";
 import ProfileGroups from "./ProfileGroups";
 import UserPosts from "./UserPosts";
+import "../styles/profileStyles.css";
 
 // Use memo to prevent unnecessary re-renders
 const Profile = memo(function Profile() {
@@ -24,6 +25,7 @@ const Profile = memo(function Profile() {
     setIsEditing,
     error,
     uploadError,
+    setUploadError,
     success,
     isLoading,
     sortOption,
@@ -40,6 +42,25 @@ const Profile = memo(function Profile() {
     USERNAME_MAX_LENGTH,
     DEFAULT_BIO,
   } = useProfile();
+
+  // Clear error and success messages after 3 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setTemporaryMessage(null, null, "");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, setTemporaryMessage]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setTemporarySuccess(null, null, "");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success, setTemporarySuccess]);
 
   if (authLoading) {
     return (
@@ -83,6 +104,7 @@ const Profile = memo(function Profile() {
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         uploadError={uploadError}
+        setUploadError={setUploadError}
         isLoading={isLoading}
         imageLoadError={imageLoadError}
         setImageLoadError={setImageLoadError}
@@ -96,47 +118,41 @@ const Profile = memo(function Profile() {
       />
 
       <Tab.Container id="profile-tabs" defaultActiveKey="posts">
-        <Row className="mt-4">
-          <Col>
-            <Nav variant="tabs" className="mb-3">
-              <Nav.Item>
-                <Nav.Link eventKey="posts" className="px-4">
-                  <i className="fas fa-comment-alt me-2"></i>
-                  Posts
-                </Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="groups" className="px-4">
-                  <i className="fas fa-users me-2"></i>
-                  Groups
-                </Nav.Link>
-              </Nav.Item>
-            </Nav>
+        <Nav variant="tabs" className="mb-4 justify-content-center">
+          <Nav.Item>
+            <Nav.Link eventKey="posts" className="px-4">
+              <i className="fas fa-newspaper me-2"></i>
+              Posts ({posts.length})
+            </Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="groups" className="px-4">
+              <i className="fas fa-users me-2"></i>
+              Groups ({joinedGroups.length})
+            </Nav.Link>
+          </Nav.Item>
+        </Nav>
 
-            <Tab.Content>
-              <Tab.Pane eventKey="posts">
-                <UserPosts
-                  posts={posts}
-                  setPosts={setPosts}
-                  isLoading={isPostsLoading}
-                  userId={user.id}
-                  sortOption={sortOption}
-                  setSortOption={setSortOption}
-                  setTemporaryMessage={setTemporaryMessage}
-                  setTemporarySuccess={setTemporarySuccess}
-                />
-              </Tab.Pane>
-              <Tab.Pane eventKey="groups">
-                <ProfileGroups
-                  groups={joinedGroups}
-                  isLoading={isGroupsLoading}
-                  setTemporaryMessage={setTemporaryMessage}
-                  setTemporarySuccess={setTemporarySuccess}
-                />
-              </Tab.Pane>
-            </Tab.Content>
-          </Col>
-        </Row>
+        <Tab.Content>
+          <Tab.Pane eventKey="posts">
+            <UserPosts
+              posts={posts}
+              setPosts={setPosts}
+              isLoading={isPostsLoading}
+              userId={user.id}
+              sortOption={sortOption}
+              setSortOption={setSortOption}
+              setTemporaryMessage={setTemporaryMessage}
+              setTemporarySuccess={setTemporarySuccess}
+            />
+          </Tab.Pane>
+          <Tab.Pane eventKey="groups">
+            <ProfileGroups
+              groups={joinedGroups}
+              isLoading={isGroupsLoading}
+            />
+          </Tab.Pane>
+        </Tab.Content>
       </Tab.Container>
     </div>
   );

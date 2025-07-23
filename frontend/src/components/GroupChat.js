@@ -87,6 +87,26 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
     fetchEvents();
   }, [group._id, setTemporaryMessage]);
 
+  // Clear message errors after 3 seconds
+  useEffect(() => {
+    if (messageError) {
+      const timer = setTimeout(() => {
+        setMessageError("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [messageError]);
+
+  // Clear file errors after 3 seconds
+  useEffect(() => {
+    if (fileError) {
+      const timer = setTimeout(() => {
+        setFileError("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [fileError]);
+
   useEffect(() => {
     // Scroll to bottom when messages change
     if (messageEndRef.current) {

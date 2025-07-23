@@ -1,5 +1,5 @@
 // 2. Fixed ProfileHeader.js
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useEffect } from "react";
 import {
   Card,
   Row,
@@ -21,6 +21,7 @@ function ProfileHeader({
   isEditing,
   setIsEditing,
   uploadError,
+  setUploadError,
   isLoading,
   imageLoadError,
   setImageLoadError,
@@ -34,6 +35,16 @@ function ProfileHeader({
 }) {
   const fileInputRef = useRef(null);
   const isCurrentUser = true; // In a real app, check if the profile belongs to the logged-in user
+
+  // Clear upload errors after 3 seconds
+  useEffect(() => {
+    if (uploadError) {
+      const timer = setTimeout(() => {
+        setUploadError("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [uploadError, setUploadError]);
 
   // Use useCallback to memoize the onError handler to prevent infinite re-renders
   const handleImageError = useCallback(() => {
@@ -66,7 +77,7 @@ function ProfileHeader({
   };
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow mb-4">
       <Card.Body className="p-4">
         <Row className="align-items-center">
           <Col md={3} className="text-center text-md-start mb-4 mb-md-0">
@@ -77,7 +88,7 @@ function ProfileHeader({
               >
                 {profilePicture && !imageLoadError ? (
                   <img
-                    src={profilePicture}
+                    src={`${process.env.REACT_APP_API_URL}${profilePicture}`}
                     alt={username}
                     className="w-100 h-100 object-fit-cover"
                     onError={handleImageError}
@@ -103,8 +114,13 @@ function ProfileHeader({
                     size="sm"
                     className="rounded-circle p-2"
                     onClick={handleFileInputClick}
+                    disabled={isLoading}
                   >
-                    <i className="fas fa-camera"></i>
+                    {isLoading ? (
+                      <Spinner animation="border" size="sm" />
+                    ) : (
+                      <i className="fas fa-camera"></i>
+                    )}
                   </Button>
                 </div>
               )}
@@ -197,6 +213,7 @@ function ProfileHeader({
                         variant="outline-primary"
                         size="sm"
                         onClick={() => setIsEditing(true)}
+                        className="btn-hover-shadow"
                       >
                         <i className="fas fa-edit me-1"></i>
                         Edit Profile
@@ -209,13 +226,14 @@ function ProfileHeader({
 
                 {profilePicture && isCurrentUser && (
                   <Button
-                    variant="link"
-                    className="text-danger p-0"
+                    variant="outline-danger"
+                    size="sm"
                     onClick={handleRemoveImage}
                     disabled={isLoading}
+                    className="btn-hover-shadow mt-2"
                   >
                     <i className="fas fa-trash me-1"></i>
-                    Remove profile picture
+                    Remove Profile Picture
                   </Button>
                 )}
               </>

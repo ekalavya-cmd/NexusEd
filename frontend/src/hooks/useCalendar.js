@@ -116,6 +116,33 @@ const useCalendar = () => {
     }
   }, [user, authLoading, currentDateTime]);
 
+  // Clear fieldErrors after 3 seconds
+  useEffect(() => {
+    const hasErrors = Object.values(fieldErrors).some(error => error.trim() !== "");
+    if (hasErrors) {
+      const timer = setTimeout(() => {
+        setFieldErrors({
+          title: "",
+          description: "",
+          start: "",
+          end: "",
+          groupId: "",
+        });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [fieldErrors]);
+
+  // Clear general error after 3 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   // Periodically refetch events to reflect server-side cleanup
   useEffect(() => {
     const interval = setInterval(() => {
