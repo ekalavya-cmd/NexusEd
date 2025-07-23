@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+// 2. Fixed ProfileHeader.js
+import React, { useRef, useCallback } from "react";
 import {
   Card,
   Row,
@@ -22,7 +23,7 @@ function ProfileHeader({
   uploadError,
   isLoading,
   imageLoadError,
-  setImageLoadError, // ✅ FIXED: Added missing prop definition
+  setImageLoadError,
   handleProfilePictureChange,
   handleRemoveProfilePicture,
   handleBioUpdate,
@@ -34,19 +35,34 @@ function ProfileHeader({
   const fileInputRef = useRef(null);
   const isCurrentUser = true; // In a real app, check if the profile belongs to the logged-in user
 
+  // Use useCallback to memoize the onError handler to prevent infinite re-renders
+  const handleImageError = useCallback(() => {
+    if (!imageLoadError) {
+      setImageLoadError(true);
+    }
+  }, [imageLoadError, setImageLoadError]);
+
   const handleFileInputClick = () => {
     fileInputRef.current.click();
   };
 
+  const handleFileChange = (e) => {
+    handleProfilePictureChange(e, fileInputRef);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleBioUpdate();
+    handleBioUpdate(e);
   };
 
   const handleCancel = () => {
     setBio(user.bio || DEFAULT_BIO);
     setUsername(user.username);
     setIsEditing(false);
+  };
+
+  const handleRemoveImage = () => {
+    handleRemoveProfilePicture(fileInputRef);
   };
 
   return (
@@ -59,13 +75,12 @@ function ProfileHeader({
                 className="rounded-circle overflow-hidden bg-light border"
                 style={{ width: "150px", height: "150px" }}
               >
-                {profilePicture ? (
+                {profilePicture && !imageLoadError ? (
                   <img
                     src={profilePicture}
                     alt={username}
                     className="w-100 h-100 object-fit-cover"
-                    onError={() => setImageLoadError(true)} // ✅ This line 66 now works correctly
-                    style={{ display: imageLoadError ? "none" : "block" }}
+                    onError={handleImageError}
                   />
                 ) : (
                   <div className="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
@@ -79,7 +94,7 @@ function ProfileHeader({
                   <input
                     type="file"
                     ref={fileInputRef}
-                    onChange={handleProfilePictureChange}
+                    onChange={handleFileChange}
                     className="d-none"
                     accept="image/*"
                   />
@@ -196,7 +211,7 @@ function ProfileHeader({
                   <Button
                     variant="link"
                     className="text-danger p-0"
-                    onClick={handleRemoveProfilePicture}
+                    onClick={handleRemoveImage}
                     disabled={isLoading}
                   >
                     <i className="fas fa-trash me-1"></i>

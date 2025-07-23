@@ -1,14 +1,14 @@
-import React from "react";
+import React, { memo } from "react";
 import { Row, Col, Tab, Nav, Spinner, Alert } from "react-bootstrap";
 import useProfile from "../hooks/useProfile";
 import ProfileHeader from "./ProfileHeader";
 import ProfileGroups from "./ProfileGroups";
 import UserPosts from "./UserPosts";
 
-function Profile() {
+// Use memo to prevent unnecessary re-renders
+const Profile = memo(function Profile() {
   const {
     user,
-    setUser,
     authLoading,
     posts,
     setPosts,
@@ -20,17 +20,12 @@ function Profile() {
     username,
     setUsername,
     profilePicture,
-    setProfilePicture,
     isEditing,
     setIsEditing,
     error,
-    setError,
     uploadError,
-    setUploadError,
     success,
-    setSuccess,
     isLoading,
-    setIsLoading,
     sortOption,
     setSortOption,
     imageLoadError,
@@ -90,6 +85,7 @@ function Profile() {
         uploadError={uploadError}
         isLoading={isLoading}
         imageLoadError={imageLoadError}
+        setImageLoadError={setImageLoadError}
         handleProfilePictureChange={handleProfilePictureChange}
         handleRemoveProfilePicture={handleRemoveProfilePicture}
         handleBioUpdate={handleBioUpdate}
@@ -144,6 +140,6 @@ function Profile() {
       </Tab.Container>
     </div>
   );
-}
+});
 
 export default Profile;

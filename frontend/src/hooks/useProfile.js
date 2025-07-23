@@ -1,4 +1,5 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+// 1. Fixed useProfile.js
+import { useState, useEffect, useContext, useCallback, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import { useTemporaryMessage } from "../utils/formatUtils";
@@ -21,6 +22,12 @@ const useProfile = () => {
   const [imageLoadError, setImageLoadError] = useState(false);
   const [usernameChangeConfirmation, setUsernameChangeConfirmation] =
     useState(false);
+
+  // Track if component is mounted
+  const isMounted = useRef(true);
+  // Skip initial user data fetching flag
+  const initialFetchDone = useRef(false);
+
   const {
     setTemporaryMessage,
     setTemporarySuccess,
@@ -34,61 +41,73 @@ const useProfile = () => {
   const DEFAULT_BIO =
     "A student passionate about learning and sharing knowledge.";
 
-  // Memoize cleanup function to prevent useEffect dependency warnings
-  const memoizedCleanup = useCallback(() => {
-    return cleanup();
+  // Set up component unmount cleanup
+  useEffect(() => {
+    // On mount, set isMounted to true
+    isMounted.current = true;
+
+    // On unmount, clean up
+    return () => {
+      isMounted.current = false;
+      cleanup();
+    };
   }, [cleanup]);
 
-  useEffect(() => {
-    return () => {
-      memoizedCleanup();
-    };
-  }, [memoizedCleanup]);
-
-  // Memoize setTemporaryMessage to prevent useEffect dependency warnings
+  // Memoized message functions to prevent dependency warnings
   const memoizedSetTemporaryMessage = useCallback(
     (setter, successSetter, message) => {
-      setTemporaryMessage(setter, successSetter, message);
+      if (isMounted.current) {
+        setTemporaryMessage(setter, successSetter, message);
+      }
     },
     [setTemporaryMessage]
   );
 
+  // Set initial state values from user when it becomes available
   useEffect(() => {
-    if (user) {
+    if (user && isMounted.current) {
       setBio(user.bio || DEFAULT_BIO);
       setUsername(user.username || "");
       setImageLoadError(false);
+    }
+  }, [user, DEFAULT_BIO]);
+
+  // Fetch profile data only once when user is available
+  useEffect(() => {
+    // Only fetch if user exists and we haven't fetched yet
+    if (user && !initialFetchDone.current && isMounted.current) {
+      initialFetchDone.current = true;
 
       const fetchUserProfile = async () => {
         try {
           const token = localStorage.getItem("token");
+          if (!token) return;
+
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/api/users/profile`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          const updatedUser = {
-            ...user,
-            bio: response.data.bio,
-            username: response.data.username,
-            email: response.data.email,
-            profilePicture: response.data.profilePicture,
-            createdAt: response.data.createdAt,
-          };
-          setUser(updatedUser);
-          setBio(response.data.bio || DEFAULT_BIO);
-          setUsername(response.data.username || "");
+
+          if (isMounted.current) {
+            // IMPORTANT: Don't call setUser here - it triggers re-renders
+            // Instead, just update the local state
+            setBio(response.data.bio || DEFAULT_BIO);
+            setUsername(response.data.username || "");
+          }
         } catch (err) {
           console.error("Failed to fetch user profile:", err.message);
-          memoizedSetTemporaryMessage(
-            setError,
-            setSuccess,
-            "Failed to fetch user profile"
-          );
+          if (isMounted.current) {
+            memoizedSetTemporaryMessage(
+              setError,
+              setSuccess,
+              "Failed to fetch user profile"
+            );
+          }
         }
       };
 
       const fetchUserPosts = async () => {
-        setIsPostsLoading(true);
+        if (isMounted.current) setIsPostsLoading(true);
         try {
           const response = await fetch(
             `${process.env.REACT_APP_API_URL}/api/posts?author=${user.id}`
@@ -97,20 +116,26 @@ const useProfile = () => {
             throw new Error(`Failed to fetch user posts: ${response.status}`);
           }
           const data = await response.json();
-          setPosts(data);
+          if (isMounted.current) {
+            setPosts(data);
+          }
         } catch (err) {
-          memoizedSetTemporaryMessage(
-            setError,
-            setSuccess,
-            "Failed to fetch posts"
-          );
+          if (isMounted.current) {
+            memoizedSetTemporaryMessage(
+              setError,
+              setSuccess,
+              "Failed to fetch posts"
+            );
+          }
         } finally {
-          setIsPostsLoading(false);
+          if (isMounted.current) {
+            setIsPostsLoading(false);
+          }
         }
       };
 
       const fetchUserGroups = async () => {
-        setIsGroupsLoading(true);
+        if (isMounted.current) setIsGroupsLoading(true);
         try {
           const response = await fetch(
             `${process.env.REACT_APP_API_URL}/api/study-groups`
@@ -119,18 +144,24 @@ const useProfile = () => {
             throw new Error(`Failed to fetch study groups: ${response.status}`);
           }
           const data = await response.json();
-          const userGroups = data.filter((group) =>
-            group.members?.some((member) => member._id === user.id)
-          );
-          setJoinedGroups(userGroups);
+          if (isMounted.current) {
+            const userGroups = data.filter((group) =>
+              group.members?.some((member) => member._id === user.id)
+            );
+            setJoinedGroups(userGroups);
+          }
         } catch (err) {
-          memoizedSetTemporaryMessage(
-            setError,
-            setSuccess,
-            "Failed to fetch study groups"
-          );
+          if (isMounted.current) {
+            memoizedSetTemporaryMessage(
+              setError,
+              setSuccess,
+              "Failed to fetch study groups"
+            );
+          }
         } finally {
-          setIsGroupsLoading(false);
+          if (isMounted.current) {
+            setIsGroupsLoading(false);
+          }
         }
       };
 
@@ -138,7 +169,7 @@ const useProfile = () => {
       fetchUserPosts();
       fetchUserGroups();
     }
-  }, [user, setUser, memoizedSetTemporaryMessage]);
+  }, [user, memoizedSetTemporaryMessage, DEFAULT_BIO]);
 
   const handleProfilePictureChange = async (e, fileInputRef) => {
     const file = e.target.files[0];
@@ -161,8 +192,9 @@ const useProfile = () => {
     formData.append("profilePicture", file);
 
     try {
-      setIsLoading(true);
+      if (isMounted.current) setIsLoading(true);
       const token = localStorage.getItem("token");
+
       await axios.post(
         `${process.env.REACT_APP_API_URL}/api/users/upload-profile-picture`,
         formData,
@@ -178,40 +210,45 @@ const useProfile = () => {
         `${process.env.REACT_APP_API_URL}/api/users/profile`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const updatedUser = {
-        ...user,
-        bio: profileResponse.data.bio,
-        username: profileResponse.data.username,
-        email: profileResponse.data.email,
-        profilePicture: profileResponse.data.profilePicture,
-        createdAt: profileResponse.data.createdAt,
-      };
-      setUser(updatedUser);
-      setImageLoadError(false);
-      setTemporarySuccess(
-        setError,
-        setSuccess,
-        "Profile picture updated successfully"
-      );
+
+      if (isMounted.current) {
+        const updatedUser = {
+          ...user,
+          profilePicture: profileResponse.data.profilePicture,
+        };
+        setUser(updatedUser);
+        setImageLoadError(false);
+        setTemporarySuccess(
+          setError,
+          setSuccess,
+          "Profile picture updated successfully"
+        );
+      }
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message ||
-        err.message ||
-        "Failed to upload profile picture";
-      setTemporaryMessage(setError, setSuccess, errorMessage);
+      if (isMounted.current) {
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to upload profile picture";
+        setTemporaryMessage(setError, setSuccess, errorMessage);
+      }
     } finally {
-      setIsLoading(false);
-      setProfilePicture(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      if (isMounted.current) {
+        setIsLoading(false);
+        setProfilePicture(null);
+        if (fileInputRef && fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
     }
   };
 
   const handleRemoveProfilePicture = async (fileInputRef) => {
     try {
-      setIsLoading(true);
-      setUploadError("");
+      if (isMounted.current) {
+        setIsLoading(true);
+        setUploadError("");
+      }
 
       const token = localStorage.getItem("token");
       if (!token) {
@@ -227,28 +264,34 @@ const useProfile = () => {
         }
       );
 
-      const updatedUser = {
-        ...user,
-        profilePicture: null,
-      };
-      setUser(updatedUser);
-      setProfilePicture(null);
-      setImageLoadError(false);
-      setTemporarySuccess(
-        setError,
-        setSuccess,
-        "Profile picture removed successfully"
-      );
+      if (isMounted.current) {
+        const updatedUser = {
+          ...user,
+          profilePicture: null,
+        };
+        setUser(updatedUser);
+        setProfilePicture(null);
+        setImageLoadError(false);
+        setTemporarySuccess(
+          setError,
+          setSuccess,
+          "Profile picture removed successfully"
+        );
+      }
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message ||
-        err.message ||
-        "Failed to remove profile picture";
-      setTemporaryMessage(setUploadError, setSuccess, errorMessage);
+      if (isMounted.current) {
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to remove profile picture";
+        setTemporaryMessage(setUploadError, setSuccess, errorMessage);
+      }
     } finally {
-      setIsLoading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      if (isMounted.current) {
+        setIsLoading(false);
+        if (fileInputRef && fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
     }
   };
@@ -259,11 +302,6 @@ const useProfile = () => {
       if (!token) {
         throw new Error("No authentication token found. Please log in again.");
       }
-      if (typeof setUser !== "function") {
-        throw new Error(
-          "setUser is not a function. Ensure AuthProvider wraps the app."
-        );
-      }
 
       const response = await axios.put(
         `${process.env.REACT_APP_API_URL}/api/users/profile`,
@@ -271,48 +309,57 @@ const useProfile = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const updatedUser = {
-        id: response.data.id,
-        username: response.data.username,
-        email: response.data.email,
-        bio: response.data.bio,
-        profilePicture: user.profilePicture || response.data.profilePicture,
-        createdAt: response.data.createdAt,
-      };
-      setUser(updatedUser);
-      setIsEditing(false);
-      setUsernameChangeConfirmation(false);
-      setTemporarySuccess(setError, setSuccess, "Profile updated successfully");
+      if (isMounted.current) {
+        const updatedUser = {
+          ...user,
+          username: response.data.username,
+          bio: response.data.bio,
+        };
+        setUser(updatedUser);
+        setIsEditing(false);
+        setUsernameChangeConfirmation(false);
+        setTemporarySuccess(
+          setError,
+          setSuccess,
+          "Profile updated successfully"
+        );
+      }
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.message ||
-        err.message ||
-        "Failed to update profile";
-      setTemporaryMessage(setError, setSuccess, errorMessage);
-      setUsernameChangeConfirmation(false);
+      if (isMounted.current) {
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to update profile";
+        setTemporaryMessage(setError, setSuccess, errorMessage);
+        setUsernameChangeConfirmation(false);
+      }
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   };
 
   const confirmUsernameChange = () => {
-    setIsLoading(true);
+    if (isMounted.current) setIsLoading(true);
     performProfileUpdate();
   };
 
   const cancelUsernameChange = () => {
-    setUsernameChangeConfirmation(false);
+    if (isMounted.current) setUsernameChangeConfirmation(false);
   };
 
   const handleBioUpdate = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
-    setIsLoading(true);
+    if (isMounted.current) {
+      setError("");
+      setSuccess("");
+      setIsLoading(true);
+    }
 
     if (!bio.trim()) {
       setTemporaryMessage(setError, setSuccess, "Bio cannot be empty");
-      setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
       return;
     }
 
@@ -322,7 +369,7 @@ const useProfile = () => {
         setSuccess,
         `Bio cannot exceed ${BIO_MAX_LENGTH} characters`
       );
-      setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
       return;
     }
 
@@ -335,7 +382,7 @@ const useProfile = () => {
         setSuccess,
         `Username must be between ${USERNAME_MIN_LENGTH} and ${USERNAME_MAX_LENGTH} characters`
       );
-      setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
       return;
     }
 
@@ -345,21 +392,22 @@ const useProfile = () => {
         setSuccess,
         "Username can only contain letters, numbers, and underscores"
       );
-      setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
       return;
     }
 
     // Check if username has changed
     if (username !== user.username && !usernameChangeConfirmation) {
-      setUsernameChangeConfirmation(true);
-      setIsLoading(false);
+      if (isMounted.current) {
+        setUsernameChangeConfirmation(true);
+        setIsLoading(false);
+      }
       return;
     }
 
     // If confirmation is already shown and user has confirmed, proceed with update
     if (usernameChangeConfirmation) {
-      // Update is handled by confirmUsernameChange
-      setIsLoading(false);
+      if (isMounted.current) setIsLoading(false);
       return;
     }
 
