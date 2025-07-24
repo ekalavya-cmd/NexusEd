@@ -3,14 +3,14 @@ import { Modal, Form, Button, Row, Col, Alert } from "react-bootstrap";
 import { format } from "date-fns";
 
 function CreateEventModal({
-  showModal,
-  setShowModal,
+  show,
+  onHide,
   newEvent,
   setNewEvent,
   currentDateTime,
   groups,
   fieldErrors,
-  handleCreateEvent,
+  onCreateEvent,
 }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,8 +19,8 @@ function CreateEventModal({
 
   return (
     <Modal
-      show={showModal}
-      onHide={() => setShowModal(false)}
+      show={show}
+      onHide={onHide}
       centered
       size="lg"
     >
@@ -79,8 +79,11 @@ function CreateEventModal({
                 <Form.Control
                   type="datetime-local"
                   name="start"
-                  value={newEvent.start}
-                  onChange={handleChange}
+                  value={newEvent.start instanceof Date ? format(newEvent.start, "yyyy-MM-dd'T'HH:mm") : newEvent.start}
+                  onChange={(e) => {
+                    const { name, value } = e.target;
+                    setNewEvent({ ...newEvent, [name]: new Date(value) });
+                  }}
                   min={format(currentDateTime, "yyyy-MM-dd'T'HH:mm")}
                   isInvalid={fieldErrors.start}
                 />
@@ -100,9 +103,12 @@ function CreateEventModal({
                 <Form.Control
                   type="datetime-local"
                   name="end"
-                  value={newEvent.end}
-                  onChange={handleChange}
-                  min={newEvent.start}
+                  value={newEvent.end instanceof Date ? format(newEvent.end, "yyyy-MM-dd'T'HH:mm") : newEvent.end}
+                  onChange={(e) => {
+                    const { name, value } = e.target;
+                    setNewEvent({ ...newEvent, [name]: new Date(value) });
+                  }}
+                  min={newEvent.start instanceof Date ? format(newEvent.start, "yyyy-MM-dd'T'HH:mm") : newEvent.start}
                   isInvalid={fieldErrors.end}
                 />
                 {fieldErrors.end && (
@@ -136,10 +142,10 @@ function CreateEventModal({
               Study Group<span className="text-danger">*</span>
             </Form.Label>
             <Form.Select
-              name="studyGroup"
-              value={newEvent.studyGroup}
+              name="groupId"
+              value={newEvent.groupId}
               onChange={handleChange}
-              isInvalid={fieldErrors.studyGroup}
+              isInvalid={fieldErrors.groupId}
             >
               <option value="">Select a study group</option>
               {groups.map((group) => (
@@ -148,14 +154,14 @@ function CreateEventModal({
                 </option>
               ))}
             </Form.Select>
-            {fieldErrors.studyGroup && (
+            {fieldErrors.groupId && (
               <Form.Control.Feedback type="invalid">
-                {fieldErrors.studyGroup}
+                {fieldErrors.groupId}
               </Form.Control.Feedback>
             )}
           </Form.Group>
 
-          {Object.keys(fieldErrors).length > 0 && (
+          {Object.values(fieldErrors).some(error => error.trim() !== "") && (
             <Alert variant="danger" className="mb-3">
               <i className="fas fa-exclamation-circle me-2"></i>
               Please fix the errors before submitting the form.
@@ -165,13 +171,13 @@ function CreateEventModal({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowModal(false)}>
+        <Button variant="secondary" onClick={onHide}>
           Cancel
         </Button>
         <Button
           variant="primary"
           className="btn-hover-shadow"
-          onClick={handleCreateEvent}
+          onClick={onCreateEvent}
         >
           <i className="fas fa-calendar-check me-2"></i>
           Create Event

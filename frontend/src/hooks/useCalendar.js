@@ -250,8 +250,12 @@ const useCalendar = () => {
   const handleCreateEvent = async (e) => {
     e.preventDefault();
 
+    console.log("Creating event with data:", newEvent);
+    console.log("Current groups:", groups);
+
     // Validate form before submission
     if (!validateForm()) {
+      console.log("Form validation failed:", fieldErrors);
       return;
     }
 

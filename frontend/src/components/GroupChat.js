@@ -11,6 +11,28 @@ import axios from "axios";
 import { format } from "date-fns";
 import EventDetailsModal from "./EventDetailsModal";
 
+// Add styles for message bubbles
+const styles = `
+  .message-bubble-received {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #212529;
+  }
+  
+  [data-bs-theme="dark"] .message-bubble-received {
+    background-color: #495057;
+    border: 1px solid #6c757d;
+    color: #f8f9fa;
+  }
+`;
+
+// Inject styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.innerText = styles;
+  document.head.appendChild(styleSheet);
+}
+
 function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,21 +87,30 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
           }
         );
 
-        // Filter events
+        // Filter events with better time-based logic
         const currentDate = new Date();
-        const upcoming = response.data
+        const currentDateString = currentDate.toDateString();
+        
+        // Only include events that haven't completely ended
+        const activeEvents = response.data
           .filter((event) => new Date(event.end) > currentDate)
           .sort((a, b) => new Date(a.start) - new Date(b.start));
 
-        const today = upcoming.filter(
-          (event) =>
-            new Date(event.start).toDateString() === currentDate.toDateString()
-        );
+        // Today's events: events that start today or are ongoing today
+        const today = activeEvents.filter((event) => {
+          const eventStart = new Date(event.start);
+          const eventEnd = new Date(event.end);
+          
+          // Event starts today OR event is ongoing (started before today but ends after current time)
+          return eventStart.toDateString() === currentDateString || 
+                 (eventStart < currentDate && eventEnd > currentDate);
+        });
 
-        const future = upcoming.filter(
-          (event) =>
-            new Date(event.start).toDateString() !== currentDate.toDateString()
-        );
+        // Future events: events that start after today
+        const future = activeEvents.filter((event) => {
+          const eventStart = new Date(event.start);
+          return eventStart.toDateString() !== currentDateString && eventStart > currentDate;
+        });
 
         setEvents({ today, upcoming: future });
       } catch (err) {
@@ -377,7 +408,7 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
                         className={`d-inline-block p-2 rounded-3 shadow-sm position-relative ${
                           msg.author._id === user.id
                             ? "bg-primary text-white"
-                            : "bg-white border"
+                            : "message-bubble-received"
                         }`}
                         style={{ 
                           maxWidth: "75%", 
