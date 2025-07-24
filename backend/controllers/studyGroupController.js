@@ -195,7 +195,7 @@ exports.joinStudyGroup = async (req, res) => {
       return res.status(404).json({ message: "Study group not found" });
     }
 
-    if (group.members.includes(userId)) {
+    if (group.members.some(member => member.toString() === userId)) {
       return res
         .status(400)
         .json({ message: "You are already a member of this group" });
@@ -233,7 +233,7 @@ exports.leaveStudyGroup = async (req, res) => {
       return res.status(404).json({ message: "Study group not found" });
     }
 
-    if (!group.members.includes(userId)) {
+    if (!group.members.some(member => member.toString() === userId)) {
       return res
         .status(400)
         .json({ message: "You are not a member of this group" });
@@ -264,6 +264,46 @@ exports.leaveStudyGroup = async (req, res) => {
   }
 };
 
+// Get messages for a study group
+exports.getMessages = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.user?.id;
+
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ message: "Invalid group ID" });
+    }
+
+    if (!userId) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    const group = await StudyGroup.findById(groupId)
+      .populate("messages.author", "username")
+      .select("messages members");
+
+    if (!group) {
+      return res.status(404).json({ message: "Study group not found" });
+    }
+
+    if (!group.members.some(member => member.toString() === userId)) {
+      return res.status(403).json({ 
+        message: "You must be a member to view messages" 
+      });
+    }
+
+    // Sort messages by creation date (newest first)
+    const sortedMessages = group.messages.sort((a, b) => 
+      new Date(a.createdAt) - new Date(b.createdAt)
+    );
+
+    res.status(200).json(sortedMessages);
+  } catch (error) {
+    console.error("Error fetching messages:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 // Add a message to the group's discussion board
 exports.addMessage = async (req, res) => {
   try {
@@ -289,7 +329,7 @@ exports.addMessage = async (req, res) => {
       return res.status(404).json({ message: "Study group not found" });
     }
 
-    if (!group.members.includes(userId)) {
+    if (!group.members.some(member => member.toString() === userId)) {
       return res
         .status(403)
         .json({ message: "You must be a member to post a message" });
@@ -319,12 +359,13 @@ exports.addMessage = async (req, res) => {
     group.messages.push(messageData);
     await group.save();
 
+    // Get the newly created message with populated author
     const updatedGroup = await StudyGroup.findById(groupId)
-      .populate("creator", "username")
-      .populate("members", "username")
       .populate("messages.author", "username");
+    
+    const newMessage = updatedGroup.messages[updatedGroup.messages.length - 1];
 
-    res.status(200).json(updatedGroup);
+    res.status(200).json(newMessage);
   } catch (error) {
     console.error("Error adding message:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });

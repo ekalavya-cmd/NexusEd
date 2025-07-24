@@ -94,5 +94,14 @@ app.get("/", (req, res) => {
   res.send("NexusEd Backend API");
 });
 
+// Test route to debug API connectivity
+app.get("/api/test", (req, res) => {
+  res.json({ 
+    message: "API is working", 
+    timestamp: new Date().toISOString(),
+    port: PORT 
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

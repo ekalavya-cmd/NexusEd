@@ -332,14 +332,10 @@ const useCalendar = () => {
     }
   };
 
-  const handleSelectSlot = ({ start, end }) => {
-    // Ensure the start time is not before the current date and time
-    const adjustedStart = start < currentDateTime ? currentDateTime : start;
-    // Ensure the end time is after the adjusted start time
-    const adjustedEnd =
-      end <= adjustedStart
-        ? new Date(adjustedStart.getTime() + 60 * 60 * 1000)
-        : end;
+  const handleSelectSlot = (selectedDate) => {
+    // For react-calendar, selectedDate is a Date object
+    const adjustedStart = selectedDate < currentDateTime ? currentDateTime : selectedDate;
+    const adjustedEnd = new Date(adjustedStart.getTime() + 60 * 60 * 1000);
     setNewEvent((prev) => ({
       ...prev,
       start: adjustedStart,

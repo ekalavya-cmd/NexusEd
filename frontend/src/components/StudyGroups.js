@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import {
   Row,
@@ -113,11 +114,28 @@ function StudyGroups() {
       return;
     }
 
+    // Validate form data
+    if (!newGroup.name.trim()) {
+      setTemporaryMessage("error", "Group name is required.");
+      return;
+    }
+    if (!newGroup.description.trim()) {
+      setTemporaryMessage("error", "Group description is required.");
+      return;
+    }
+
+    // Trim data before sending
+    const groupData = {
+      ...newGroup,
+      name: newGroup.name.trim(),
+      description: newGroup.description.trim()
+    };
+
     try {
       setIsLoading(true);
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/study-groups`,
-        newGroup,
+        groupData,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -145,11 +163,28 @@ function StudyGroups() {
     e.preventDefault();
     if (!user || !editGroup) return;
 
+    // Validate form data
+    if (!editGroup.name.trim()) {
+      setTemporaryMessage("error", "Group name is required.");
+      return;
+    }
+    if (!editGroup.description.trim()) {
+      setTemporaryMessage("error", "Group description is required.");
+      return;
+    }
+
+    // Trim data before sending
+    const groupData = {
+      ...editGroup,
+      name: editGroup.name.trim(),
+      description: editGroup.description.trim()
+    };
+
     try {
       setIsLoading(true);
       const response = await axios.put(
         `${process.env.REACT_APP_API_URL}/api/study-groups/${editGroup._id}`,
-        editGroup,
+        groupData,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -273,8 +308,8 @@ function StudyGroups() {
     .filter(
       (group) =>
         searchTerm === "" ||
-        group.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        group.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (group.name && group.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (group.description && group.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
   if (authLoading) {
@@ -424,7 +459,12 @@ function StudyGroups() {
             </Button>
           )}
           {!user && (
-            <Button variant="primary" className="btn-hover-shadow" href="/login">
+            <Button 
+              variant="primary" 
+              className="btn-hover-shadow" 
+              as={Link}
+              to="/login"
+            >
               <i className="fas fa-sign-in-alt me-2"></i>
               Login to Join
             </Button>

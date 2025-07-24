@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const postSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: function() {
+      return !this.studyGroup;
+    },
     trim: true,
   },
   content: {
@@ -15,6 +17,11 @@ const postSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+  },
+  studyGroup: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "StudyGroup",
+    required: false,
   },
   comments: [
     {

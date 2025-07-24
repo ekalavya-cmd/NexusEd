@@ -10,6 +10,7 @@ const {
   joinStudyGroup,
   leaveStudyGroup,
   addMessage,
+  getMessages,
   deleteMessage,
 } = require("../controllers/studyGroupController");
 
@@ -37,6 +38,7 @@ router.post(
   },
   addMessage
 );
+router.get("/:groupId/messages", auth, getMessages);
 router.delete("/:groupId/messages/:messageId", auth, deleteMessage);
 
 module.exports = router;

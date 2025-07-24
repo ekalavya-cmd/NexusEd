@@ -50,7 +50,10 @@ function GroupDetail() {
         setPosts(postsResponse.data);
       } catch (err) {
         console.error("Error fetching group details:", err);
-        setError("Failed to load group details. Please try again later.");
+        // Only show error if it's not a 404 (group not found) or 403 (unauthorized)
+        if (err.response?.status !== 404 && err.response?.status !== 403) {
+          setError("Failed to load group details. Please try again later.");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -62,14 +65,31 @@ function GroupDetail() {
   const setTemporaryMessage = (message) => {
     setError(message);
     if (timeoutId) clearTimeout(timeoutId);
-    setTimeoutId(setTimeout(() => setError(""), 3000));
+    const newTimeoutId = setTimeout(() => {
+      setError("");
+      setTimeoutId(null);
+    }, 3000);
+    setTimeoutId(newTimeoutId);
   };
 
   const setTemporarySuccess = (message) => {
     setSuccess(message);
     if (timeoutId) clearTimeout(timeoutId);
-    setTimeoutId(setTimeout(() => setSuccess(""), 3000));
+    const newTimeoutId = setTimeout(() => {
+      setSuccess("");
+      setTimeoutId(null);
+    }, 3000);
+    setTimeoutId(newTimeoutId);
   };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [timeoutId]);
 
   const handleCreatePost = async (content) => {
     try {
@@ -242,9 +262,23 @@ function GroupDetail() {
       <div className="text-center py-5">
         <Alert variant="danger">
           <Alert.Heading>Group Not Found</Alert.Heading>
-          <p>The study group you're looking for doesn't exist.</p>
+          <p>The study group you're looking for doesn't exist or you don't have permission to view it.</p>
           <Button variant="primary" onClick={() => navigate("/study-groups")}>
             Back to Study Groups
+          </Button>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="text-center py-5">
+        <Alert variant="warning">
+          <Alert.Heading>Authentication Required</Alert.Heading>
+          <p>You must be logged in to view group details.</p>
+          <Button variant="primary" onClick={() => navigate("/login")}>
+            Login
           </Button>
         </Alert>
       </div>

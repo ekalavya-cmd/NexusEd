@@ -36,8 +36,8 @@ function PostCard({
 
   const handleCommentSubmit = (e) => {
     e.preventDefault();
-    if (commentContent.trim()) {
-      handleAddComment(post._id, commentContent);
+    if (commentContent.trim() && commentContent.length <= 300) {
+      handleAddComment(post._id, commentContent.trim());
       setCommentContent("");
     }
   };
@@ -220,16 +220,22 @@ function PostCard({
                     value={commentContent}
                     onChange={(e) => setCommentContent(e.target.value)}
                     onKeyDown={handleCommentKeyDown}
-                    placeholder="Add a comment"
+                    placeholder="Add a comment (max 300 characters)"
                     disabled={isCommenting}
+                    maxLength={300}
                   />
+                  <Form.Text 
+                    className={commentContent.length > 280 ? "text-warning" : "text-muted"}
+                  >
+                    {commentContent.length}/300 characters
+                  </Form.Text>
                 </Form.Group>
                 <Button
                   type="submit"
                   variant="primary"
                   size="sm"
                   ref={commentButtonRef}
-                  disabled={isCommenting || !commentContent.trim()}
+                  disabled={isCommenting || !commentContent.trim() || commentContent.length > 300}
                 >
                   {isCommenting ? (
                     <>

@@ -1,17 +1,4 @@
-import { dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
-
-// Setup date-fns localizer for react-big-calendar
-const locales = {
-  "en-US": require("date-fns/locale/en-US"),
-};
-export const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
+import { format } from "date-fns";
 
 // Fallback function to check if a date is valid
 export const isDateValid = (date) => {

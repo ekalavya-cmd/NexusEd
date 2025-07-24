@@ -21,26 +21,65 @@ router.get("/", async (req, res) => {
 
 router.post("/", auth, async (req, res) => {
   try {
-    const { title, content } = req.body;
-    if (!title || !content) {
+    const { title, content, studyGroup } = req.body;
+    
+    // For regular posts, title is required. For group posts, title is optional
+    if (!studyGroup && !title) {
       return res
         .status(400)
-        .json({ message: "Title and content are required" });
+        .json({ message: "Title is required for general posts" });
     }
-    const post = new Post({
-      title,
+    
+    if (!content) {
+      return res
+        .status(400)
+        .json({ message: "Content is required" });
+    }
+    
+    const postData = {
       content,
       author: req.user.id,
-    });
+    };
+    
+    if (title) {
+      postData.title = title;
+    }
+    
+    if (studyGroup) {
+      postData.studyGroup = studyGroup;
+    }
+    
+    const post = new Post(postData);
     await post.save();
-    const populatedPost = await Post.findById(post._id).populate(
-      "author",
-      "username"
-    );
+    
+    let populatedPost = await Post.findById(post._id).populate("author", "username");
+    
+    if (studyGroup) {
+      populatedPost = await Post.findById(post._id)
+        .populate("author", "username")
+        .populate("studyGroup", "name");
+    }
+    
     res.status(201).json(populatedPost);
   } catch (err) {
     console.error("Error creating post:", err.message);
     res.status(500).json({ message: err.message || "Error creating post" });
+  }
+});
+
+// Get posts by group ID
+router.get("/group/:groupId", async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const posts = await Post.find({ studyGroup: groupId })
+      .populate("author", "username")
+      .populate("comments.author", "username")
+      .populate("studyGroup", "name")
+      .sort({ createdAt: -1 });
+    res.json(posts);
+  } catch (err) {
+    console.error("Error fetching group posts:", err.message);
+    res.status(500).json({ message: err.message || "Error fetching group posts" });
   }
 });
 

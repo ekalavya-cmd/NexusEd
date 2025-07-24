@@ -101,15 +101,15 @@ function EventDetailsModal({
             Study Group
           </h5>
           <div className="ps-4">
-            {selectedEvent.studyGroup ? (
+            {selectedEvent.group ? (
               <Badge
                 bg="primary"
                 as={Link}
-                to={`/groups/${selectedEvent.studyGroup._id}`}
+                to={`/groups/${selectedEvent.group._id}`}
                 style={{ textDecoration: "none" }}
                 className="fs-6"
               >
-                {selectedEvent.studyGroup.name}
+                {selectedEvent.group.name}
               </Badge>
             ) : (
               <p className="mb-0">No group associated</p>
@@ -119,10 +119,10 @@ function EventDetailsModal({
       </Modal.Body>
 
       <Modal.Footer>
-        {!hideViewGroupButton && selectedEvent.studyGroup && (
+        {!hideViewGroupButton && selectedEvent.group && (
           <Button
             as={Link}
-            to={`/groups/${selectedEvent.studyGroup._id}`}
+            to={`/groups/${selectedEvent.group._id}`}
             variant="outline-primary"
             onClick={() => setSelectedEvent(null)}
           >

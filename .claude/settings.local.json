@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm uninstall:*)",
+      "Bash(npm install:*)",
+      "Bash(sudo npm uninstall:*)",
+      "Bash(sudo npm install:*)",
+      "Bash(npm start)",
+      "Bash(npm run build:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
