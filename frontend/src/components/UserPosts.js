@@ -44,14 +44,32 @@ function UserPosts({
     setPosts(sortedPosts);
   };
 
-  const handleCreatePost = async (content) => {
+  const handleCreatePost = async (content, studyGroupId = null, files = []) => {
     try {
+      const formData = new FormData();
+      formData.append("content", content);
+      
+      if (studyGroupId) {
+        formData.append("studyGroup", studyGroupId);
+      }
+      
+      // For general posts, we need title (use content as title for now)
+      if (!studyGroupId) {
+        formData.append("title", content.substring(0, 100)); // Use first 100 chars as title
+      }
+      
+      // Add files to FormData
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+      }
+      
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/posts`,
-        { content },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -61,7 +79,11 @@ function UserPosts({
       return true;
     } catch (err) {
       console.error("Error creating post:", err);
-      setTemporaryMessage("Failed to create post. Please try again.");
+      if (err.response?.status === 413) {
+        setTemporaryMessage("File size too large. Maximum size per file is 10MB.");
+      } else {
+        setTemporaryMessage("Failed to create post. Please try again.");
+      }
       return false;
     }
   };

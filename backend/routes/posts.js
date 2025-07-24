@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const Post = require("../models/Post");
 const User = require("../models/User");
+const { deleteFiles } = require("../utils/fileUtils");
 
 router.get("/", async (req, res) => {
   try {
@@ -19,9 +20,24 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", auth, async (req, res) => {
+router.post("/", auth, (req, res, next) => {
+  const upload = req.app.get("upload");
+  upload.array("files", 5)(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
-    const { title, content, studyGroup } = req.body;
+    // Debug logging
+    console.log("Request body:", req.body);
+    console.log("Files:", req.files);
+    
+    // Extract data from req.body, handling both regular and FormData requests
+    const title = req.body.title || null;
+    const content = req.body.content || "";
+    const studyGroup = req.body.studyGroup || null;
     
     // For regular posts, title is required. For group posts, title is optional
     if (!studyGroup && !title) {
@@ -30,7 +46,7 @@ router.post("/", auth, async (req, res) => {
         .json({ message: "Title is required for general posts" });
     }
     
-    if (!content) {
+    if (!content.trim()) {
       return res
         .status(400)
         .json({ message: "Content is required" });
@@ -47,6 +63,16 @@ router.post("/", auth, async (req, res) => {
     
     if (studyGroup) {
       postData.studyGroup = studyGroup;
+    }
+    
+    // Handle file uploads
+    if (req.files && req.files.length > 0) {
+      postData.files = req.files.map(file => ({
+        name: file.originalname,
+        url: `/uploads/${file.filename}`,
+        mimetype: file.mimetype,
+        size: file.size,
+      }));
     }
     
     const post = new Post(postData);
@@ -92,6 +118,12 @@ router.delete("/:id", auth, async (req, res) => {
     if (post.author.toString() !== req.user.id) {
       return res.status(403).json({ message: "Unauthorized" });
     }
+    
+    // Delete associated files from uploads folder
+    if (post.files && post.files.length > 0) {
+      deleteFiles(post.files);
+    }
+    
     await Post.findByIdAndDelete(req.params.id);
     res.json({ message: "Post deleted" });
   } catch (err) {

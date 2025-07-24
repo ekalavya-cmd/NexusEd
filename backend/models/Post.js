@@ -53,6 +53,14 @@ const postSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  files: [
+    {
+      name: String,
+      url: String,
+      mimetype: String,
+      size: Number,
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

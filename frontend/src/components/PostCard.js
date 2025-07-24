@@ -108,6 +108,82 @@ function PostCard({
 
         <Card.Text className="mb-3">{post.content}</Card.Text>
 
+        {/* File attachments display */}
+        {post.files && post.files.length > 0 && (
+          <div className="mb-3">
+            <small className="text-muted d-flex align-items-center mb-2">
+              <i className="fas fa-paperclip me-1"></i>
+              {post.files.length} attachment(s)
+            </small>
+            <div className="d-flex flex-wrap gap-2">
+              {post.files.map((file, index) => {
+                const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(file.name);
+                
+                if (isImage) {
+                  return (
+                    <div key={index} className="position-relative">
+                      <img
+                        src={`${process.env.REACT_APP_API_URL}${file.url}`}
+                        alt={file.name}
+                        className="img-fluid rounded shadow-sm"
+                        style={{
+                          maxWidth: "200px",
+                          maxHeight: "150px",
+                          objectFit: "cover",
+                          cursor: "pointer"
+                        }}
+                        onClick={() => window.open(`${process.env.REACT_APP_API_URL}${file.url}`, '_blank')}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
+                        }}
+                      />
+                      <div 
+                        style={{ display: 'none' }}
+                        className="d-flex align-items-center text-decoration-none text-primary"
+                      >
+                        <a
+                          href={`${process.env.REACT_APP_API_URL}${file.url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="d-flex align-items-center text-decoration-none text-primary"
+                          style={{ fontSize: "0.9rem" }}
+                        >
+                          <i className="fas fa-image me-2" style={{ fontSize: "0.8rem" }}></i>
+                          <span className="text-truncate">{file.name}</span>
+                        </a>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div key={index} className="border rounded p-2 bg-light">
+                      <a
+                        href={`${process.env.REACT_APP_API_URL}${file.url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="d-flex align-items-center text-decoration-none text-primary"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        <i className="fas fa-file-download me-2" style={{ fontSize: "0.8rem" }}></i>
+                        <div>
+                          <div className="text-truncate" style={{ maxWidth: "150px" }}>
+                            {file.name}
+                          </div>
+                          <small className="text-muted">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </small>
+                        </div>
+                      </a>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="d-flex justify-content-between align-items-center mb-3">
           <div>
             <Button

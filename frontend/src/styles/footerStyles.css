@@ -96,8 +96,9 @@ footer::before {
   box-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
 }
 
-/* HOVER EFFECT: Extend underline when hovering over the section heading */
-.footer-heading-animated:hover::after {
+/* HOVER EFFECT: Extend underline when hovering over the section heading OR any link in the section */
+.footer-heading-animated:hover::after,
+.footer-section:hover .footer-heading-animated::after {
   width: 100%; /* Full width underline on hover */
   background: rgba(255, 255, 255, 0.9); /* Brighter on hover */
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);

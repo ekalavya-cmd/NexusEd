@@ -2,6 +2,7 @@ const StudyGroup = require("../models/StudyGroup");
 const mongoose = require("mongoose");
 const path = require("path");
 const fs = require("fs");
+const { deleteFiles } = require("../utils/fileUtils");
 
 // Get all study groups
 exports.getStudyGroups = async (req, res) => {
@@ -160,15 +161,10 @@ exports.deleteStudyGroup = async (req, res) => {
         .json({ message: "Only the creator can delete this group" });
     }
 
-    // Delete all associated files in messages
+    // Delete all associated files in messages using the helper function
     for (const message of group.messages) {
       if (message.files && message.files.length > 0) {
-        for (const file of message.files) {
-          const filePath = path.join(__dirname, "..", file.url);
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        }
+        deleteFiles(message.files);
       }
     }
 
@@ -406,14 +402,9 @@ exports.deleteMessage = async (req, res) => {
         .json({ message: "You can only delete your own messages" });
     }
 
-    // Delete associated files
+    // Delete associated files using the helper function
     if (message.files && message.files.length > 0) {
-      for (const file of message.files) {
-        const filePath = path.join(__dirname, "..", file.url);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      }
+      deleteFiles(message.files);
     }
 
     group.messages.pull({ _id: messageId });

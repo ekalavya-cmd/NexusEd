@@ -135,7 +135,7 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
   }, [shouldScrollToBottom]);
 
   const handleSendMessage = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
 
     if (!message.trim() && selectedFiles.length === 0) {
       setMessageError("Please enter a message or attach a file.");
@@ -170,9 +170,8 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
         }
       );
 
-      // Add new message and trigger scroll
+      // Add new message without auto-scroll
       setMessages(prevMessages => [...prevMessages, response.data]);
-      setShouldScrollToBottom(true);
       setMessage("");
       setSelectedFiles([]);
 
@@ -188,6 +187,13 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
       }
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
@@ -355,28 +361,31 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
                         msg.author._id === user.id ? "text-end" : ""
                       }`}
                     >
+                      {/* Username outside message container */}
+                      <div className={`mb-1 ${
+                        msg.author._id === user.id ? "text-end" : ""
+                      }`}>
+                        <small
+                          className="text-muted fw-bold"
+                          style={{ fontSize: "0.75rem" }}
+                        >
+                          {msg.author.username}
+                        </small>
+                      </div>
+                      
                       <div
                         className={`d-inline-block p-2 rounded-3 shadow-sm position-relative ${
                           msg.author._id === user.id
                             ? "bg-primary text-white"
                             : "bg-white border"
                         }`}
-                        style={{ maxWidth: "75%", fontSize: "0.9rem" }}
+                        style={{ 
+                          maxWidth: "75%", 
+                          fontSize: "0.9rem" 
+                        }}
                       >
-                        <div className="d-flex align-items-center mb-1">
-                          <small
-                            className={
-                              msg.author._id === user.id
-                                ? "text-white fw-bold"
-                                : "text-primary fw-bold"
-                            }
-                            style={{ fontSize: "0.75rem" }}
-                          >
-                            {msg.author.username}
-                          </small>
-                        </div>
 
-                        {msg.content && <p className="mb-1" style={{ fontSize: "0.85rem", lineHeight: "1.4" }}>{msg.content}</p>}
+                        {msg.content && <p className="mb-0" style={{ fontSize: "0.85rem", lineHeight: "1.4" }}>{msg.content}</p>}
 
                         {msg.files && msg.files.length > 0 && (
                           <div className="mt-1">
@@ -511,7 +520,8 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
                     rows={2}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Type your message..."
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
                     disabled={isSending}
                     className="border-end-0"
                     style={{
@@ -541,7 +551,11 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
                   onChange={handleFileChange}
                   className="d-none"
                   multiple
+                  accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
                 />
+                <Form.Text className="text-muted" style={{ fontSize: "0.75rem" }}>
+                  Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF (Max 5 files, 10MB each)
+                </Form.Text>
 
                 {selectedFiles.length > 0 && (
                   <div className="mt-2 p-2 bg-light rounded">

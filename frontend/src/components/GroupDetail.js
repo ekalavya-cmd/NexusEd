@@ -91,14 +91,24 @@ function GroupDetail() {
     };
   }, [timeoutId]);
 
-  const handleCreatePost = async (content) => {
+  const handleCreatePost = async (content, studyGroupId = null, files = []) => {
     try {
+      const formData = new FormData();
+      formData.append("content", content);
+      formData.append("studyGroup", groupId);
+      
+      // Add files to FormData
+      for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+      }
+      
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/posts`,
-        { content, studyGroup: groupId },
+        formData,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -107,7 +117,11 @@ function GroupDetail() {
       return true;
     } catch (err) {
       console.error("Error creating post:", err);
-      setTemporaryMessage("Failed to create post. Please try again.");
+      if (err.response?.status === 413) {
+        setTemporaryMessage("File size too large. Maximum size per file is 10MB.");
+      } else {
+        setTemporaryMessage("Failed to create post. Please try again.");
+      }
       return false;
     }
   };
