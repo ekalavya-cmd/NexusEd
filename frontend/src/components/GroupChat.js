@@ -11,7 +11,7 @@ import axios from "axios";
 import { format } from "date-fns";
 import EventDetailsModal from "./EventDetailsModal";
 
-// Add styles for message bubbles
+// Enhanced styles for message bubbles with better dark mode support
 const styles = `
   .message-bubble-received {
     background-color: #f8f9fa;
@@ -20,9 +20,111 @@ const styles = `
   }
   
   [data-bs-theme="dark"] .message-bubble-received {
-    background-color: #495057;
-    border: 1px solid #6c757d;
-    color: #f8f9fa;
+    background-color: #374151 !important;
+    border: 1px solid #4b5563 !important;
+    color: #f9fafb !important;
+  }
+  
+  [data-bs-theme="dark"] .messages-container {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+  
+  [data-bs-theme="dark"] .text-muted {
+    color: #9ca3af !important;
+  }
+  
+  [data-bs-theme="dark"] .text-secondary {
+    color: #d1d5db !important;
+  }
+  
+  [data-bs-theme="dark"] .bg-light {
+    background-color: #374151 !important;
+  }
+  
+  [data-bs-theme="dark"] .border {
+    border-color: #4b5563 !important;
+  }
+  
+  [data-bs-theme="dark"] .rounded {
+    background-color: transparent;
+  }
+  
+  /* Fix chat input area in dark mode */
+  [data-bs-theme="dark"] .form-control {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #f9fafb !important;
+  }
+  
+  [data-bs-theme="dark"] .form-control:focus {
+    background-color: #374151 !important;
+    border-color: #6366f1 !important;
+    color: #f9fafb !important;
+    box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25) !important;
+  }
+  
+  [data-bs-theme="dark"] .form-control::placeholder {
+    color: #9ca3af !important;
+  }
+  
+  /* Fix selected files display in dark mode */
+  [data-bs-theme="dark"] .bg-light.rounded {
+    background-color: #374151 !important;
+    border: 1px solid #4b5563;
+  }
+  
+  /* Fix event cards in dark mode */
+  [data-bs-theme="dark"] .card {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #f9fafb !important;
+  }
+  
+  [data-bs-theme="dark"] .card-title {
+    color: #f9fafb !important;
+  }
+  
+  [data-bs-theme="dark"] .card-subtitle {
+    color: #d1d5db !important;
+  }
+  
+  /* Fix button styling in dark mode */
+  [data-bs-theme="dark"] .btn-outline-primary {
+    color: #6366f1 !important;
+    border-color: #6366f1 !important;
+  }
+  
+  [data-bs-theme="dark"] .btn-outline-primary:hover {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+  }
+  
+  [data-bs-theme="dark"] .btn-outline-secondary {
+    color: #9ca3af !important;
+    border-color: #4b5563 !important;
+  }
+  
+  [data-bs-theme="dark"] .btn-outline-secondary:hover {
+    background-color: #4b5563 !important;
+    border-color: #4b5563 !important;
+    color: #f9fafb !important;
+  }
+  
+  /* Fix form text colors in dark mode */
+  [data-bs-theme="dark"] .form-text {
+    color: #9ca3af !important;
+  }
+  
+  /* Fix small text elements */
+  [data-bs-theme="dark"] small {
+    color: #d1d5db !important;
+  }
+  
+  /* Fix icons in dark mode */
+  [data-bs-theme="dark"] .text-primary i {
+    color: #6366f1 !important;
   }
 `;
 
