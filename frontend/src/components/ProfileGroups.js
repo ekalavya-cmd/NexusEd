@@ -1,11 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Row, Col, Card, Button, Badge, Spinner } from "react-bootstrap";
+import GroupCard from "./GroupCard";
 
 function ProfileGroups({
   groups,
   isLoading,
+  user,
 }) {
+  const [visibleMembers, setVisibleMembers] = useState({});
+
+  const toggleMembersVisibility = (groupId) => {
+    setVisibleMembers(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  };
   if (isLoading) {
     return (
       <div className="text-center py-5">
@@ -39,57 +49,23 @@ function ProfileGroups({
   }
 
   return (
-    <Row xs={1} md={2} className="g-4">
+    <Row xs={1} md={2} lg={3} className="g-4">
       {groups.map((group, index) => (
         <Col key={group._id}>
-          <Card
-            className="h-100 shadow-sm animate-fade-in-up"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <Card.Body className="d-flex flex-column">
-              <div className="d-flex align-items-center mb-3">
-                <div
-                  className="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-3"
-                  style={{ width: "40px", height: "40px" }}
-                >
-                  <i
-                    className={`fa-solid ${group.groupImage || "fa-users"}`}
-                  ></i>
-                </div>
-                <div>
-                  <Card.Title className="mb-0 fs-5">{group.name}</Card.Title>
-                  {group.category && (
-                    <Badge bg="primary" pill className="mt-1">
-                      {group.category}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              <Card.Text className="text-secondary mb-3">
-                {group.description.length > 100
-                  ? `${group.description.substring(0, 100)}...`
-                  : group.description}
-              </Card.Text>
-
-              <div className="d-flex justify-content-between align-items-center mt-auto">
-                <small className="text-muted">
-                  <i className="fas fa-users me-1"></i>{" "}
-                  {group.members?.length || 0} members
-                </small>
-
-                <Button
-                  as={Link}
-                  to={`/groups/${group._id}`}
-                  variant="outline-primary"
-                  size="sm"
-                  className="btn-hover-shadow"
-                >
-                  View Group
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
+          <GroupCard
+            group={group}
+            user={user}
+            visibleMembers={visibleMembers}
+            toggleMembersVisibility={toggleMembersVisibility}
+            handleEditGroup={() => {}} // Not used in profile view
+            handleDeleteConfirmation={() => {}} // Not used in profile view
+            handleJoinGroup={() => {}} // Not used in profile view (already a member)
+            handleLeaveGroup={() => {}} // Not used in profile view
+            deleteConfirmation={null}
+            handleDeleteGroup={() => {}} // Not used in profile view
+            cancelDeleteGroup={() => {}} // Not used in profile view
+            animationDelay={`${index * 0.1}s`}
+          />
         </Col>
       ))}
     </Row>

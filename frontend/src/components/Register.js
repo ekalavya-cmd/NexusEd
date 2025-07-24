@@ -23,6 +23,12 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
     feedback: "Enter a password",
@@ -70,6 +76,22 @@ function Register() {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Clear field errors after 3 seconds
+  useEffect(() => {
+    const hasFieldErrors = Object.values(fieldErrors).some(error => error.trim() !== "");
+    if (hasFieldErrors) {
+      const timer = setTimeout(() => {
+        setFieldErrors({
+          username: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [fieldErrors]);
 
   const handleSubmit = async () => {
     addDebugLog("Form submission started");
@@ -191,38 +213,61 @@ function Register() {
   };
 
   const validateForm = () => {
-    if (!username.trim() || !email.trim() || !password || !confirmPassword) {
-      setError("All fields are required.");
-      return false;
+    const errors = {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    };
+    let formIsValid = true;
+
+    // Clear previous general error
+    setError("");
+
+    // Validate username
+    if (!username.trim()) {
+      errors.username = "Username is required.";
+      formIsValid = false;
+    } else if (username.length < 3) {
+      errors.username = "Username must be at least 3 characters long.";
+      formIsValid = false;
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      errors.username = "Username can only contain letters, numbers, and underscores.";
+      formIsValid = false;
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return false;
+    // Validate email
+    if (!email.trim()) {
+      errors.email = "Email is required.";
+      formIsValid = false;
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        errors.email = "Please enter a valid email address.";
+        formIsValid = false;
+      }
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
-      return false;
+    // Validate password
+    if (!password) {
+      errors.password = "Password is required.";
+      formIsValid = false;
+    } else if (password.length < 8) {
+      errors.password = "Password must be at least 8 characters long.";
+      formIsValid = false;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError("Please enter a valid email address.");
-      return false;
+    // Validate confirm password
+    if (!confirmPassword) {
+      errors.confirmPassword = "Please confirm your password.";
+      formIsValid = false;
+    } else if (password !== confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+      formIsValid = false;
     }
 
-    if (username.length < 3) {
-      setError("Username must be at least 3 characters long.");
-      return false;
-    }
-
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-      setError("Username can only contain letters, numbers, and underscores.");
-      return false;
-    }
-
-    return true;
+    setFieldErrors(errors);
+    return formIsValid;
   };
 
   return (
@@ -261,12 +306,20 @@ function Register() {
                     placeholder="Choose a username"
                     autoComplete="username"
                     disabled={isLoading}
+                    isInvalid={fieldErrors.username}
                     required
                   />
                 </InputGroup>
-                <Form.Text className="text-muted">
-                  3+ characters, letters, numbers, and underscores only
-                </Form.Text>
+                {fieldErrors.username ? (
+                  <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {fieldErrors.username}
+                  </Form.Control.Feedback>
+                ) : (
+                  <Form.Text className="text-muted">
+                    3+ characters, letters, numbers, and underscores only
+                  </Form.Text>
+                )}
               </Form.Group>
 
               <Form.Group className="mb-4">
@@ -284,12 +337,20 @@ function Register() {
                     placeholder="Enter your email"
                     autoComplete="email"
                     disabled={isLoading}
+                    isInvalid={fieldErrors.email}
                     required
                   />
                 </InputGroup>
-                <Form.Text className="text-muted">
-                  Will be converted to lowercase automatically
-                </Form.Text>
+                {fieldErrors.email ? (
+                  <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {fieldErrors.email}
+                  </Form.Control.Feedback>
+                ) : (
+                  <Form.Text className="text-muted">
+                    Will be converted to lowercase automatically
+                  </Form.Text>
+                )}
               </Form.Group>
 
               <Form.Group className="mb-4">
@@ -307,6 +368,7 @@ function Register() {
                     placeholder="Create a password"
                     autoComplete="new-password"
                     disabled={isLoading}
+                    isInvalid={fieldErrors.password}
                     required
                   />
                   <Button
@@ -324,6 +386,12 @@ function Register() {
                     ></i>
                   </Button>
                 </InputGroup>
+                {fieldErrors.password && (
+                  <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {fieldErrors.password}
+                  </Form.Control.Feedback>
+                )}
 
                 {password && (
                   <div className="mt-3">
@@ -453,20 +521,30 @@ function Register() {
                     placeholder="Confirm your password"
                     autoComplete="new-password"
                     disabled={isLoading}
+                    isInvalid={fieldErrors.confirmPassword}
                     required
                   />
                 </InputGroup>
-                {confirmPassword && password !== confirmPassword && (
-                  <small className="text-danger">
-                    <i className="fas fa-times me-1"></i>
-                    Passwords do not match
-                  </small>
-                )}
-                {confirmPassword && password === confirmPassword && (
-                  <small className="text-success">
-                    <i className="fas fa-check me-1"></i>
-                    Passwords match
-                  </small>
+                {fieldErrors.confirmPassword ? (
+                  <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {fieldErrors.confirmPassword}
+                  </Form.Control.Feedback>
+                ) : (
+                  <>
+                    {confirmPassword && password !== confirmPassword && (
+                      <small className="text-danger">
+                        <i className="fas fa-times me-1"></i>
+                        Passwords do not match
+                      </small>
+                    )}
+                    {confirmPassword && password === confirmPassword && (
+                      <small className="text-success">
+                        <i className="fas fa-check me-1"></i>
+                        Passwords match
+                      </small>
+                    )}
+                  </>
                 )}
               </Form.Group>
 

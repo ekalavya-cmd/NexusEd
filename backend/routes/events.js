@@ -49,10 +49,21 @@ router.get("/", auth, async (req, res) => {
 
     const groupIds = groups.map((group) => group._id);
 
-    // Fetch events for those groups
-    const events = await Event.find({ group: { $in: groupIds } })
+    // Clean up expired events first
+    const currentTime = new Date();
+    await Event.deleteMany({ 
+      group: { $in: groupIds }, 
+      end: { $lt: currentTime } 
+    });
+
+    // Fetch active events for those groups (events that haven't ended)
+    const events = await Event.find({ 
+      group: { $in: groupIds },
+      end: { $gte: currentTime }
+    })
       .populate("group", "name _id") // Explicitly include _id
-      .populate("creator", "username _id"); // Explicitly include _id
+      .populate("creator", "username _id") // Explicitly include _id
+      .sort({ start: 1 });
 
     res.json(events);
   } catch (error) {
@@ -79,10 +90,21 @@ router.get("/group/:groupId", auth, async (req, res) => {
       });
     }
 
-    // Fetch events for the group
-    const events = await Event.find({ group: groupId })
+    // Clean up expired events first
+    const currentTime = new Date();
+    await Event.deleteMany({ 
+      group: groupId, 
+      end: { $lt: currentTime } 
+    });
+
+    // Fetch active events for the group (events that haven't ended)
+    const events = await Event.find({ 
+      group: groupId,
+      end: { $gte: currentTime }
+    })
       .populate("group", "name _id")
-      .populate("creator", "username _id");
+      .populate("creator", "username _id")
+      .sort({ start: 1 });
 
     res.json(events);
   } catch (error) {

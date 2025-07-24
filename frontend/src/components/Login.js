@@ -20,6 +20,10 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    emailOrUsername: "",
+    password: "",
+  });
 
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -33,6 +37,20 @@ function Login() {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Clear field errors after 3 seconds
+  useEffect(() => {
+    const hasFieldErrors = Object.values(fieldErrors).some(error => error.trim() !== "");
+    if (hasFieldErrors) {
+      const timer = setTimeout(() => {
+        setFieldErrors({
+          emailOrUsername: "",
+          password: "",
+        });
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [fieldErrors]);
 
   // Focus management for navigation
   const handleKeyDown = (e, currentField) => {
@@ -57,11 +75,29 @@ function Login() {
   };
 
   const validateForm = () => {
-    if (!emailOrUsername.trim() || !password.trim()) {
-      setError("Please enter both email/username and password.");
-      return false;
+    const errors = {
+      emailOrUsername: "",
+      password: "",
+    };
+    let formIsValid = true;
+
+    // Clear previous general error
+    setError("");
+
+    // Validate email/username field
+    if (!emailOrUsername.trim()) {
+      errors.emailOrUsername = "Email or username is required.";
+      formIsValid = false;
     }
-    return true;
+
+    // Validate password field
+    if (!password.trim()) {
+      errors.password = "Password is required.";
+      formIsValid = false;
+    }
+
+    setFieldErrors(errors);
+    return formIsValid;
   };
 
   const handleSubmit = async () => {
@@ -143,9 +179,16 @@ function Login() {
                     placeholder="Enter your email or username"
                     autoComplete="username email"
                     disabled={isLoading}
+                    isInvalid={fieldErrors.emailOrUsername}
                     required
                   />
                 </InputGroup>
+                {fieldErrors.emailOrUsername && (
+                  <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {fieldErrors.emailOrUsername}
+                  </Form.Control.Feedback>
+                )}
               </Form.Group>
 
               <Form.Group className="mb-4">
@@ -163,6 +206,7 @@ function Login() {
                     placeholder="Enter your password"
                     autoComplete="current-password"
                     disabled={isLoading}
+                    isInvalid={fieldErrors.password}
                     required
                   />
                   <Button
@@ -180,6 +224,12 @@ function Login() {
                     ></i>
                   </Button>
                 </InputGroup>
+                {fieldErrors.password && (
+                  <Form.Control.Feedback type="invalid" style={{ display: 'block' }}>
+                    <i className="fas fa-exclamation-circle me-2"></i>
+                    {fieldErrors.password}
+                  </Form.Control.Feedback>
+                )}
               </Form.Group>
 
               <div className="d-grid">

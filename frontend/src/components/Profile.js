@@ -150,6 +150,7 @@ const Profile = memo(function Profile() {
             <ProfileGroups
               groups={joinedGroups}
               isLoading={isGroupsLoading}
+              user={user}
             />
           </Tab.Pane>
         </Tab.Content>

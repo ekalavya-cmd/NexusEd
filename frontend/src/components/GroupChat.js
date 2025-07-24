@@ -87,32 +87,30 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
           }
         );
 
-        // Filter events with better time-based logic
-        const currentDate = new Date();
-        const currentDateString = currentDate.toDateString();
+        // Enhanced event filtering and categorization
+        const currentTime = new Date();
+        const currentDateString = currentTime.toDateString();
         
-        // Only include events that haven't completely ended
-        const activeEvents = response.data
-          .filter((event) => new Date(event.end) > currentDate)
-          .sort((a, b) => new Date(a.start) - new Date(b.start));
+        // Sort all events by start time
+        const sortedEvents = response.data.sort((a, b) => new Date(a.start) - new Date(b.start));
 
-        // Today's events: events that start today or are ongoing today
-        const today = activeEvents.filter((event) => {
+        // Today's events: events that occur today (start today or are ongoing today)
+        const todayEvents = sortedEvents.filter((event) => {
           const eventStart = new Date(event.start);
           const eventEnd = new Date(event.end);
           
-          // Event starts today OR event is ongoing (started before today but ends after current time)
+          // Event starts today OR event is currently ongoing (started before but ends after current time)
           return eventStart.toDateString() === currentDateString || 
-                 (eventStart < currentDate && eventEnd > currentDate);
+                 (eventStart < currentTime && eventEnd > currentTime && eventStart.toDateString() !== currentDateString);
         });
 
-        // Future events: events that start after today
-        const future = activeEvents.filter((event) => {
+        // Upcoming events: events that start after today
+        const upcomingEvents = sortedEvents.filter((event) => {
           const eventStart = new Date(event.start);
-          return eventStart.toDateString() !== currentDateString && eventStart > currentDate;
+          return eventStart.toDateString() !== currentDateString && eventStart > currentTime;
         });
 
-        setEvents({ today, upcoming: future });
+        setEvents({ today: todayEvents, upcoming: upcomingEvents });
       } catch (err) {
         console.error("Error fetching events:", err);
         console.error("Events error response:", err.response);
@@ -128,6 +126,15 @@ function GroupChat({ group, user, setTemporaryMessage, setTemporarySuccess }) {
 
     fetchMessages();
     fetchEvents();
+
+    // Set up periodic event refresh to handle date transitions and expired events
+    const eventRefreshInterval = setInterval(() => {
+      fetchEvents();
+    }, 60000); // Refresh every minute
+
+    return () => {
+      clearInterval(eventRefreshInterval);
+    };
   }, [group._id, setTemporaryMessage]);
 
   // Clear message errors after 3 seconds
